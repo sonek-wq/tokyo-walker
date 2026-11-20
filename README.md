@@ -1,0 +1,44 @@
+# TOKYO WALKER
+
+デフォルメした東京を PS1 / N64 風の見た目で歩き回る、ブラウザ用の 3D 散歩シミュレーター (Three.js)。
+
+## 遊び方
+
+`dist/tokyo_walker.html` をブラウザで開くだけです (1ファイルで完結。Three.js は CDN から読み込みます)。
+
+## ビルド
+
+```
+python3 build.py          # dist/tokyo_walker.html を作る
+python3 build.py --zip    # ソース一式の zip (dist/tokyo_walker_src.zip) も作る
+```
+
+`src/` のファイルを `src/build_order.txt` の順に1つの `<script type="module">` へつなげ、
+`src/index.template.html` に埋め込みます。Python 3 だけで動きます (追加のライブラリは不要)。
+
+## フォルダ構成
+
+| 場所 | 中身 |
+| --- | --- |
+| `src/index.template.html` | 画面の HTML と CSS。スクリプトは `/*@@BUNDLE@@*/` の位置に入る |
+| `src/engine/` | エンジン: 描画・当たり判定・地面・建物の組み立て・山手線の環と列車・自動生成の街・地図・プレイヤー・時間など |
+| `src/areas/` | 作り込みエリア: 竹芝・浜松町・芝・東京タワー・新橋・汐留・銀座・築地など |
+| `src/stations/` | 山手線の駅 (1駅 = 1ファイル、JY番号順) |
+| `src/game/` | 遊びの要素: うんちく・ねこ・実績・じいちゃんの写真・到着/出航の演出・メインループ |
+| `build.py` | 1ファイルの HTML にまとめるスクリプト |
+
+## デフォルメのルール
+
+- 建物・道幅・名所の大きさは実寸のまま
+- 場所と場所の間は実際の約 1/2 (浜松町駅を基準に緯度経度を縦横 1/2 に縮めて配置)
+- 山手線の環は実際の形・駅の順番・方角を保つ (1周 約17km)
+- 浜松町〜新橋の間だけは、作り込み済みの街並みを残すため南北を少し伸ばしている
+
+## 駅を作り込むには
+
+`src/stations/jyNN_xxx.js` の `build(st) {}` の中に、その駅ならではの建物や名所を書きます。
+駅舎・ホーム・駅名標・駅前広場は共通の仕組みで自動的に作られます。
+`st.x, st.z` が駅の位置、`ringAt(st.s)` で線路の向き (`tx, tz`) と外向きの向き (`nx, nz`) が取れます。
+
+新しい駅ファイルを足すときは `STATION({ no, name, kana, roma, town, lat, lon, build(st) {} })` を書いたファイルを
+`src/stations/` に置くだけです (ビルド時に番号順で自動的に組み込まれます)。

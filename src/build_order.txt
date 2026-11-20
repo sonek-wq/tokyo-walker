@@ -1,0 +1,36 @@
+# 結合する順番 (上から順に1つの <script type="module"> にまとめる)
+# stations/*.js は engine/03_station_registry.js の /*@@STATIONS@@*/ の位置に番号順で入る
+engine/00_import.js
+engine/01_util.js
+engine/02_renderer.js
+areas/00_map_base.js
+engine/03_station_registry.js
+engine/04_ring.js
+engine/05_chunks.js
+engine/06_collision.js
+engine/07_drawlist.js
+engine/08_materials.js
+engine/09_buildings.js
+engine/10_district_kit.js
+areas/10_shimbashi_ginza.js
+areas/20_takeshiba_blocks.js
+areas/30_tsukiji.js
+engine/11_ground.js
+areas/40_jr_hamamatsucho_shimbashi.js
+engine/12_yamanote_line.js
+engine/13_trees.js
+engine/14_props.js
+engine/15_proc_city.js
+areas/50_takeshiba_structures.js
+areas/60_shiba_tower.js
+engine/16_traffic.js
+areas/70_distant_view.js
+engine/17_map.js
+engine/18_player.js
+engine/19_options.js
+engine/20_time.js
+engine/21_area_display.js
+engine/22_avatar_camera.js
+engine/23_vehicles.js
+game/30_fun.js
+game/40_story_and_loop.js
