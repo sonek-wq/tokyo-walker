@@ -38,7 +38,7 @@ def make_zip():
     with zipfile.ZipFile(z, 'w', zipfile.ZIP_DEFLATED) as f:
         for p in sorted(ROOT.rglob('*')):
             rel = p.relative_to(ROOT)
-            if p.is_file() and rel.parts[0] not in ('dist', '.git') and '__pycache__' not in rel.parts:
+            if p.is_file() and rel.parts[0] != 'dist' and '__pycache__' not in rel.parts:   # .git も入れて変更履歴ごと渡す
                 f.write(p, 'tokyo-walker/' + rel.as_posix())
     print(f'{z.relative_to(ROOT)}  {z.stat().st_size // 1024} KB')
 
