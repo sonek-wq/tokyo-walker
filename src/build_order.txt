@@ -23,6 +23,7 @@ areas/40_jr_hamamatsucho_shimbashi.js
 engine/12_yamanote_line.js
 engine/12b_waterbus.js
 engine/12c_regions.js
+engine/12d_rail_lines.js
 engine/13_trees.js
 engine/14_props.js
 engine/15_proc_city.js

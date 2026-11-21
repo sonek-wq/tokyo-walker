@@ -267,20 +267,7 @@ REGION({
       LM_ZONES.push(rectPoly(1545, -3365, 1892, -3336));
       LM_PEOPLE.push([[1565, -3343, 1825, -3343], 12]);
     }
-    // 東武の電車 (浅草〜とうきょうスカイツリー。鉄橋の上は急カーブなのでゆっくり)
-    {
-      const seg = [], L = [0]; for (let i = 0; i < RAILP.length - 1; i++) { const a = RAILP[i], b = RAILP[i + 1]; seg.push([a, b]); L.push(L[i] + Math.hypot(b[0] - a[0], b[1] - a[1])); }
-      const at = s => { s = Math.max(0, Math.min(L[L.length - 1] - 0.01, s)); let i = 0; while (L[i + 1] < s) i++; const [a, b] = seg[i], u = (s - L[i]) / (L[i + 1] - L[i]); return [a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u, Math.atan2(b[0] - a[0], b[1] - a[1])]; };
-      const side = tex(64, 16, g => { g.fillStyle = '#c8ccd0'; g.fillRect(0, 0, 64, 16); g.fillStyle = '#2a3440'; for (let i = 3; i < 64; i += 8) g.fillRect(i, 4, 5, 5); g.fillStyle = '#e8762a'; g.fillRect(0, 11, 64, 1.5); g.fillStyle = '#2a5ab0'; g.fillRect(0, 12.5, 64, 1.5); });
-      const sm = lam({ map: side, emissive: 0xffe8c0, emissiveMap: side, emissiveIntensity: 0 }), em = lam({ color: 0xb8bcc0 }); GLOW.push([sm, 0.5]);
-      const NC = 6, CL = 18, cars = []; for (let k = 0; k < NC; k++) { const m = new THREE.Mesh(new THREE.BoxGeometry(2.8, 3.3, CL - 0.6), [sm, sm, em, em, em, em]); scene.add(m); cars.push(m); }
-      const total = L[L.length - 1], span = NC * CL, br0 = L[3] - 20, br1 = L[4] + 30, tr = { s: 2, d: 1, dwell: 20 };
-      LM_UPDATERS.push(dt => {
-        if (tr.dwell > 0) tr.dwell -= dt;
-        else { const slow = tr.s + span > br0 && tr.s < br1, v = slow ? 4.5 : 11; tr.s += tr.d * v * dt; if (tr.s > total - span - 2) { tr.s = total - span - 2; tr.d = -1; tr.dwell = 30; } if (tr.s < 2) { tr.s = 2; tr.d = 1; tr.dwell = 30; } }
-        cars.forEach((m, k) => { const [x, z, h] = at(tr.s + CL / 2 + k * CL); m.position.set(x, 8.75, z); m.rotation.y = h; });
-      });
-    }
+    // 東武の電車は engine/12d の鉄道のしくみで走る (regions/01_rail_lines.js の東武スカイツリーライン)
     // 隅田公園 (両岸): 桜並木は8代将軍吉宗が庶民の花見のために植えさせたのが始まり
     {
       const strip = (zA, zB, east) => {

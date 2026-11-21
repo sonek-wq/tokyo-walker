@@ -6,6 +6,12 @@ const onStraight = (x, z) => inR([JR[0] - 3, JR[1] - 2, JR[2] + 3, JR[3] + 2], x
 const EAST = [STN[24].s, STN[8].s + RING_LEN], SHINK = [STN[24].s, STN[0].s + RING_LEN];
 const inRange = (s, R) => { let u = wrapS(s); if (u < R[0]) u += RING_LEN; return u >= R[0] && u <= R[1]; };
 const deckHalf = s => inRange(s, EAST) ? 17 : 7;
+// 山手線以外の鉄道 (regions/01_rail_lines.js)。地平の線路が山手線の高架の下をくぐる所には、山手線の橋脚を立てない
+const RAIL_LINES = RAIL_DEFS(), RAIL_UNDER = [];
+for (const l of RAIL_LINES) for (let i = 0; i < l.pts.length - 1; i++) {
+  const a = l.pts[i], b = l.pts[i + 1], n = Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) / 4);
+  for (let k = 0; k < n; k++) { const t = k / n, x = a[0] + (b[0] - a[0]) * t, z = a[1] + (b[1] - a[1]) * t, y = a[2] + (b[2] - a[2]) * t; if (y > -0.6 && y < 5) { const rn = ringNearest(x, z); if (rn && rn.d < 22) RAIL_UNDER.push([x, z]); } }
+}
 {
   const STEP = 8, M = { deck: [], par: [], bed: [], pil: [] }, o = new THREE.Object3D();
   const put = (arr, x, y, z, ang, sx, sy, sz) => { o.position.set(x, y, z); o.rotation.set(0, ang, 0); o.scale.set(sx, sy, sz); o.updateMatrix(); arr.push(o.matrix.clone()); };
@@ -18,7 +24,8 @@ const deckHalf = s => inRange(s, EAST) ? 17 : 7;
     const hx = Math.abs(q.tx) * STEP / 2 + Math.abs(q.nx) * h, hz = Math.abs(q.tz) * STEP / 2 + Math.abs(q.nz) * h;
     solid(q.x - hx, q.z - hz, q.x + hx, q.z + hz, 5.2, 6);
     if (Math.round(s / STEP) % 3 === 0) for (const lat of h > 10 ? [-11, 0, 11] : [0]) {
-      const px = q.x + q.nx * lat, pz = q.z + q.nz * lat; put(M.pil, px, 2.6, pz, q.ang, 1.8, 5.2, 1.8); solid(px - 0.9, pz - 0.9, px + 0.9, pz + 0.9, 0, 5.2);
+      const px = q.x + q.nx * lat, pz = q.z + q.nz * lat; if (RAIL_UNDER.some(p => Math.hypot(p[0] - px, p[1] - pz) < 7)) continue;
+      put(M.pil, px, 2.6, pz, q.ang, 1.8, 5.2, 1.8); solid(px - 0.9, pz - 0.9, px + 0.9, pz + 0.9, 0, 5.2);
     }
   }
   const inst = (list, mat) => { const m = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), mat, list.length); list.forEach((x, i) => m.setMatrixAt(i, x)); scene.add(m); };

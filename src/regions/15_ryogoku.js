@@ -37,17 +37,11 @@ REGION({
       }
       { const g = new THREE.BufferGeometry(), at = { position: [], normal: [], uv: [] }; for (const q of diag) for (const k in at) at[k].push(...q.attributes[k].array); for (const k in at) g.setAttribute(k, new THREE.Float32BufferAttribute(at[k], k === 'uv' ? 2 : 3)); scene.add(new THREE.Mesh(g, WALL.RG_TRUSS)); }
       for (const x of [990, 1025]) pushPrism('CONC', null, rectPoly(x - 2, cz - 6, x + 2, cz + 6), -3.2, RY - 1.2);
-      for (const x of [RAIL[0], RAIL[2] - 2]) pushPrism('CONC', 'CONC', rectPoly(x, RAIL[1], x + 2, RAIL[3]), RY, RY + 3);   // 端 (この先は作っていない)
       // ホームと屋根
       pushPrism('CONC', 'CONC', rectPoly(1180, RAIL[1] - 6, 1300, RAIL[1]), RY - 1.4, RY + 0.9);
       pushPrism('CONC', 'ROOF', rectPoly(1184, RAIL[1] - 5, 1296, RAIL[1] + 3), RY + 4.2, RY + 4.6, { solid: false });
       for (let x = 1188; x < 1296; x += 12) pushPrism('CONC', null, rectPoly(x - 0.2, RAIL[1] - 3.2, x + 0.2, RAIL[1] - 2.8), RY + 0.9, RY + 4.2, { solid: false });
-      // 黄色い電車 (総武線各駅停車) が両国駅に止まりながら行き来する
-      const yl = lam({ color: 0xf0c020 }), gr = lam({ color: 0xc8ccd0 }), win = lam({ color: 0x2a3440 }), TR = new THREE.Group(); scene.add(TR);
-      for (let i = 0; i < 4; i++) { const g = new THREE.Group(); g.position.x = i * 20.5; TR.add(g); box(20, 3.2, 2.9, gr, 0, 1.9, 0, g); box(20.05, 0.5, 2.95, yl, 0, 2.6, 0, g); box(19, 0.9, 2.95, win, 0, 2.2, 0, g); }
-      const L0 = RAIL[0] + 6, L1 = RAIL[2] - 90, STOP = 1196;
-      let tx = L0, dir = 1, wait = 0;
-      LM_UPDATERS.push(dt => { if (wait > 0) { wait -= dt; } else { const prev = tx; tx += dir * 9 * dt; if ((prev - STOP) * (tx - STOP) <= 0 && Math.abs(prev - tx) < 5) { tx = STOP; wait = 12; } if (tx > L1) { tx = L1; dir = -1; wait = 4; } if (tx < L0) { tx = L0; dir = 1; wait = 4; } } TR.position.set(tx, RY, cz - 4); });
+      // 黄色い電車 (総武線各駅停車) は engine/12d の鉄道のしくみで走る (regions/01_rail_lines.js)
       // 旧駅舎 (いまは飲食店街「両国 江戸NOREN」)
       const S = [1180, -2600, 1238, -2580];
       pushPrism(STA, 'ROOF', rectPoly(...S), 0, 11); oHip(AXIS, 'RF1', ...S, 11, 3.2, { over: 0.8 });

@@ -92,8 +92,17 @@ function layoutBig() {
   b.strokeStyle = '#7fd0ff'; b.lineWidth = 2 * lw; b.stroke();
   // 水上バスの航路 (点線)
   b.save(); b.setLineDash([6, 5]); b.lineWidth = 2.5 * lw;
-  for (const ln of WB_LINES) { b.strokeStyle = ln.color; b.beginPath(); ln.pts.forEach(([x, z], i) => i ? b.lineTo(mx(x), mz(z)) : b.moveTo(mx(x), mz(z))); b.stroke(); }
+  for (const ln of WB_LINES) { if (ln.kind === 'rail') continue; b.strokeStyle = ln.color; b.beginPath(); ln.pts.forEach(([x, z], i) => i ? b.lineTo(mx(x), mz(z)) : b.moveTo(mx(x), mz(z))); b.stroke(); }
   b.restore();
+  // 山手線以外の鉄道 (地下の区間は細い点線) と駅
+  for (const ln of RAIL_TR) {
+    for (let i = 0; i < ln.pts.length - 1; i++) {
+      const [x0, z0, y0] = ln.pts[i], [x1, z1] = ln.pts[i + 1], under = y0 < -0.6;
+      b.setLineDash(under ? [3, 4] : []); b.strokeStyle = ln.color; b.lineWidth = (under ? 1.5 : 3) * lw; b.beginPath(); b.moveTo(mx(x0), mz(z0)); b.lineTo(mx(x1), mz(z1)); b.stroke();
+    }
+    b.setLineDash([]);
+    for (const st of ln.stations) { b.fillStyle = '#fff'; b.strokeStyle = ln.color; b.lineWidth = 1.5; b.beginPath(); b.arc(mx(st.px), mz(st.pz), 2.6 * lw, 0, 7); b.fill(); b.stroke(); }
+  }
   // 山手線の環と駅
   b.beginPath(); RP.forEach(([x, z], i) => i ? b.lineTo(mx(x), mz(z)) : b.moveTo(mx(x), mz(z))); b.closePath();
   b.strokeStyle = '#1a3a1a'; b.lineWidth = 6 * lw; b.stroke(); b.strokeStyle = '#80c241'; b.lineWidth = 3.5 * lw; b.stroke();
@@ -148,7 +157,7 @@ function drawBig(px, pz, yaw, t) {
   bctx.beginPath(); bctx.moveTo(s, 0); bctx.lineTo(-s * 0.7, -s * 0.7); bctx.lineTo(-s * 0.7, s * 0.7); bctx.closePath(); bctx.stroke(); bctx.fill();
   bctx.restore();
   // 走っている列車
-  for (const wb of WB_BOATS) { bctx.fillStyle = wb.line.color; bctx.fillRect((wb.g.position.x - BX0) * BK - 3, (wb.g.position.z - BZ0) * BK - 3, 6, 6); }
+  for (const wb of WB_BOATS) { const p = wb.g ? wb.g.position : trAt(wb.line, wb.s); bctx.fillStyle = wb.line.color; bctx.fillRect((p.x - BX0) * BK - 3, (p.z - BZ0) * BK - 3, 6, 6); }
   for (const tr of YAMA) { const q = ringAt(tr.s); bctx.fillStyle = tr.dwell > 0 ? '#ffffff' : '#c8f080'; bctx.fillRect((q.x - BX0) * BK - 2.5, (q.z - BZ0) * BK - 2.5, 5, 5); }
   for (const tr of JR_TRAINS) { bctx.fillStyle = tr.name === '京浜東北線' ? '#00b2e5' : '#ffffff'; bctx.fillRect((tr.head[0] - BX0) * BK - 2, (tr.head[1] - BZ0) * BK - 2, 4, 4); }
 }

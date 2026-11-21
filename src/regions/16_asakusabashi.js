@@ -15,9 +15,9 @@ REGION({
       const W = ['人形', 'ひな人形', '五月人形', '節句人形', '羽子板', 'こいのぼり', '人形', '雛', '兜'];
       const WM = W.map(w => glow(new THREE.MeshLambertMaterial({ map: textTex(w, '#8a1a1a', '#fff0d0', 96, 24) }), '#ffc8a0', 0.7));
       const red = lam({ color: 0xc8302a }), doll = [lam({ color: 0xe8202a }), lam({ color: 0x2a3a8a }), lam({ color: 0xf0d8c0 }), lam({ color: 0xd8b040 })];
-      LM_ZONES.push(rectPoly(750, -2790, 778, -2668), rectPoly(802, -2790, 830, -2668));
-      for (const [x0, x1, fx, ry] of [[752, 778, 778.3, Math.PI / 2], [802, 828, 801.7, -Math.PI / 2]]) for (let z = -2788; z < -2672;) {
-        const w = Math.min(rr(8, 13), -2670 - z); pushPrism(pick(['office', 'brick', 'resi2', 'office2', 'JB_KS2']), 'ROOF', rectPoly(x0, z, x1, z + w), 0, rr(12, 30));
+      LM_ZONES.push(rectPoly(750, -2790, 778, -2676), rectPoly(802, -2790, 830, -2676));   // (北の端は総武線の高架)
+      for (const [x0, x1, fx, ry] of [[752, 778, 778.3, Math.PI / 2], [802, 828, 801.7, -Math.PI / 2]]) for (let z = -2788; z < -2682;) {
+        const w = Math.min(rr(8, 13), -2678 - z); pushPrism(pick(['office', 'brick', 'resi2', 'office2', 'JB_KS2']), 'ROOF', rectPoly(x0, z, x1, z + w), 0, rr(12, 30));
         bake(pick(WM), new THREE.PlaneGeometry(Math.min(5, w - 1), 1.3).rotateY(ry).translate(fx, 5.4, z + w / 2));
         // ショーウィンドウのひな壇 (赤い段に小さな人形)
         const sx = fx + (ry > 0 ? -0.6 : 0.6);
@@ -30,11 +30,11 @@ REGION({
     // ===== 柳橋の船宿と、つながれた屋形船 =====
     const S = seg(R.pts[13], R.pts[14]);   // [800,-2640] → [880,-2610]
     {
-      for (let u = 6; u < S.L - 8; u += 12) {   // 北岸の船宿・料亭 (木造2階建て)
+      for (let u = 42; u < S.L - 8; u += 12) {   // 北岸の船宿・料亭 (木造2階建て。西のはしは総武線の高架)
         pushPrism('WOOD', 'ROOF', S.F.rect(u, -30, u + 10, -17), 0, 7);
         oHip(S.F, 'RF0', u, -30, u + 10, -17, 7, 2.6, { over: 0.8 });
       }
-      LM_ZONES.push(S.F.rect(0, -32, S.L, -16));
+      LM_ZONES.push(S.F.rect(40, -32, S.L, -16));
       const hull = lam({ color: 0x3a2a22 }), wall = lam({ color: 0xe8dcc0 }), roof = lam({ color: 0x2a2a2e }), lan = glow(lam({ color: 0xd8382a }), '#ff5030', 0.9);
       const ang = Math.atan2(-S.uz, S.ux);
       const boat = (u, v) => {   // 屋形船: 屋根の低い木の船。軒に赤い提灯
@@ -78,7 +78,7 @@ REGION({
     }
 
     // ===== 名所の名前・地図・豆知識・役立ち情報・実績 =====
-    SPOT_AREAS.push(['浅草橋の人形問屋街', 750, -2790, 830, -2668], ['柳橋の船宿', ...polyBB(S.F.rect(0, -32, S.L, -16))], ['両国広小路跡 (両国橋西詰)', 860, -2502, 914, -2472], ['浅草御蔵跡', 1020, -2732, 1040, -2720], ['蔵前', 750, -2898, 830, -2752]);
+    SPOT_AREAS.push(['浅草橋の人形問屋街', 750, -2790, 830, -2676], ['柳橋の船宿', ...polyBB(S.F.rect(0, -32, S.L, -16))], ['両国広小路跡 (両国橋西詰)', 860, -2502, 914, -2472], ['浅草御蔵跡', 1020, -2732, 1040, -2720], ['蔵前', 750, -2898, 830, -2752]);
     LM_LABELS.push(['人形問屋街', 790, -2730, '🎎', '浅草橋の人形問屋街'], ['屋形船', ...S.F.w(40, 0), '🚣', '柳橋の船宿'], ['両国広小路跡', 886, -2488, '🎆', '両国広小路跡 (両国橋西詰)'], ['蔵前', 790, -2830, '☕']);
     Object.assign(LM_NOTES, {
       '浅草橋の人形問屋街': 'ひな人形や五月人形の老舗が並ぶ問屋街。春の節句の前はとくににぎわう',
