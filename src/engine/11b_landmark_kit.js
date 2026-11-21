@@ -152,6 +152,18 @@ function mesh(geo, mat, x, y, z, ry = 0, far = false) {
   const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.rotation.y = ry;
   (far ? FAR.group : chunkAt(x, z).group).add(m); return m;
 }
+// 小さな飾りをまとめて1つの形にする (描画の回数を減らす)。bake(材質, 位置・向きを入れた形) → 最後に bakeFlush()
+const BAKE = new Map();
+function bake(mat, geo) { if (!BAKE.has(mat)) BAKE.set(mat, []); BAKE.get(mat).push(geo.index ? geo.toNonIndexed() : geo); }
+function bakeFlush() {
+  for (const [mat, geos] of BAKE) {
+    const g = new THREE.BufferGeometry(), at = { position: [], normal: [], uv: [] };
+    for (const q of geos) for (const k in at) if (q.attributes[k]) at[k].push(...q.attributes[k].array);
+    for (const k in at) g.setAttribute(k, new THREE.Float32BufferAttribute(at[k], k === 'uv' ? 2 : 3));
+    g.computeBoundingSphere(); scene.add(new THREE.Mesh(g, mat));
+  }
+  BAKE.clear();
+}
 // 窓の柄のテクスチャ (32px = 16m)。夜は窓が灯る
 const LM_MAT = (key, draw) => { if (!WALL[key]) MATS[key] = wallMats(key, makeTex(draw)); return key; };
 // 大型ビジョン: 色の変わる広告映像 (架空の広告)
