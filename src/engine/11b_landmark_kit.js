@@ -14,8 +14,9 @@ const LM_LABELS = [];     // 全体マップのラベル (MAP_LABELS と同じ�
 const LM_PEOPLE = [];     // 歩く人 [[x0, z0, x1, z1], 人数]
 const ROAD_STOPS = [];    // 信号で車が止まる交差点 { rect, red: ns => 赤信号か }
 
-const inZone = (x, z) => LM_ZONES.some(P => inPoly(P, x, z));
-const zoneHitsRect = r => LM_ZONES.some(P => polyHitsRect(P, r));
+const zbb = P => P.bb || (P.bb = polyBB(P));   // 範囲の外接長方形 (一度だけ計算)
+const inZone = (x, z) => LM_ZONES.some(P => inR(zbb(P), x, z, 0.01) && inPoly(P, x, z));
+const zoneHitsRect = r => LM_ZONES.some(P => overlap(zbb(P), r) && polyHitsRect(P, r));
 
 // ---- 回転した座標系: u = 軸方向, v = それに直交する向き (vHint の側)
 function frame(ox, oz, ux, uz, vhx, vhz) {

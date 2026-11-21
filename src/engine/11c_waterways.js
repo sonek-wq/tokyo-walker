@@ -4,7 +4,7 @@
    - 橋は船がくぐれるよう中央が高いアーチ形。歩いて渡れる
    ============================================================ */
 // 埋立地の島の護岸
-for (const [x0, z0, x1, z1] of GEO_RECTS) box(x1 - x0, 5, z1 - z0, wallNoTop, (x0 + x1) / 2, -2.5, (z0 + z1) / 2);
+for (const [x0, z0, x1, z1] of GEO_WALLED) box(x1 - x0, 5, z1 - z0, wallNoTop, (x0 + x1) / 2, -2.5, (z0 + z1) / 2);
 WALL.RIVERW = lam({ map: (() => { const t = waterTex.clone(); t.repeat.set(1, 1); t.needsUpdate = true; TEXTURES.push(t); LM_UPDATERS.push((dt, tt) => t.offset.set(tt * 0.01, tt * 0.004)); return t; })() });
 WALL.RAIL = lam({ color: 0x5a6068 });
 {

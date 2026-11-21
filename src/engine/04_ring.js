@@ -72,7 +72,13 @@ const MINX = Math.min(-1680, Math.floor((Math.min(...RP.map(p => p[0])) - 750) /
 const MINZ = Math.min(-1300, Math.floor((Math.min(...RP.map(p => p[1])) - 350) / 100) * 100), MAXZ = Math.max(320, Math.ceil((Math.max(...RP.map(p => p[1])) + 350) / 100) * 100);
 const WW = MAXX - MINX, WH = MAXZ - MINZ;
 // 自動生成の街の陸地 (既存エリアの外側)。東は隅田川・東京湾
-const GEO_RECTS = GEO_LAND.map(([n, ...r]) => clip(r, [MINX, MINZ, MAXX, MAXZ])).filter(Boolean);   // 東側の陸地 (regions/00_geography.js)
+const GEO_RECTS = GEO_LAND.map(([n, x0, z0, x1, z1]) => clip([x0, z0, x1, z1], [MINX, MINZ, MAXX, MAXZ])).filter(Boolean);
+const GEO_WALLED = GEO_LAND.filter(g => !(g[5] && g[5].beach)).map(([n, x0, z0, x1, z1]) => clip([x0, z0, x1, z1], [MINX, MINZ, MAXX, MAXZ])).filter(Boolean);   // 護岸のある陸地 (砂浜は除く)
+// 地面の高さ (砂浜の坂。川は11_groundで掘り下げる)
+function groundY(x, z) {
+  for (const [x0, z0, x1, z1, ys, yl, dir] of GEO_SLOPES) if (x >= x0 && x <= x1 && z >= z0 && z <= z1) return dir === 'flat' ? ys : ys + (yl - ys) * (z - z0) / (z1 - z0);
+  return 0;
+}   // 東側の陸地 (regions/00_geography.js)
 const PROC_LAND = [[MINX, MINZ, -1680, 290], [-1680, MINZ, -300, -1080], [-300, MINZ, 430, -1300], [MINX, 320, -320, 700], [MINX, 700, -600, MAXZ], ...GEO_RECTS];
 /* ---- 川 (折れ線に幅をつけた多角形)。地面はこの中だけ低く掘り下げ、水面がのぞく */
 const RIVERS = GEO_RIVERS.map(r => ({ ...r, polys: [] })), RIVER_HASH = new Map(), RHC = 100;
@@ -110,7 +116,7 @@ const riverHitsRect = (f, m = 0) => {
 };
 const BRIDGE_POLYS = [];   // 川・海の上の橋 (この上は歩ける)。[多角形, 名前]
 // 海かどうか (地図の外の「見えるだけの街」にも使う)
-const GEO_ALL = GEO_LAND.map(([n, ...r]) => r);
+const GEO_ALL = GEO_LAND.map(([n, x0, z0, x1, z1]) => [x0, z0, x1, z1]);
 const isWaterXZ = (x, z) => inRiver(x, z) || (!GEO_ALL.some(r => inR(r, x, z)) && ((x > 430 && z > -600) || (x > -320 && z >= 320 && z < 700) || (x > -600 && z >= 700)));
 // 古川を渡る橋 (自動生成の街の大通り)
 const RIVER_BR = [];

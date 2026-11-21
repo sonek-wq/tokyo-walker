@@ -50,7 +50,7 @@ function areaAt(x, z, y) {
   if (hokoActive() && inR([-140, -1300, -116, -500], x, z)) return '銀座 中央通り (歩行者天国)';
   if (y > 3 && y < 4.6 && inR([JR[0], GADO[0], JR[2], GADO[1]], x, z)) return '新橋 ガード下 (屋台の屋根)';
   if (P.ride) return '山手線 車内';
-  if (P.boat) return '水上バス ' + P.boat.b.line.name;
+  if (P.boat) return P.boat.b.line.kind === 'boat' ? '水上バス ' + P.boat.b.line.name : 'ゆりかもめ 車内';
   const rn = ringNearest(x, z);
   if (rn && rn.d < 9 && y > 5) { const st = stationAtS(rn.s); return st ? `${st.name}駅 ${rn.d < 2.8 ? 'ホーム' : '(線路の上)'}` : '山手線の高架の上'; }
   const br = BRIDGE_POLYS.find(([Pb]) => inPoly(Pb, x, z)); if (br) return br[1];

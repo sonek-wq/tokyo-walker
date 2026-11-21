@@ -14,7 +14,7 @@ function onLand(x, z) {
   return true;
 }
 function floorAt(x, z, y) {
-  let f = onLand(x, z) ? 0 : -1.4;   // 水の上なら水面
+  let f = onLand(x, z) ? groundY(x, z) : -1.4;   // 水の上なら水面 (砂浜は坂)
   for (const s of query(x - RAD, z - RAD, x + RAD, z + RAD)) if (s[5] <= y + STEP && s[5] > f && inR(s, x, z, RAD)) f = s[5];
   return f;
 }

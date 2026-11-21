@@ -28,8 +28,8 @@ for (let i = Math.floor(MINX / CH); i < Math.ceil(MAXX / CH); i++) for (let j = 
   const rects = WALK.map(r => clip(r, T)).filter(Boolean);
   if (!rects.length) continue;
   const t = { x0: T[0], z0: T[1], cx: T[0] + CH / 2, cz: T[1] + CH / 2, mat: groundLam({ map: GROUND_PLACEHOLDER }), tex: null };
-  const wet = riverHitsRect(T, 10);   // 川の通るタイルは細かく分けて、川の中だけ地面を掘り下げる
-  t.meshes = rects.map(r => groundMesh(...r, t.mat, (x, z) => [(x - t.x0) / CH, (z - t.z0) / CH], wet ? 5 : 10, wet ? (x, z) => inRiver(x, z) ? -3.2 : 0 : null)); // DataTexture は上下反転しないので v = z方向そのまま
+  const wet = riverHitsRect(T, 10) || GEO_SLOPES.some(g => overlap(g, T));   // 川・砂浜のタイルは細かく分けて、地面の高さを変える
+  t.meshes = rects.map(r => groundMesh(...r, t.mat, (x, z) => [(x - t.x0) / CH, (z - t.z0) / CH], wet ? 5 : 10, wet ? (x, z) => inRiver(x, z) ? -3.2 : groundY(x, z) : null)); // DataTexture は上下反転しないので v = z方向そのまま
   GTILES.push(t);
 }
 function loadTile(t) {

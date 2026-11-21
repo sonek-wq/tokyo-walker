@@ -286,7 +286,7 @@ function update(dt, t) {
   }
   P.grounded = !P.climbing && P.vy === 0 && P.y <= fl + 1e-4;
   if (P.grounded) {
-    if (fl < -0.5) {                   // 水に落ちたら最後に立っていた岸へ戻る
+    if (fl < -0.5 && !onLand(P.x, P.z)) {   // 水に落ちたら最後に立っていた岸へ戻る (砂浜の波打ちぎわは陸)
       [P.x, P.z, P.y] = P.safe; P.vy = 0; P.svx = P.svz = 0; toast('ドボン！ 岸に戻りました');
     } else if (onLand(P.x, P.z)) P.safe = [P.x, P.z, P.y];
   }
@@ -315,15 +315,6 @@ function update(dt, t) {
   wPos.needsUpdate = true;
   waterTex.offset.set(t * 0.004, t * 0.0025); riverTex.offset.set(t * 0.006, 0);
 
-  // --- ゆりかもめ
-  if (train.wait > 0) train.wait -= dt;
-  else {
-    const prev = train.p; train.p += train.dir * 14 * dt;
-    for (const st of train.stops) if ((prev - st) * (train.p - st) <= 0 && prev !== st) { train.p = st; train.wait = 8; }
-    if (train.p > train.span) { train.p = train.span; train.dir = -1; train.wait = 5; }
-    if (train.p < 0) { train.p = 0; train.dir = 1; train.wait = 5; }
-  }
-  TRAIN.forEach((m, i) => { const p = pathAt(train.p + i * 9.6 + 4.6); m.position.set(p.x, 11.5, p.z); m.rotation.y = p.ang; });
   updateFun(dt, t);
   // --- 東京モノレール (浜松町駅で停車 → 南へ)
   if (mono.wait > 0) mono.wait -= dt;

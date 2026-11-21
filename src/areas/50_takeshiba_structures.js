@@ -59,10 +59,8 @@ const ysideE = tex(32, 8, x => { x.fillStyle = '#000'; x.fillRect(0, 0, 32, 8); 
 const carGeo = new THREE.BoxGeometry(2.6, 3, 9.2);
 const ySideM = lam({ map: yside, emissive: 0xffffff, emissiveMap: ysideE, emissiveIntensity: 0 }), yFrontM = lam({ map: yfront });
 GLOW.push([ySideM, 1]);
-const TRAIN = [];
-for (let i = 0; i < 6; i++) { const m = new THREE.Mesh(carGeo, [ySideM, ySideM, white, white, yFrontM, yFrontM]); scene.add(m); TRAIN.push(m); }
+const TRAIN = [];   // (ゆりかもめの車両は乗り物の路線 (engine/12b) で動かす)
 function sNear(x, z) { let b = 0, bd = Infinity; YP.forEach((p, i) => { const d = Math.hypot(p[0] - x, p[1] - z); if (d < bd) { bd = d; b = i; } }); return YL[b]; }
-const train = { p: 40, dir: 1, wait: 0, stops: [[15, 0], [-360, -620]].map(([x, z]) => sNear(x, z) - 28.8), span: Y_LEN - 6 * 9.6 };
 // ゆりかもめ 汐留駅・新橋駅
 for (const zc of [-620, -870]) {
   const xc = -360, st2 = new THREE.Mesh(boxGeo(20, 6, 60), MATS.station); st2.position.set(xc, 6, zc); scene.add(st2);
