@@ -10,7 +10,7 @@ function onLand(x, z) {
   if (BRIDGE_POLYS.some(([P]) => inPoly(P, x, z))) return true;   // 川や海に架かる橋の上
   if (!WALK.some(r => inR(r, x, z))) return false;
   if (inRiver(x, z)) return false;
-  for (const p of PONDS) if (inE(p, x, z) && !inE(ISLAND, x, z) && !inR(POND_BRIDGE, x, z)) return false;
+  for (const p of PONDS) if (inE(p, x, z) && !inE(ISLAND, x, z) && !inR(POND_BRIDGE, x, z) && !inPondLand(x, z)) return false;
   return true;
 }
 function floorAt(x, z, y) {

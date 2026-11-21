@@ -24,58 +24,6 @@ REGION({
       x.fillStyle = bg; x.fillRect(0, 0, 32, 32); y.fillStyle = '#000'; y.fillRect(0, 0, 32, 32);
       for (let j = 1; j < 32; j += rows) for (let i = 1; i < 32; i += step) { x.fillStyle = win; x.fillRect(i, j, step - 1, rows - 1); y.fillStyle = rnd() < lit ? pick(LIT) : '#000'; y.fillRect(i, j, step - 1, rows - 1); }
     });
-    // ---- お寺の屋根: 軒が反った2段の屋根。kind = irimoya (入母屋) / hip (寄棟・宝形) / band (五重塔などの庇だけ)
-    function jRoof(key, x0, z0, x1, z1, y0, h, opt = {}) {
-      const over = opt.over ?? 1.6, kind = opt.kind || 'irimoya', fl = kind === 'band' ? 1 : (opt.flare ?? 0.3);
-      const H = opt.holder || holderFor((x0 + x1) / 2, (z0 + z1) / 2, y0 + h), t = bucket(H, key), gt = bucket(H, opt.gable || key);
-      const X0 = x0 - over, Z0 = z0 - over, X1 = x1 + over, Z1 = z1 + over, alongX = X1 - X0 >= Z1 - Z0;
-      const [A0, A1, B0, B1] = alongX ? [X0, X1, Z0, Z1] : [Z0, Z1, X0, X1];   // a = 長い向き, b = 短い向き
-      const pt = (a, b, y) => alongX ? [a, y, b] : [b, y, a], nrm = (da, db) => alongX ? [da, 0.7, db] : [db, 0.7, da];
-      const hb = (B1 - B0) / 2, ins = hb * (opt.ins ?? (kind === 'band' ? 0.55 : 0.4)), ym = y0 + h * fl, yr = y0 + h, bc = (B0 + B1) / 2;
-      const a0 = A0 + ins, a1 = A1 - ins, b0 = B0 + ins, b1 = B1 - ins;
-      const F = (pts, da, db, tt = t) => pushFace(tt, pts.map(p => pt(...p)), nrm(da, db));
-      F([[A0, B0, y0], [A1, B0, y0], [a1, b0, ym], [a0, b0, ym]], 0, -1); F([[A1, B1, y0], [A0, B1, y0], [a0, b1, ym], [a1, b1, ym]], 0, 1);
-      F([[A0, B1, y0], [A0, B0, y0], [a0, b0, ym], [a0, b1, ym]], -1, 0); F([[A1, B0, y0], [A1, B1, y0], [a1, b1, ym], [a1, b0, ym]], 1, 0);
-      pushFace(t, [pt(A0, B0, y0 - 0.05), pt(A1, B0, y0 - 0.05), pt(A1, B1, y0 - 0.05), pt(A0, B1, y0 - 0.05)], [0, -1, 0]);   // 軒裏
-      const hd = (b1 - b0) / 2, AB = (pa, pb, qa, qb) => alongX ? [Math.min(pa, qa), Math.min(pb, qb), Math.max(pa, qa), Math.max(pb, qb)] : [Math.min(pb, qb), Math.min(pa, qa), Math.max(pb, qb), Math.max(pa, qa)];
-      if (kind === 'band') pushFace(t, [pt(a0, b0, ym), pt(a1, b0, ym), pt(a1, b1, ym), pt(a0, b1, ym)], [0, 1, 0]);
-      else if (kind === 'hip' || a1 - a0 <= hd * 2.05) {
-        const ra = Math.min(a0 + hd, (a0 + a1) / 2), rb = Math.max(a1 - hd, (a0 + a1) / 2);
-        F([[a0, b0, ym], [a1, b0, ym], [rb, bc, yr], [ra, bc, yr]], 0, -1); F([[a1, b1, ym], [a0, b1, ym], [ra, bc, yr], [rb, bc, yr]], 0, 1);
-        F([[a0, b1, ym], [a0, b0, ym], [ra, bc, yr]], -1, 0); F([[a1, b0, ym], [a1, b1, ym], [rb, bc, yr]], 1, 0);
-      } else {
-        const k = 0.4, yg = ym + (yr - ym) * k, ra = a0 + hd * 0.8, rb = a1 - hd * 0.8, ba = b0 + (bc - b0) * k, bb = b1 - (b1 - bc) * k;
-        F([[a0, b0, ym], [a1, b0, ym], [rb, ba, yg], [ra, ba, yg]], 0, -1); F([[ra, ba, yg], [rb, ba, yg], [rb, bc, yr], [ra, bc, yr]], 0, -1);
-        F([[a1, b1, ym], [a0, b1, ym], [ra, bb, yg], [rb, bb, yg]], 0, 1); F([[rb, bb, yg], [ra, bb, yg], [ra, bc, yr], [rb, bc, yr]], 0, 1);
-        F([[a0, b1, ym], [a0, b0, ym], [ra, ba, yg], [ra, bb, yg]], -1, 0); F([[a1, b0, ym], [a1, b1, ym], [rb, bb, yg], [rb, ba, yg]], 1, 0);
-        F([[ra, ba, yg], [ra, bb, yg], [ra, bc, yr]], -1, 0, gt); F([[rb, bb, yg], [rb, ba, yg], [rb, bc, yr]], 1, 0, gt);   // 妻 (三角の壁)
-      }
-      if (opt.solid !== false) { solid(...AB(a0, b0, a1, b1), y0, ym); if (kind !== 'band') solid(...AB((a0 * 3 + a1) / 4, (b0 * 3 + b1) / 4, (a0 + a1 * 3) / 4, (b0 + b1 * 3) / 4), ym, ym + (yr - ym) * 0.6); }
-    }
-    // ---- 提灯: 胴がふくらんだ形。表 (南) と裏に縦書きの字
-    function chochin(x, y, z, rad, h, front, back, col = '#c8261c', ry = 0) {
-      const t = tex(128, 64, g => {
-        g.fillStyle = col; g.fillRect(0, 0, 128, 64); g.fillStyle = 'rgba(0,0,0,.16)'; for (let j = 3; j < 64; j += 4) g.fillRect(0, j, 128, 1);
-        g.fillStyle = '#16120e'; g.textAlign = 'center'; g.textBaseline = 'middle';
-        const col1 = (s, cx) => { const n = [...s].length, fs = Math.min(26, 54 / n); g.font = `bold ${fs}px "DotGothic16", sans-serif`; [...s].forEach((c, i) => g.fillText(c, cx, 32 + (i - (n - 1) / 2) * fs)); };
-        col1(front, 64); if (back) { col1(back, 0); col1(back, 128); }
-      });
-      const m = lam({ map: t, emissive: 0xff7050, emissiveMap: t, emissiveIntensity: 0 }); GLOW.push([m, 0.7]);
-      const pts = []; for (let i = 0; i <= 8; i++) pts.push(new THREE.Vector2(rad * (0.8 + 0.2 * Math.sin(Math.PI * i / 8)), -h / 2 + h * i / 8));
-      mesh(new THREE.LatheGeometry(pts, 16), m, x, y, z, Math.PI + ry);
-      for (const dy of [-h / 2, h / 2]) mesh(new THREE.CylinderGeometry(rad * 0.84, rad * 0.84, 0.35, 16), WALL[BLK], x, y + dy, z);
-      solid(x - rad, z - rad, x + rad, z + rad, y - h / 2, y + h / 2);
-    }
-    // ---- 像 (風神・雷神・仁王): kind で持ち物が変わる
-    function figure(x, z, y0, s, col, kind, ry = 0) {
-      const g = new THREE.Group(), m = lam({ color: col }), dk = lam({ color: 0x2a2420 }); g.position.set(x, y0, z); g.rotation.y = ry; g.scale.setScalar(s); chunkAt(x, z).group.add(g);
-      box(0.5, 1.0, 0.5, m, -0.32, 0.5, 0, g); box(0.5, 1.0, 0.5, m, 0.32, 0.5, 0, g); box(1.25, 1.1, 0.75, m, 0, 1.55, 0, g); box(0.62, 0.62, 0.6, m, 0, 2.42, 0.05, g);
-      box(0.3, 0.95, 0.3, m, -0.82, 1.75, 0.1, g).rotation.z = -0.5; box(0.3, 0.95, 0.3, m, 0.82, 1.75, 0.1, g).rotation.z = 0.5;
-      box(0.5, 0.12, 0.08, dk, 0, 2.5, 0.36, g);   // 目
-      if (kind === 'fujin') { const b = new THREE.Mesh(new THREE.TorusGeometry(0.95, 0.22, 6, 12, Math.PI * 1.3), lam({ color: 0xe8e0c8 })); b.position.set(0, 2.55, -0.25); b.rotation.z = -0.3; g.add(b); }
-      if (kind === 'raijin') { const b = new THREE.Mesh(new THREE.TorusGeometry(1.15, 0.06, 4, 16), dk); b.position.set(0, 2.5, -0.35); g.add(b); for (let i = 0; i < 6; i++) { const a = Math.PI * (0.1 + i * 0.16), d = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.15, 8), lam({ color: 0xd8a040 })); d.position.set(Math.cos(a) * 1.15, 2.5 + Math.sin(a) * 1.15, -0.35); d.rotation.x = Math.PI / 2; g.add(d); } }
-      return g;
-    }
     const AX = 1300, KZ = -3410;   // 浅草寺の中心線 (仲見世の真ん中) と雷門の位置
 
     // ===== 雷門 (風雷神門): 高さ11.7m。大提灯は高さ3.9m・重さ約700kg =====
