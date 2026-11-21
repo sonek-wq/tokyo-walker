@@ -5,6 +5,7 @@ engine/01_util.js
 engine/02_renderer.js
 areas/00_map_base.js
 engine/03_station_registry.js
+engine/03b_region_registry.js
 engine/04_ring.js
 engine/05_chunks.js
 engine/06_collision.js
@@ -17,8 +18,11 @@ areas/20_takeshiba_blocks.js
 areas/30_tsukiji.js
 engine/11_ground.js
 engine/11b_landmark_kit.js
+engine/11c_waterways.js
 areas/40_jr_hamamatsucho_shimbashi.js
 engine/12_yamanote_line.js
+engine/12b_waterbus.js
+engine/12c_regions.js
 engine/13_trees.js
 engine/14_props.js
 engine/15_proc_city.js

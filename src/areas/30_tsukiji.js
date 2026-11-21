@@ -96,6 +96,8 @@ market(TSUKIJI_MKT, T_RES, '築地場外市場');
   for (let x = 120; x < 190; x += 5) PARKED.push([x, -520, Math.PI / 2]);
   SPOT_AREAS.push(['築地市場跡地', ...F]);
 }
+// 勝どき橋の路面の高さ: 中央の跳開部がゆるやかに高い (水上バスが下をくぐれる)
+const KACHI_Y = x => x > 330 && x < 430 ? 3.2 * Math.sin(Math.PI * (x - 330) / 100) : 0;
 { // 勝どき橋 (1940年完成の跳開橋。いまは開かない)
   const gm = lam({ color: 0xb8c4bc }), Z0 = -1206, Z1 = -1182;
   fr(330, -1200, 430, -1188, '#3c3c42'); for (let x = 330; x < 430; x += 6) fr(x, -1194.15, x + 3, -1193.85, '#e8e6dc');
@@ -104,20 +106,16 @@ market(TSUKIJI_MKT, T_RES, '築地場外市場');
     for (const z of [Z0 + 0.5, Z1 - 0.5]) {
       const n = 12;
       for (let k = 0; k < n; k++) {
-        const t0 = k / n, t1 = (k + 1) / n, y0 = 1.2 + top * Math.sin(Math.PI * t0), y1 = 1.2 + top * Math.sin(Math.PI * t1);
-        const a = new THREE.Vector3(xa + (xb - xa) * t0, y0, z), b = new THREE.Vector3(xa + (xb - xa) * t1, y1, z);
+        const t0 = k / n, t1 = (k + 1) / n, xa0 = xa + (xb - xa) * t0, xa1 = xa + (xb - xa) * t1, y0 = 1.2 + KACHI_Y(xa0) + top * Math.sin(Math.PI * t0), y1 = 1.2 + KACHI_Y(xa1) + top * Math.sin(Math.PI * t1);
+        const a = new THREE.Vector3(xa0, y0, z), b = new THREE.Vector3(xa1, y1, z);
         o.position.copy(a).add(b).multiplyScalar(0.5); o.scale.set(0.6, 0.6, a.distanceTo(b)); o.lookAt(b); o.updateMatrix(); AM.push(o.matrix.clone());
-        if (k % 2 === 0 && y0 > 1.4) { o.position.set(a.x, (y0 + 1.2) / 2, z); o.rotation.set(0, 0, 0); o.scale.set(0.3, y0 - 1.2, 0.3); o.updateMatrix(); AM.push(o.matrix.clone()); }
+        if (k % 2 === 0 && y0 > 1.4 + KACHI_Y(xa0)) { const yb = 1.2 + KACHI_Y(xa0); o.position.set(a.x, (y0 + yb) / 2, z); o.rotation.set(0, 0, 0); o.scale.set(0.3, y0 - yb, 0.3); o.updateMatrix(); AM.push(o.matrix.clone()); }
       }
     }
   };
   archSeg(330, 364, 9); archSeg(396, 430, 9);
   const am = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), gm, AM.length); AM.forEach((m, i) => am.setMatrixAt(i, m)); scene.add(am);
-  for (const x of [364, 396]) { blk(x - 2, 0, Z0 - 3, x + 2, 9, Z0, gm); blk(x - 2, 0, Z1, x + 2, 9, Z1 + 3, gm); } // 跳開部の運転室
-  box(0.2, 0.25, 24, dark, 380, 0.12, -1194); // 跳開部の継ぎ目
-  blk(428, 0, Z0, 430, 1.3, Z1, lam({ color: 0xd8c050 }));
-  const t = textTex('この先 勝どき・月島 (次回のアップデートで…)', '#1c3a6a', '#ffffff', 320, 24);
-  const sg = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.2, 16), lam({ map: t })); sg.position.set(427.6, 2.2, -1194); sg.rotation.y = Math.PI; scene.add(sg);
+  for (const x of [364, 396]) { const yb = KACHI_Y(x) - 1.4; blk(x - 2, yb, Z0 - 3, x + 2, 9 + KACHI_Y(x), Z0, gm); blk(x - 2, yb, Z1, x + 2, 9 + KACHI_Y(x), Z1 + 3, gm); } // 跳開部の運転室
   SPOT_AREAS.unshift(['勝どき橋 (跳開部の真ん中)', 374, Z0, 386, Z1]);
   SPOT_AREAS.push(['勝どき橋', 330, Z0, 430, Z1]);
 }

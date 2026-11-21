@@ -5,7 +5,7 @@
     python3 build.py --zip      # ついでにソース一式の zip (dist/tokyo_walker_src.zip) も作る
 
 - 結合の順番は src/build_order.txt に書く (上から順に1つの <script type="module"> になる)
-- 駅は src/stations/*.js を置くだけで、ファイル名の順 (= JY番号順) に自動で組み込まれる
+- 駅は src/stations/*.js、東側のエリアは src/regions/*.js を置くだけで、ファイル名の順に自動で組み込まれる
 """
 import pathlib, sys, zipfile
 
@@ -16,22 +16,24 @@ def build():
     tpl = (SRC / 'index.template.html').read_text(encoding='utf-8')
     order = [l.strip() for l in (SRC / 'build_order.txt').read_text(encoding='utf-8').splitlines()
              if l.strip() and not l.lstrip().startswith('#')]
-    stations = sorted((SRC / 'stations').glob('*.js'))
+    # 差し込み口: 駅 (stations/) とエリア (regions/) のファイルは、置くだけでファイル名の順に組み込まれる
+    SLOTS = {'/*@@STATIONS@@*/': sorted((SRC / 'stations').glob('*.js')), '/*@@REGIONS@@*/': sorted((SRC / 'regions').glob('*.js'))}
+    stations = SLOTS['/*@@STATIONS@@*/']
     parts = []
     for rel in order:
         txt = (SRC / rel).read_text(encoding='utf-8')
         if txt.endswith('\n'): txt = txt[:-1]   # ファイル末尾の改行1つ分だけ外す
-        if '/*@@STATIONS@@*/' in txt:
-            txt = txt.replace('/*@@STATIONS@@*/', '\n'.join(p.read_text(encoding='utf-8').rstrip('\n') for p in stations))
+        for mark, files in SLOTS.items():
+            if mark in txt: txt = txt.replace(mark, '\n'.join(p.read_text(encoding='utf-8').rstrip('\n') for p in files))
         parts.append(txt)
-    listed = set(order) | {p.relative_to(SRC).as_posix() for p in stations}
+    listed = set(order) | {p.relative_to(SRC).as_posix() for fs in SLOTS.values() for p in fs}
     missing = [p.relative_to(SRC).as_posix() for p in SRC.rglob('*.js') if p.relative_to(SRC).as_posix() not in listed]
     if missing: print('警告: build_order.txt に載っていないファイル:', ', '.join(missing))
     html = tpl.replace('/*@@BUNDLE@@*/', '\n'.join(parts))
     DIST.mkdir(exist_ok=True)
     out = DIST / 'tokyo_walker.html'
     out.write_text(html, encoding='utf-8')
-    print(f'{out.relative_to(ROOT)}  {len(html.encode()) // 1024} KB  ({len(order)} files + {len(stations)} stations)')
+    print(f'{out.relative_to(ROOT)}  {len(html.encode()) // 1024} KB  ({len(order)} files + {len(stations)} stations + {len(SLOTS["/*@@REGIONS@@*/"])} regions)')
 
 def make_zip():
     z = DIST / 'tokyo_walker_src.zip'

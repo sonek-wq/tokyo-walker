@@ -68,12 +68,50 @@ for (const st of STN) { const n = ringNearest(st.x, st.z); st.s = n.s; }
 const stationAtS = s => STN.find(st => Math.abs(sDiff(s, st.s)) < 100);
 // マップの範囲 = 既存エリア + 山手線の環の外側 約350m
 // 西側は西新宿の高層ビル群・新宿中央公園が入るよう広めにとる
-const MINX = Math.min(-1680, Math.floor((Math.min(...RP.map(p => p[0])) - 750) / 100) * 100), MAXX = Math.max(430, Math.ceil((Math.max(...RP.map(p => p[0])) + 350) / 100) * 100);
+const MINX = Math.min(-1680, Math.floor((Math.min(...RP.map(p => p[0])) - 750) / 100) * 100), MAXX = Math.max(430, GEO_MAXX, Math.ceil((Math.max(...RP.map(p => p[0])) + 350) / 100) * 100);
 const MINZ = Math.min(-1300, Math.floor((Math.min(...RP.map(p => p[1])) - 350) / 100) * 100), MAXZ = Math.max(320, Math.ceil((Math.max(...RP.map(p => p[1])) + 350) / 100) * 100);
 const WW = MAXX - MINX, WH = MAXZ - MINZ;
 // 自動生成の街の陸地 (既存エリアの外側)。東は隅田川・東京湾
-const PROC_LAND = [[MINX, MINZ, -1680, 290], [-1680, MINZ, -300, -1080], [-300, MINZ, MAXX, -1300], [MINX, 320, -320, 700], [MINX, 700, -600, MAXZ]];
-const isWaterXZ = (x, z) => (x > 430 && z > -1300 && z < 320) || (x > -320 && z >= 320 && z < 700) || (x > -600 && z >= 700);
+const GEO_RECTS = GEO_LAND.map(([n, ...r]) => clip(r, [MINX, MINZ, MAXX, MAXZ])).filter(Boolean);   // 東側の陸地 (regions/00_geography.js)
+const PROC_LAND = [[MINX, MINZ, -1680, 290], [-1680, MINZ, -300, -1080], [-300, MINZ, 430, -1300], [MINX, 320, -320, 700], [MINX, 700, -600, MAXZ], ...GEO_RECTS];
+/* ---- 川 (折れ線に幅をつけた多角形)。地面はこの中だけ低く掘り下げ、水面がのぞく */
+const RIVERS = GEO_RIVERS.map(r => ({ ...r, polys: [] })), RIVER_HASH = new Map(), RHC = 100;
+for (const r of RIVERS) {
+  const add = P => { const bb = polyBB(P); r.polys.push(P);
+    for (let i = Math.floor((bb[0] - r.plain - 20) / RHC); i <= Math.floor((bb[2] + r.plain + 20) / RHC); i++) for (let j = Math.floor((bb[1] - r.plain - 20) / RHC); j <= Math.floor((bb[3] + r.plain + 20) / RHC); j++) {
+      const k = i * 100003 + j; let a = RIVER_HASH.get(k); if (!a) RIVER_HASH.set(k, a = []); a.push([P, r]); } };
+  r.pts.forEach((p, i) => {
+    add(regularPoly(p[0], p[1], r.w / Math.cos(Math.PI / 8), 8, Math.PI / 8));   // 折れ目をふさぐ八角形
+    const q = r.pts[i + 1]; if (!q) return;
+    const dx = q[0] - p[0], dz = q[1] - p[1], l = Math.hypot(dx, dz), nx = -dz / l * r.w, nz = dx / l * r.w;
+    add([[p[0] + nx, p[1] + nz], [q[0] + nx, q[1] + nz], [q[0] - nx, q[1] - nz], [p[0] - nx, p[1] - nz]]);
+  });
+}
+// (x, z) からいちばん近い川の中心線までの距離 → 川の情報 (中: 水面 / 岸から plain 以内: 河川敷)
+function riverInfo(x, z, extra = 0) {
+  const c = RIVER_HASH.get(Math.floor(x / RHC) * 100003 + Math.floor(z / RHC)); if (!c) return null;
+  let best = null;
+  for (const [, r] of c) {
+    if (best && best.r === r) continue;
+    for (let i = 0; i < r.pts.length - 1; i++) {
+      const [ax, az] = r.pts[i], [bx, bz] = r.pts[i + 1], dx = bx - ax, dz = bz - az, t = Math.max(0, Math.min(1, ((x - ax) * dx + (z - az) * dz) / (dx * dx + dz * dz)));
+      const d = Math.hypot(x - ax - dx * t, z - az - dz * t);
+      if (d < r.w + r.plain + extra && (!best || d - r.w < best.d - best.r.w)) best = { r, d, i, t };
+    }
+  }
+  return best;
+}
+const inRiver = (x, z) => { const c = RIVER_HASH.get(Math.floor(x / RHC) * 100003 + Math.floor(z / RHC)); return !!c && c.some(([P]) => inPoly(P, x, z)); };
+const riverHitsRect = (f, m = 0) => {
+  const e = [f[0] - m, f[1] - m, f[2] + m, f[3] + m];
+  for (let i = Math.floor(e[0] / RHC); i <= Math.floor(e[2] / RHC); i++) for (let j = Math.floor(e[1] / RHC); j <= Math.floor(e[3] / RHC); j++)
+    for (const [P, r] of RIVER_HASH.get(i * 100003 + j) || []) if (polyHitsRect(P, [e[0] - r.plain, e[1] - r.plain, e[2] + r.plain, e[3] + r.plain])) return true;
+  return false;
+};
+const BRIDGE_POLYS = [];   // 川・海の上の橋 (この上は歩ける)。[多角形, 名前]
+// 海かどうか (地図の外の「見えるだけの街」にも使う)
+const GEO_ALL = GEO_LAND.map(([n, ...r]) => r);
+const isWaterXZ = (x, z) => inRiver(x, z) || (!GEO_ALL.some(r => inR(r, x, z)) && ((x > 430 && z > -600) || (x > -320 && z >= 320 && z < 700) || (x > -600 && z >= 700)));
 // 古川を渡る橋 (自動生成の街の大通り)
 const RIVER_BR = [];
 for (let x = Math.ceil(MINX / 400) * 400; x < -1680; x += 400) RIVER_BR.push([x - 10, 290, x + 10, 320]);
@@ -94,7 +132,7 @@ function carveRect(list, h) {
 }
 { const c = LM_WATER.reduce(carveRect, PROC_LAND); PROC_LAND.length = 0; PROC_LAND.push(...c); }
 const LM_BRIDGES = STN.flatMap(st => (st.land && st.land.bridges) || []), LM_WALK = STN.flatMap(st => (st.land && st.land.walk) || []);
-WALK.push(...PROC_LAND, ...RIVER_BR, ...LM_BRIDGES, ...LM_WALK); BRIDGES.push(...RIVER_BR, ...LM_BRIDGES);
+WALK.push(...PROC_LAND, ...RIVER_BR, ...LM_BRIDGES, ...LM_WALK, ...GEO_BRIDGES.flat); BRIDGES.push(...RIVER_BR, ...LM_BRIDGES, ...GEO_BRIDGES.flat);
 
 const LANDMARKS = [ // x0,z0,x1,z1,h,material
   [-145, -35, -55, 55, 18, 'glass'], [-130, -20, -72, 38, 200, 'glass'], [-205, 65, -172, 100, 76, 'resi'],

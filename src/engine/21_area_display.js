@@ -21,7 +21,9 @@ const DISC_KEY = 'tokyoWalker_disc';
 const DISC = new Set((() => { try { return JSON.parse(localStorage.getItem(DISC_KEY) || '[]'); } catch (e) { return []; } })());
 const SPECIAL_NAMES = ['浜松町駅の小便小僧', '銀座 中央通り (歩行者天国)', '首都高速 都心環状線', '東京タワー 鉄塔', '東京タワー 大展望台', '東京タワー トップデッキ', '東京タワー アンテナ頂上', 'JR山手線・京浜東北線の線路の上',
   '東京モノレール 浜松町駅の屋根', '東京モノレールの軌道', '歩道橋 (第一京浜)', '歩道橋 (日比谷通り)', '汐留 ペデストリアンデッキ', '愛宕山 山頂 (愛宕神社)', '新橋 ガード下 (屋台の屋根)'];
-const ALL_NAMES = new Set([...AREAS.map(a => a[0]), ...SPECIAL_NAMES, ...STN.map(st => st.town)]);
+// 東側のエリアの地名 (いちばん近い地名を表示)
+const TOWNS = REGION_DEFS.flatMap(r => r.towns || []);
+const ALL_NAMES = new Set([...AREAS.map(a => a[0]), ...SPECIAL_NAMES, ...STN.map(st => st.town), ...TOWNS.map(t => t[0]), ...RIVERS.map(r => r.name), ...RIVERS.filter(r => r.plain).map(r => r.name + ' 河川敷'), ...BRIDGE_POLYS.map(b => b[1])]);
 const discEl = document.getElementById('disc'), discCap = document.getElementById('discCap');
 function updateDiscUI() {
   const n = [...DISC].filter(k => ALL_NAMES.has(k)).length;
@@ -48,10 +50,14 @@ function areaAt(x, z, y) {
   if (hokoActive() && inR([-140, -1300, -116, -500], x, z)) return '銀座 中央通り (歩行者天国)';
   if (y > 3 && y < 4.6 && inR([JR[0], GADO[0], JR[2], GADO[1]], x, z)) return '新橋 ガード下 (屋台の屋根)';
   if (P.ride) return '山手線 車内';
+  if (P.boat) return '水上バス ' + P.boat.b.line.name;
   const rn = ringNearest(x, z);
   if (rn && rn.d < 9 && y > 5) { const st = stationAtS(rn.s); return st ? `${st.name}駅 ${rn.d < 2.8 ? 'ホーム' : '(線路の上)'}` : '山手線の高架の上'; }
+  const br = BRIDGE_POLYS.find(([Pb]) => inPoly(Pb, x, z)); if (br) return br[1];
+  const rv = riverInfo(x, z); if (rv) return rv.d < rv.r.w ? rv.r.name : rv.r.name + ' 河川敷';
   let name = null;
   for (const a of AREAS) if (inR(a.slice(1), x, z)) { name = a[0]; break; }
+  if (!name) { let bt = null, bd = 700; for (const t of TOWNS) { const d = Math.hypot(t[1] - x, t[2] - z); if (d < bd) { bd = d; bt = t[0]; } } name = bt; }
   if (!name) { const [st, d] = nearestStn(x, z); name = d < 1600 ? st.town : "東京"; }
   return y > 18 ? name + '（屋上）' : name;
 }

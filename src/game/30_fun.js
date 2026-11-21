@@ -259,12 +259,12 @@ function updateFun(dt, t) {
   if (sk && Math.hypot(P.x - sk.head[0], P.z - sk.head[1]) < 30 && inRange(sk.u, sk.R)) achieve('densha');
 }
 function toggleScooter() {
-  if (!started || P.glider || P.climbing || P.ride) return;
+  if (!started || P.glider || P.climbing || P.ride || P.boat) return;
   P.scooter = !P.scooter; P.svx = P.svz = 0;
   toast(P.scooter ? '🛴 電動スクーターに乗りました (R で降りる)' : '電動スクーターを降りました');
 }
 function toggleGlider() {
-  if (!started || P.grounded || P.climbing || P.ride) return;   // 空中でのみ開閉できる
+  if (!started || P.grounded || P.climbing || P.ride || P.boat) return;   // 空中でのみ開閉できる
   P.glider = !P.glider;
   if (P.glider) {
     P.gOpen = 0;

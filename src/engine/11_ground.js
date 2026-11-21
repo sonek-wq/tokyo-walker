@@ -2,10 +2,10 @@
    地面 (チャンク単位のテクスチャをストリーミング)・護岸・水面・街の外周
    ============================================================ */
 const lattice = (a, b, s = 10) => { const v = [a]; for (let k = Math.floor(a / s) * s + s; k < b; k += s) v.push(k); v.push(b); return v; };
-function groundMesh(x0, z0, x1, z1, mat, uvf, step = 10) {
+function groundMesh(x0, z0, x1, z1, mat, uvf, step = 10, yfn = null) {
   const xs = lattice(x0, x1, step), zs = lattice(z0, z1, step), nx = xs.length;
   const pos = [], nor = [], uv = [], idx = [];
-  for (const z of zs) for (const x of xs) { pos.push(x, 0, z); nor.push(0, 1, 0); uv.push(...uvf(x, z)); }
+  for (const z of zs) for (const x of xs) { pos.push(x, yfn ? yfn(x, z) : 0, z); nor.push(0, 1, 0); uv.push(...uvf(x, z)); }
   for (let j = 0; j < zs.length - 1; j++) for (let i = 0; i < nx - 1; i++) { const a = j * nx + i, b = a + 1, c = a + nx, d = c + 1; idx.push(a, c, b, b, c, d); }
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
@@ -28,7 +28,8 @@ for (let i = Math.floor(MINX / CH); i < Math.ceil(MAXX / CH); i++) for (let j = 
   const rects = WALK.map(r => clip(r, T)).filter(Boolean);
   if (!rects.length) continue;
   const t = { x0: T[0], z0: T[1], cx: T[0] + CH / 2, cz: T[1] + CH / 2, mat: groundLam({ map: GROUND_PLACEHOLDER }), tex: null };
-  t.meshes = rects.map(r => groundMesh(...r, t.mat, (x, z) => [(x - t.x0) / CH, (z - t.z0) / CH])); // DataTexture は上下反転しないので v = z方向そのまま
+  const wet = riverHitsRect(T, 10);   // 川の通るタイルは細かく分けて、川の中だけ地面を掘り下げる
+  t.meshes = rects.map(r => groundMesh(...r, t.mat, (x, z) => [(x - t.x0) / CH, (z - t.z0) / CH], wet ? 5 : 10, wet ? (x, z) => inRiver(x, z) ? -3.2 : 0 : null)); // DataTexture は上下反転しないので v = z方向そのまま
   GTILES.push(t);
 }
 function loadTile(t) {
@@ -71,6 +72,7 @@ const wallNoTop = [seawall, seawall, hidden, seawall, seawall, seawall];
 //   カメラ付近の地面を上書きしてしまう (地面テクスチャが消える原因) ため廃止
 for (const [x0, z0, x1, z1] of LAND) box(x1 - x0, 5, z1 - z0, wallNoTop, (x0 + x1) / 2, -2.5, (z0 + z1) / 2);
 for (const [x0, z0, x1, z1] of BRIDGES) {
+  if (x0 === 330 && z0 === -1206) continue;   // 勝どき橋は専用の形 (中央が少し高い) で作る
   box(x1 - x0, 1.4, z1 - z0, wallNoTop, (x0 + x1) / 2, -0.7, (z0 + z1) / 2);
   if (x1 - x0 < z1 - z0) for (const x of [x0 + 0.2, x1 - 0.2]) box(0.3, 1.1, z1 - z0, dark, x, 0.55, (z0 + z1) / 2);
   else for (const z of [z0 + 0.2, z1 - 0.2]) box(x1 - x0, 1.1, 0.3, dark, (x0 + x1) / 2, 0.55, z);
@@ -101,16 +103,17 @@ box(0.25, 1.1, 80, dark, 239.8, 0.55, 10);
   groundMesh(MINX - 1600, MINZ - 1600, MAXX + 1600, MINZ, sm, uvf, 100);   // 北
   groundMesh(MINX - 1600, MINZ, MINX, MAXZ + 1600, sm, uvf, 100);          // 西
   groundMesh(MINX, MAXZ, -600, MAXZ + 1600, sm, uvf, 100);                 // 南
-  groundMesh(MAXX, MINZ, MAXX + 1600, -1300, sm, uvf, 100);                // 東 (隅田川より北)
+  groundMesh(MAXX, MINZ, MAXX + 1600, -600, sm, uvf, 100);                 // 東 (江戸川の向こう、千葉県側)
 }
 const waterTex = tex(16, 16, x => {
   x.fillStyle = '#2d6585'; x.fillRect(0, 0, 16, 16);
   for (let i = 0; i < 18; i++) { x.fillStyle = rnd() < 0.5 ? '#4b88a8' : '#245572'; x.fillRect(rnd() * 16 | 0, rnd() * 16 | 0, 3 + rnd() * 4 | 0, 1); }
 });
-waterTex.repeat.set(800, 800);
-const waterGeo = new THREE.PlaneGeometry(9000, 9000, 70, 80); waterGeo.rotateX(-Math.PI / 2); // 東京湾・隅田川 (西側・北側の街の下には敷かない)
+const WSX = MAXX + 2000 - -600, WSZ = MAXZ + 3000 - -1300;   // 東京湾 (隅田川の河口から東。西側・北側の街の下には敷かない)
+const waterGeo = new THREE.PlaneGeometry(WSX, WSZ, Math.ceil(WSX / 120), Math.ceil(WSZ / 120)); waterGeo.rotateX(-Math.PI / 2);
 const water = new THREE.Mesh(waterGeo, waterLam({ map: waterTex }));
-water.position.set(-600 + 4500, -1.6, -1300 + 4500); scene.add(water);
+waterTex.repeat.set(WSX / 11, WSZ / 11);
+water.position.set(-600 + WSX / 2, -1.6, -1300 + WSZ / 2); scene.add(water);
 const wPos = waterGeo.attributes.position, wBase = Float32Array.from(wPos.array);
 // 古川 (拡張エリアの南を流れる川)
 const riverTex = waterTex.clone(); riverTex.repeat.set(310, 2.6); riverTex.needsUpdate = true; TEXTURES.push(riverTex);

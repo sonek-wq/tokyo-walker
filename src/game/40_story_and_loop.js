@@ -75,7 +75,7 @@ function photoCards(el, mode) {
 }
 function newGame() {
   STORY.begun = true; STORY.photos = {}; STORY.shots = []; STORY.cleared = false; saveStory();
-  gameH = 8; Object.assign(P, { x: 176, z: -22, y: 0, vy: 0, yaw: Math.PI / 2, pitch: 0.04, scooter: false, glider: false, ride: null });
+  gameH = 8; Object.assign(P, { x: 176, z: -22, y: 0, vy: 0, yaw: Math.PI / 2, pitch: 0.04, scooter: false, glider: false, ride: null, boat: null });
   cine = { mode: 'arrive', t: 0 };
   bannerSmall.textContent = 'ようこそ'; bannerText.textContent = 'WELCOME TO TOKYO'; noteEl.textContent = '伊豆諸島から、竹芝桟橋へ';
 }
@@ -189,7 +189,7 @@ function updateStory(dt) {
   let near = null;
   if (started) for (const ph of PHOTOS) if (!STORY.photos[ph.id] && Math.hypot(P.x - ph.x, P.z - ph.z) < 28 && Math.abs(P.y - ph.y) < 8) near = ph;
   hintEl.textContent = near ? '📷 …この景色、写真で見た気がする' : '';
-  const sp = started ? stationPrompt() : '', boat = started && allTaken() && inR(BOARD, P.x, P.z) && P.y < 2;
+  const sp = started ? (boatPrompt() || stationPrompt()) : '', boat = started && allTaken() && inR(BOARD, P.x, P.z) && P.y < 2;
   promptEl.textContent = sp || 'E　帰りの船に乗る'; promptEl.style.display = sp || boat ? 'block' : 'none';
 }
 // 演出 (到着・出航)
@@ -241,7 +241,7 @@ const clock = new THREE.Clock();
 const dmy = new THREE.Object3D();
 let areaTick = 0, chunkTick = 0;
 function update(dt, t) {
-  if (cine) updateCine(dt, t); else if (P.ride) updateRide(dt); else {
+  if (cine) updateCine(dt, t); else if (P.ride) updateRide(dt); else if (P.boat) updateBoatRide(dt); else {
   // --- プレイヤー
   if (keys.ArrowLeft) P.yaw += 1.9 * dt;
   if (keys.ArrowRight) P.yaw -= 1.9 * dt;
@@ -378,7 +378,7 @@ function update(dt, t) {
     const a = areaAt(P.x, P.z, P.y);
     if (a !== curArea) {
       curArea = a; areaEl.textContent = '📍 ' + a;
-      const isNew = started && !P.ride && discover(a);
+      const isNew = started && !P.ride && !P.boat && discover(a);
       const note = NOTES[a.replace('（屋上）', '')] || '';
       if (started) { bannerText.textContent = a; bannerSmall.textContent = isNew ? '★ NEW SPOT ★' : 'AREA'; noteEl.textContent = note; banner.style.opacity = 1; bannerTimer = (isNew ? 3.5 : 2.5) + (note ? 2.5 : 0); }
     }

@@ -7,7 +7,9 @@ const RAD = 0.35, STEP = 0.45, BODY = 1.7;
 const BOUNDS = [MINX, MINZ, MAXX, MAXZ];
 // 陸地か (水面・池でない)
 function onLand(x, z) {
+  if (BRIDGE_POLYS.some(([P]) => inPoly(P, x, z))) return true;   // 川や海に架かる橋の上
   if (!WALK.some(r => inR(r, x, z))) return false;
+  if (inRiver(x, z)) return false;
   for (const p of PONDS) if (inE(p, x, z) && !inE(ISLAND, x, z) && !inR(POND_BRIDGE, x, z)) return false;
   return true;
 }
@@ -37,7 +39,7 @@ addEventListener('keydown', e => {
   if (e.code === 'KeyM') toggleBig();
   if (e.code === 'KeyC' && !e.repeat) takePhoto();
   if (e.code === 'KeyB' && !e.repeat) toggleAlbum();
-  if (e.code === 'KeyE' && !e.repeat && started && !cine) { if (!stationAction()) tryBoard(); }
+  if (e.code === 'KeyE' && !e.repeat && started && !cine) { if (!boatAction() && !stationAction()) tryBoard(); }
   if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) e.preventDefault();
 });
 addEventListener('keyup', e => keys[e.code] = false);

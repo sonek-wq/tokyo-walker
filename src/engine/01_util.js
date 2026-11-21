@@ -93,4 +93,35 @@ function boxGeo(w, h, d, tw = 16, th = 16) {
   }
   return geo;
 }
-
+// ---- 多角形 (名所づくり・川の形などで使う)
+const polyBB = P => [Math.min(...P.map(p => p[0])), Math.min(...P.map(p => p[1])), Math.max(...P.map(p => p[0])), Math.max(...P.map(p => p[1]))];
+const polyC = P => P.reduce((a, p) => [a[0] + p[0] / P.length, a[1] + p[1] / P.length], [0, 0]);
+function inPoly(P, x, z) {   // 凸多角形の内側か (頂点の並びの向きは問わない)
+  let sg = 0;
+  for (let i = 0; i < P.length; i++) {
+    const a = P[i], b = P[(i + 1) % P.length], c = (b[0] - a[0]) * (z - a[1]) - (b[1] - a[1]) * (x - a[0]);
+    if (c !== 0) { if (sg && Math.sign(c) !== sg) return false; sg = Math.sign(c); }
+  }
+  return true;
+}
+function polyHitsRect(P, r) {   // 凸多角形と長方形が重なるか (分離軸)
+  if (!overlap(polyBB(P), r)) return false;
+  const R = [[r[0], r[1]], [r[2], r[1]], [r[2], r[3]], [r[0], r[3]]];
+  for (let i = 0; i < P.length; i++) {
+    const a = P[i], b = P[(i + 1) % P.length], nx = a[1] - b[1], nz = b[0] - a[0];
+    const pp = P.map(p => p[0] * nx + p[1] * nz), rp = R.map(p => p[0] * nx + p[1] * nz);
+    if (Math.max(...rp) <= Math.min(...pp) || Math.min(...rp) >= Math.max(...pp)) return false;
+  }
+  return true;
+}
+function clipPolyX(P, xmin, keepGreater = true) {   // 凸多角形を x = xmin で切る (片側を残す)
+  const out = [], inside = p => keepGreater ? p[0] >= xmin : p[0] <= xmin;
+  for (let i = 0; i < P.length; i++) {
+    const a = P[i], b = P[(i + 1) % P.length];
+    if (inside(a)) out.push(a);
+    if (inside(a) !== inside(b)) { const t = (xmin - a[0]) / (b[0] - a[0]); out.push([xmin, a[1] + (b[1] - a[1]) * t]); }
+  }
+  return out;
+}
+const rectPoly = (x0, z0, x1, z1) => [[x0, z0], [x1, z0], [x1, z1], [x0, z1]];
+function regularPoly(cx, cz, r, n, rot = 0) { const P = []; for (let i = 0; i < n; i++) { const a = rot + i / n * Math.PI * 2; P.push([cx + Math.cos(a) * r, cz + Math.sin(a) * r]); } return P; }

@@ -22,9 +22,15 @@ function cellLayout(ci, cj) {
   const blk2 = [inner[0] + 2.5, inner[1] + 2.5, inner[2] - 2.5, inner[3] - 2.5];   // 歩道の内側
   const [st, sd] = nearestStn(cx, cz), h = R();
   let zone = sd < 170 ? 'core' : sd < 450 ? 'town' : 'resi';
+  const RANK = { core: 4, towers: 3, town: 2, resi: 1 };   // 東側のエリア: 街の中心 (hub) ごとの性格
+  for (const rg of REGION_DEFS) for (const hb of rg.hubs || []) {
+    const d = Math.hypot(hb.x - cx, hb.z - cz), z2 = hb.core && d < hb.core ? 'core' : d < hb.town ? (hb.style || 'town') : null;
+    if (z2 && RANK[z2] > (RANK[zone] || 0)) zone = z2;
+  }
+  for (const [r, sty] of GEO_STYLES) if (inR(r, cx, cz)) zone = sty;
   if (zone !== 'core' && h < 0.06) zone = 'park'; else if (zone === 'resi' && h < 0.085) zone = 'temple';
   const L = { rect, inner, blk: blk2, zone, lots: [], trees: [], outside: !inside, major: [rect[0] === x0 && isMajor(ci), rect[1] === z0 && isMajor(cj), rect[2] === x0 + PC && isMajor(ci + 1), rect[3] === z0 + PC && isMajor(cj + 1)] };
-  const bad = f => ringNearRect(f, 15) || STN_RES.some(r => overlap(r, f)) || zoneHitsRect(f);
+  const bad = f => ringNearRect(f, 15) || STN_RES.some(r => overlap(r, f)) || zoneHitsRect(f) || riverHitsRect(f, 8) || BRIDGE_POLYS.some(([P]) => polyHitsRect(P, f));
   const lots = (minW, maxW, g, cb) => {
     for (let x = blk2[0]; x < blk2[2] - 4;) {
       let w = rg(minW, maxW); if (blk2[2] - (x + w) < minW * 0.7) w = blk2[2] - x;
@@ -43,6 +49,13 @@ function cellLayout(ci, cj) {
     const c = [(blk2[0] + blk2[2]) / 2, (blk2[1] + blk2[3]) / 2], f = [c[0] - 11, c[1] - 8, c[0] + 11, c[1] + 8];
     if (!bad(f)) L.lots.push({ f, kind: 'temple' });
     for (let k = 0; k < 10; k++) { const a = k / 10 * Math.PI * 2; L.trees.push([c[0] + Math.cos(a) * 30, c[1] + Math.sin(a) * 26, rg(1, 1.4), 2]); }
+  } else if (zone === 'soko') {   // 倉庫街: 大きな平たい倉庫
+    lots(28, 46, 3, f => { if (R() < 0.15) L.lots.push({ f, kind: 'parking' }); else L.lots.push({ f, kind: 'box', h: rg(8, 18), key: pk(['soko0', 'soko1', 'soko2']) }); });
+  } else if (zone === 'towers') {   // タワーマンションの街
+    lots(30, 44, 5, f => { const q = R();
+      if (q < 0.55) L.lots.push({ f, kind: 'box', h: rg(70, 170), key: pk(['resi', 'resi2', 'glass', 'resi']) });
+      else if (q < 0.8) L.lots.push({ f, kind: 'box', h: rg(8, 14), key: pk(SHOPS) });
+      else { L.lots.push({ f, kind: 'plaza' }); L.trees.push([(f[0] + f[2]) / 2, (f[1] + f[3]) / 2, 1, 1]); } });
   } else if (zone === 'core') {
     lots(22, 40, 2, f => { const q = R();
       if (q < 0.55) L.lots.push({ f, kind: 'box', h: rg(40, 130), key: pk(['glass', 'glassDark', 'office', 'office2', 'glass']) });
@@ -66,11 +79,11 @@ function cellLayout(ci, cj) {
   if (L.major[2]) for (let z = ins[1] + 6; z < ins[3] - 3; z += 16) L.trees.push([ins[2] - 1.2, z, 0.9, 0]);
   if (L.major[1]) for (let x = ins[0] + 6; x < ins[2] - 3; x += 16) L.trees.push([x, ins[1] + 1.2, 0.9, 0]);
   if (L.major[3]) for (let x = ins[0] + 6; x < ins[2] - 3; x += 16) L.trees.push([x, ins[3] - 1.2, 0.9, 0]);
-  L.trees = L.trees.filter(([x, z]) => !ringNearRect([x, z, x, z], 9) && !STN_RES.some(r => inR(r, x, z)) && !inZone(x, z));
+  L.trees = L.trees.filter(([x, z]) => !ringNearRect([x, z, x, z], 9) && !STN_RES.some(r => inR(r, x, z)) && !inZone(x, z) && !riverInfo(x, z, 6) && !BRIDGE_POLYS.some(([P]) => inPoly(P, x, z)));
   LAYOUT.set(key, L); return L;
 }
 // 地面テクスチャ・地図への描画
-const ZONE_COL = { core: '#a8a29a', town: '#8f8b82', resi: '#8a867c', park: GRASS, temple: '#b8ad92' };
+const ZONE_COL = { core: '#a8a29a', town: '#8f8b82', resi: '#8a867c', park: GRASS, temple: '#b8ad92', towers: '#9c978e', soko: '#8c8c86' };
 function procPaint(g, T, simple = false) {
   for (let ci = Math.floor(T[0] / PC); ci <= Math.floor((T[2] - 0.01) / PC); ci++) for (let cj = Math.floor(T[1] / PC); cj <= Math.floor((T[3] - 0.01) / PC); cj++) {
     const L = cellLayout(ci, cj); if (!L || L.outside) continue;
@@ -171,6 +184,6 @@ function streamProc(dt) {
 // 陸と海の境目の護岸 (自動生成の街の東側)
 {
   const wall = (x0, z0, x1, z1) => box(x1 - x0, 5, z1 - z0, seawall, (x0 + x1) / 2, -2.5, (z0 + z1) / 2);
-  wall(430, -1301, MAXX, -1300); wall(-321, 320, -320, 700); wall(-600, 699, -320, 700); wall(-601, 700, -600, MAXZ);
+  wall(-321, 320, -320, 700); wall(-600, 699, -320, 700); wall(-601, 700, -600, MAXZ);
 }
 

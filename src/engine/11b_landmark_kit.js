@@ -14,40 +14,8 @@ const LM_LABELS = [];     // 全体マップのラベル (MAP_LABELS と同じ�
 const LM_PEOPLE = [];     // 歩く人 [[x0, z0, x1, z1], 人数]
 const ROAD_STOPS = [];    // 信号で車が止まる交差点 { rect, red: ns => 赤信号か }
 
-// ---- 多角形
-const polyBB = P => [Math.min(...P.map(p => p[0])), Math.min(...P.map(p => p[1])), Math.max(...P.map(p => p[0])), Math.max(...P.map(p => p[1]))];
-const polyC = P => P.reduce((a, p) => [a[0] + p[0] / P.length, a[1] + p[1] / P.length], [0, 0]);
-function inPoly(P, x, z) {   // 凸多角形の内側か (頂点の並びの向きは問わない)
-  let sg = 0;
-  for (let i = 0; i < P.length; i++) {
-    const a = P[i], b = P[(i + 1) % P.length], c = (b[0] - a[0]) * (z - a[1]) - (b[1] - a[1]) * (x - a[0]);
-    if (c !== 0) { if (sg && Math.sign(c) !== sg) return false; sg = Math.sign(c); }
-  }
-  return true;
-}
-function polyHitsRect(P, r) {   // 凸多角形と長方形が重なるか (分離軸)
-  if (!overlap(polyBB(P), r)) return false;
-  const R = [[r[0], r[1]], [r[2], r[1]], [r[2], r[3]], [r[0], r[3]]];
-  for (let i = 0; i < P.length; i++) {
-    const a = P[i], b = P[(i + 1) % P.length], nx = a[1] - b[1], nz = b[0] - a[0];
-    const pp = P.map(p => p[0] * nx + p[1] * nz), rp = R.map(p => p[0] * nx + p[1] * nz);
-    if (Math.max(...rp) <= Math.min(...pp) || Math.min(...rp) >= Math.max(...pp)) return false;
-  }
-  return true;
-}
-function clipPolyX(P, xmin, keepGreater = true) {   // 凸多角形を x = xmin で切る (片側を残す)
-  const out = [], inside = p => keepGreater ? p[0] >= xmin : p[0] <= xmin;
-  for (let i = 0; i < P.length; i++) {
-    const a = P[i], b = P[(i + 1) % P.length];
-    if (inside(a)) out.push(a);
-    if (inside(a) !== inside(b)) { const t = (xmin - a[0]) / (b[0] - a[0]); out.push([xmin, a[1] + (b[1] - a[1]) * t]); }
-  }
-  return out;
-}
 const inZone = (x, z) => LM_ZONES.some(P => inPoly(P, x, z));
 const zoneHitsRect = r => LM_ZONES.some(P => polyHitsRect(P, r));
-const rectPoly = (x0, z0, x1, z1) => [[x0, z0], [x1, z0], [x1, z1], [x0, z1]];
-function regularPoly(cx, cz, r, n, rot = 0) { const P = []; for (let i = 0; i < n; i++) { const a = rot + i / n * Math.PI * 2; P.push([cx + Math.cos(a) * r, cz + Math.sin(a) * r]); } return P; }
 
 // ---- 回転した座標系: u = 軸方向, v = それに直交する向き (vHint の側)
 function frame(ox, oz, ux, uz, vhx, vhz) {
@@ -76,6 +44,11 @@ function pushPrism(wallKey, topKey, P, y0, y1, opt = {}) {
     let a = P[0], b = P[i], d = P[i + 1];
     if ((b[1] - a[1]) * (d[0] - a[0]) - (b[0] - a[0]) * (d[1] - a[1]) < 0) [b, d] = [d, b];
     pushTri(tt, [a[0], y1, a[1]], [b[0], y1, b[1]], [d[0], y1, d[1]], [0, 1, 0], [a[0] / 16, -a[1] / 16, b[0] / 16, -b[1] / 16, d[0] / 16, -d[1] / 16]);
+  }
+  if (opt.bottom) for (let i = 1; i < P.length - 1; i++) {   // 底面 (下から見える橋など)
+    let a = P[0], b = P[i], d = P[i + 1];
+    if ((b[1] - a[1]) * (d[0] - a[0]) - (b[0] - a[0]) * (d[1] - a[1]) > 0) [b, d] = [d, b];
+    pushTri(bucket(H, opt.bottom === true ? wallKey : opt.bottom), [a[0], y0, a[1]], [b[0], y0, b[1]], [d[0], y0, d[1]], [0, -1, 0], [0, 0, 1, 0, 1, 1]);
   }
   if (opt.solid !== false) polySolid(P, y0, y1);
   if (opt.fp) polyFr(P, opt.fp);
@@ -200,3 +173,14 @@ WALL.MEMBRANE = lam({ color: 0xf2f2ee, emissive: 0x9a9890, side: THREE.DoubleSid
 WALL.GRASSTOP = lam({ map: tex(16, 16, x => { x.fillStyle = '#5a8a3c'; x.fillRect(0, 0, 16, 16); for (let i = 0; i < 30; i++) { x.fillStyle = rnd() < 0.5 ? '#6a9a48' : '#4a7a30'; x.fillRect(rnd() * 16 | 0, rnd() * 16 | 0, 1, 2); } }) });
 WALL.BRONZE = lam({ color: 0x4a4436 });
 WALL.SLATE = lam({ map: roofTex('#4a5058', '#3c4248') });
+WALL.ASPH = lam({ color: 0x46464c });
+// 傾いた板 (橋の路面・欄干など): 中心線 a → b、半幅 hw、高さ ya → yb、厚さ th。なめらかな坂になる
+function pushSlope(topKey, sideKey, a, b, hw, ya, yb, th) {
+  const dx = b[0] - a[0], dz = b[1] - a[1], l = Math.hypot(dx, dz), nx = -dz / l * hw, nz = dx / l * hw;
+  const H = holderFor((a[0] + b[0]) / 2, (a[1] + b[1]) / 2, Math.max(ya, yb)), T = bucket(H, topKey), S = bucket(H, sideKey);
+  const p = (c, s, y) => [c[0] + nx * s, y, c[1] + nz * s];
+  pushFace(T, [p(a, 1, ya), p(b, 1, yb), p(b, -1, yb), p(a, -1, ya)], [0, 1, 0]);
+  pushFace(S, [p(a, 1, ya - th), p(b, 1, yb - th), p(b, -1, yb - th), p(a, -1, ya - th)], [0, -1, 0]);
+  pushFace(S, [p(a, 1, ya), p(b, 1, yb), p(b, 1, yb - th), p(a, 1, ya - th)], [nx, 0, nz]);
+  pushFace(S, [p(a, -1, ya), p(b, -1, yb), p(b, -1, yb - th), p(a, -1, ya - th)], [-nx, 0, -nz]);
+}
