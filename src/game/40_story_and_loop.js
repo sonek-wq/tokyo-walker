@@ -345,7 +345,7 @@ function update(dt, t) {
     if (c.s > L.b) c.s = L.a; if (c.s < L.a) c.s = L.b;
     if (L.ns) { dmy.position.set(L.c, L.y || 0, c.s); dmy.rotation.set(0, L.dir > 0 ? 0 : Math.PI, 0); }
     else { dmy.position.set(c.s, L.y || 0, L.c); dmy.rotation.set(0, L.dir > 0 ? Math.PI / 2 : -Math.PI / 2, 0); }
-    const hide = L.hoko && hokoActive(); dmy.scale.setScalar(hide ? 0 : 1); dmy.updateMatrix();
+    const hide = (L.hoko && hokoActive()) || (L.hokoFn && L.hokoFn()); dmy.scale.setScalar(hide ? 0 : 1); dmy.updateMatrix();
     for (const m of carParts) m.setMatrixAt(i, dmy.matrix);
     if (c.taxi) andon.setMatrixAt(i, dmy.matrix);
   });
@@ -358,7 +358,7 @@ function update(dt, t) {
     pp.t += pp.d * pp.v * dt; if (pp.t > 1) { pp.t = 1; pp.d = -1; } if (pp.t < 0) { pp.t = 0; pp.d = 1; }
     const [x0, z0, x1, z1] = pp.p;
     dmy.position.set(x0 + (x1 - x0) * pp.t, Math.abs(Math.sin(t * 7 + pp.ph)) * 0.06, z0 + (z1 - z0) * pp.t);
-    dmy.rotation.set(0, Math.atan2((x1 - x0) * pp.d, (z1 - z0) * pp.d), 0); dmy.scale.setScalar(pp.hk && !hokoActive() ? 0 : 1); dmy.updateMatrix();
+    dmy.rotation.set(0, Math.atan2((x1 - x0) * pp.d, (z1 - z0) * pp.d), 0); dmy.scale.setScalar((pp.hk && !hokoActive()) || (pp.hf && !pp.hf()) ? 0 : 1); dmy.updateMatrix();
     for (const m of pplParts) m.setMatrixAt(i, dmy.matrix);
   });
   for (const m of pplParts) m.instanceMatrix.needsUpdate = true;

@@ -14,6 +14,7 @@ for (const [x0, z0, x1, z1, d] of ROADS) {
 for (const [c, dir] of [[296, 1], [300, 1], [304, -1], [308, -1]]) LANES.push({ ns: false, c, dir, a: -3000, b: -532, y: SHUTO_Y });
 for (const [c, dir] of [[-516, 1], [-520, 1], [-524, -1], [-528, -1]]) LANES.push({ ns: true, c, dir, a: 312, b: 2490, y: SHUTO_Y });
 for (const L of LANES) L.hoko = L.ns && L.c > -140 && L.c < -116 && L.b < -400; // 銀座 中央通り
+for (const L of LANES) for (const h of HOKO_ZONES) if (L.ns && L.c > h.r[0] && L.c < h.r[2] && L.a >= h.r[1] - 3 && L.b <= h.r[3] + 3) L.hokoFn = h.on;   // 秋葉原など
 for (const L of LANES) {   // 信号で止まる交差点 (渋谷スクランブル交差点など)
   L.stops = [];
   for (const sp of ROAD_STOPS) {
@@ -56,7 +57,7 @@ PPATH.push([110, -905, 280, -905], [110, -870, 280, -870], [200, -980, 200, -830
 for (let i = 0; i < 180; i++) {
   const p = i < 20 ? PPATH[PPATH.length - 7 + (i % 3)] : pick(PPATH); PEOPLE.push({ p, t: rnd(), v: rr(1, 1.6) / Math.hypot(p[2] - p[0], p[3] - p[1]), d: rnd() < 0.5 ? 1 : -1, ph: rr(0, 6) });
 }
-for (const [p, n] of LM_PEOPLE) for (let i = 0; i < n; i++) PEOPLE.push({ p, t: rnd(), v: rr(1, 1.6) / Math.hypot(p[2] - p[0], p[3] - p[1]), d: rnd() < 0.5 ? 1 : -1, ph: rr(0, 6) });
+for (const [p, n, hf] of LM_PEOPLE) for (let i = 0; i < n; i++) PEOPLE.push({ p, t: rnd(), v: rr(1, 1.6) / Math.hypot(p[2] - p[0], p[3] - p[1]), d: rnd() < 0.5 ? 1 : -1, ph: rr(0, 6), hf });   // hf: 歩行者天国のときだけ出る人
 const pplParts = [
   new THREE.InstancedMesh(new THREE.BoxGeometry(0.42, 0.8, 0.26).translate(0, 0.4, 0), lam({ color: 0xffffff }), PEOPLE.length),
   new THREE.InstancedMesh(new THREE.BoxGeometry(0.5, 0.7, 0.3).translate(0, 1.15, 0), lam({ color: 0xffffff }), PEOPLE.length),

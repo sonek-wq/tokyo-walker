@@ -49,6 +49,7 @@ function areaAt(x, z, y) {
   if (y > 25 && Math.hypot(x - ATAGO.x, z - ATAGO.z) < 40) return '愛宕山 山頂 (愛宕神社)';
   if (y > 6.5 && Math.hypot(x - MANNEKEN[0], z - MANNEKEN[1]) < 8) return '浜松町駅の小便小僧';
   if (hokoActive() && inR([-140, -1300, -116, -500], x, z)) return '銀座 中央通り (歩行者天国)';
+  for (const h of HOKO_ZONES) if (y < 3 && h.on() && inR(h.r, x, z)) return h.name;
   if (y > 3 && y < 4.6 && inR([JR[0], GADO[0], JR[2], GADO[1]], x, z)) return '新橋 ガード下 (屋台の屋根)';
   if (P.ride) return '山手線 車内';
   if (P.boat) return P.boat.b.line.kind === 'boat' ? '水上バス ' + P.boat.b.line.name : 'ゆりかもめ 車内';
