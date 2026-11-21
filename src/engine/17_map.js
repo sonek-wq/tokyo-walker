@@ -66,39 +66,53 @@ const MAP_DISTRICTS = [['築地', 210, -880], ['隅田川', 380, -700], ['竹芝
   ['汐留', -250, -700], ['銀座', -150, -1100], ['虎ノ門', -1500, -700], ['西新橋', -1020, -840], ['東京湾', 300, -250]];
 for (const r of REGION_DEFS) for (const [n, x, z] of r.towns || []) MAP_DISTRICTS.push([n, x, z]);
 for (const st of STN) if (!['浜松町', '新橋'].includes(st.name)) { const q = ringAt(st.s); MAP_DISTRICTS.push([st.town, st.x - q.nx * 260, st.z - q.nz * 260]); }
-let showBig = false, bigBase = null, BK = 1, BW = 0, BH = 0;
+// 全体マップ: 5段階で拡大縮小 (ホイール / ＋ −)。拡大中は現在地を中心に表示し、街の細かい地図に切り替わる
+const BIG_ZOOM = [1, 1.7, 3, 5, 8];
+let showBig = false, bigBase = null, BK = 1, BW = 0, BH = 0, BX0 = MINX, BZ0 = MINZ, bigZ = 0, bigCtr = [0, 0];
+const bigZoomEl = document.getElementById('bigZoom');
 function layoutBig() {
-  BK = Math.min((innerWidth - 40) / WW, (innerHeight - 70) / WH);
-  BW = Math.floor(WW * BK); BH = Math.floor(WH * BK);
+  const fitK = Math.min((innerWidth - 40) / WW, (innerHeight - 90) / WH), zoom = BIG_ZOOM[bigZ];
+  BK = fitK * zoom;
+  if (bigZ === 0) { BW = Math.floor(WW * BK); BH = Math.floor(WH * BK); BX0 = MINX; BZ0 = MINZ; }
+  else {   // 画面いっぱいの窓で、現在地を中心に切り取る (地図の端では端に寄せる)
+    BW = Math.floor(Math.min(innerWidth - 40, WW * BK)); BH = Math.floor(Math.min(innerHeight - 90, WH * BK));
+    const vw = BW / BK, vh = BH / BK;
+    BX0 = Math.max(MINX, Math.min(MAXX - vw, P.x - vw / 2)); BZ0 = Math.max(MINZ, Math.min(MAXZ - vh, P.z - vh / 2));
+  }
+  bigCtr = [P.x, P.z];
   big.width = BW; big.height = BH; big.style.width = BW + 'px'; big.style.height = BH + 'px';
   bigBase = document.createElement('canvas'); bigBase.width = BW; bigBase.height = BH;
-  const b = bigBase.getContext('2d'), mx = x => (x - MINX) * BK, mz = z => (z - MINZ) * BK;
-  b.imageSmoothingEnabled = true; b.drawImage(OV, 0, 0, BW, BH);
-  b.strokeStyle = '#000'; b.lineWidth = 4; b.beginPath(); YP.forEach(([x, z], i) => i ? b.lineTo(mx(x), mz(z)) : b.moveTo(mx(x), mz(z))); b.stroke();
-  b.strokeStyle = '#7fd0ff'; b.lineWidth = 2; b.stroke();
+  const b = bigBase.getContext('2d'), mx = x => (x - BX0) * BK, mz = z => (z - BZ0) * BK, vw = BW / BK, vh = BH / BK;
+  if (vw > 3200) { b.imageSmoothingEnabled = true; b.drawImage(OV, (BX0 - MINX) * OVS, (BZ0 - MINZ) * OVS, vw * OVS, vh * OVS, 0, 0, BW, BH); }
+  else {   // 拡大したときは、ミニマップと同じ細かい地図 (道路・建物・名所) を描く
+    b.save(); b.fillStyle = '#2b5b78'; b.fillRect(0, 0, BW, BH); b.setTransform(BK, 0, 0, BK, -BX0 * BK, -BZ0 * BK); paintWorld(b, [BX0, BZ0, BX0 + vw, BZ0 + vh]); b.restore();
+  }
+  const lw = Math.min(1.6, Math.max(1, zoom / 2.5));
+  b.strokeStyle = '#000'; b.lineWidth = 4 * lw; b.beginPath(); YP.forEach(([x, z], i) => i ? b.lineTo(mx(x), mz(z)) : b.moveTo(mx(x), mz(z))); b.stroke();
+  b.strokeStyle = '#7fd0ff'; b.lineWidth = 2 * lw; b.stroke();
   // 水上バスの航路 (点線)
-  b.save(); b.setLineDash([6, 5]); b.lineWidth = 2.5;
+  b.save(); b.setLineDash([6, 5]); b.lineWidth = 2.5 * lw;
   for (const ln of WB_LINES) { b.strokeStyle = ln.color; b.beginPath(); ln.pts.forEach(([x, z], i) => i ? b.lineTo(mx(x), mz(z)) : b.moveTo(mx(x), mz(z))); b.stroke(); }
   b.restore();
   // 山手線の環と駅
   b.beginPath(); RP.forEach(([x, z], i) => i ? b.lineTo(mx(x), mz(z)) : b.moveTo(mx(x), mz(z))); b.closePath();
-  b.strokeStyle = '#1a3a1a'; b.lineWidth = 6; b.stroke(); b.strokeStyle = '#80c241'; b.lineWidth = 3.5; b.stroke();
-  for (const st of STN) { b.fillStyle = '#fff'; b.strokeStyle = '#2a5a2a'; b.lineWidth = 2; b.beginPath(); b.arc(mx(st.x), mz(st.z), 4, 0, 7); b.fill(); b.stroke(); }
-  const fs = Math.max(10, Math.round(BH / 62));
+  b.strokeStyle = '#1a3a1a'; b.lineWidth = 6 * lw; b.stroke(); b.strokeStyle = '#80c241'; b.lineWidth = 3.5 * lw; b.stroke();
+  for (const st of STN) { b.fillStyle = '#fff'; b.strokeStyle = '#2a5a2a'; b.lineWidth = 2; b.beginPath(); b.arc(mx(st.x), mz(st.z), 4 * lw, 0, 7); b.fill(); b.stroke(); }
+  const fs = Math.max(10, Math.round(WH * fitK / 62)) + (bigZ >= 3 ? 2 : 0), vis = (X, Y) => X > -80 && X < BW + 80 && Y > -30 && Y < BH + 30;
   b.font = `${fs}px DotGothic16, monospace`; b.textAlign = 'center'; b.textBaseline = 'middle'; b.lineJoin = 'round';
   // 地区名 (大きく薄く)
-  b.save(); b.font = `bold ${Math.round(fs * 1.7)}px DotGothic16, monospace`; b.fillStyle = 'rgba(255,255,255,.2)';
-  for (const [t, x, z] of MAP_DISTRICTS) b.fillText(t, mx(x), mz(z)); b.restore();
+  b.save(); b.font = `bold ${Math.round(fs * 1.7)}px DotGothic16, monospace`; b.fillStyle = bigZ ? 'rgba(255,255,255,.32)' : 'rgba(255,255,255,.2)';
+  if (bigZ) { b.lineWidth = 3; b.strokeStyle = 'rgba(0,0,0,.25)'; }
+  for (const [t, x, z] of MAP_DISTRICTS) if (vis(mx(x), mz(z))) { if (bigZ) b.strokeText(t, mx(x), mz(z)); b.fillText(t, mx(x), mz(z)); } b.restore();
   b.font = `${fs}px DotGothic16, monospace`;
   // ラベル同士が重ならないよう、上下にずらして配置 (置けなければアイコンだけ)
   const placed = [], fits = r => !placed.some(q => r[0] < q[2] && r[2] > q[0] && r[1] < q[3] && r[3] > q[1]);
   // 見つけたねこ
-  b.font = `${fs}px DotGothic16, monospace`;
   for (const c of (typeof CATS !== 'undefined' ? CATS : [])) if (CAT_FOUND.has(c.i)) b.fillText('🐈', mx(c.g.position.x), mz(c.g.position.z));
   for (const [t, x, z, icon, key] of MAP_LABELS) {
+    const X = mx(x), Y = mz(z); if (!vis(X, Y)) continue;
     const k = key || t, tracked = ALL_NAMES.has(k), found = !tracked || DISC.has(k);
-    const label = (icon ? icon + ' ' : '') + t + (tracked && found ? ' ★' : '');
-    const X = mx(x), Y = mz(z), w = b.measureText(label).width;
+    const label = (icon ? icon + ' ' : '') + t + (tracked && found ? ' ★' : ''), w = b.measureText(label).width;
     b.lineWidth = 4; b.strokeStyle = '#000'; b.fillStyle = !tracked ? '#cfe8ff' : found ? '#ffe68a' : '#d8d8dc';
     let done = false;
     for (const dy of [0, -fs * 1.15, fs * 1.15, -fs * 2.3, fs * 2.3]) {
@@ -107,17 +121,25 @@ function layoutBig() {
     }
     if (!done && icon) { b.strokeText(icon, X, Y); b.fillText(icon, X, Y); }
   }
-  // タイトル
-  b.textAlign = 'left'; b.font = `${fs + 2}px DotGothic16, monospace`; b.fillStyle = '#ffd84a'; b.strokeText('TOKYO WALKER MAP', 60, 22); b.fillText('TOKYO WALKER MAP', 60, 22); b.textAlign = 'center';
-  b.fillStyle = '#ffd84a'; b.font = `${fs + 4}px DotGothic16, monospace`; b.lineWidth = 4; b.strokeText('▲N', 28, 22); b.fillText('▲N', 28, 22);
-  const bar = 200 * BK; b.fillStyle = '#fff'; b.fillRect(BW - 14 - bar, BH - 18, bar, 4);
-  b.font = `${fs}px DotGothic16, monospace`; b.textAlign = 'right'; b.strokeText('200m', BW - 14, BH - 30); b.fillText('200m', BW - 14, BH - 30);
+  // タイトル・方位・縮尺
+  b.textAlign = 'left'; b.font = `${fs + 2}px DotGothic16, monospace`; b.fillStyle = '#ffd84a'; b.lineWidth = 4; b.strokeStyle = '#000'; b.strokeText('TOKYO WALKER MAP', 60, 22); b.fillText('TOKYO WALKER MAP', 60, 22); b.textAlign = 'center';
+  b.fillStyle = '#ffd84a'; b.font = `${fs + 4}px DotGothic16, monospace`; b.strokeText('▲N', 28, 22); b.fillText('▲N', 28, 22);
+  const m = [50, 100, 200, 500, 1000, 2000].find(v => v * BK >= 70) || 2000, bar = m * BK;
+  b.fillStyle = '#000'; b.fillRect(BW - 16 - bar, BH - 20, bar + 4, 8); b.fillStyle = '#fff'; b.fillRect(BW - 14 - bar, BH - 18, bar, 4);
+  b.font = `${fs}px DotGothic16, monospace`; b.textAlign = 'right'; b.strokeText(m >= 1000 ? m / 1000 + 'km' : m + 'm', BW - 14, BH - 32); b.fillText(m >= 1000 ? m / 1000 + 'km' : m + 'm', BW - 14, BH - 32);
+  bigZoomEl.textContent = '🔍 ' + '■'.repeat(bigZ + 1) + '□'.repeat(BIG_ZOOM.length - 1 - bigZ);
 }
 function toggleBig() { showBig = !showBig; if (showBig) layoutBig(); bigWrap.style.display = showBig ? 'flex' : 'none'; }
+function zoomBig(d) {
+  const z = Math.max(0, Math.min(BIG_ZOOM.length - 1, bigZ + d)); if (z === bigZ || !showBig) return;
+  bigZ = z; layoutBig(); toast(`🗺 地図の拡大 ${bigZ + 1} / ${BIG_ZOOM.length}`); toastTimer = 1.2;
+}
 addEventListener('resize', () => { if (showBig) layoutBig(); });
+addEventListener('wheel', e => { if (!showBig) return; zoomBig(e.deltaY < 0 ? 1 : -1); e.preventDefault(); }, { passive: false });
 function drawBig(px, pz, yaw, t) {
+  if (bigZ && Math.max(Math.abs(px - bigCtr[0]), Math.abs(pz - bigCtr[1])) * BK > Math.min(BW, BH) * 0.18) layoutBig();   // 拡大中は現在地について動く
   bctx.drawImage(bigBase, 0, 0);
-  const x = (px - MINX) * BK, y = (pz - MINZ) * BK, s = Math.max(9, BH / 40);
+  const x = (px - BX0) * BK, y = (pz - BZ0) * BK, s = Math.max(9, Math.min(BH, 700) / 40);
   bctx.save(); bctx.translate(x, y);
   bctx.strokeStyle = `rgba(255,216,74,${0.35 + 0.35 * Math.sin(t * 5)})`; bctx.lineWidth = 2;
   bctx.beginPath(); bctx.arc(0, 0, s * 1.6, 0, 7); bctx.stroke();
@@ -126,8 +148,8 @@ function drawBig(px, pz, yaw, t) {
   bctx.beginPath(); bctx.moveTo(s, 0); bctx.lineTo(-s * 0.7, -s * 0.7); bctx.lineTo(-s * 0.7, s * 0.7); bctx.closePath(); bctx.stroke(); bctx.fill();
   bctx.restore();
   // 走っている列車
-  for (const wb of WB_BOATS) { bctx.fillStyle = wb.line.color; bctx.fillRect((wb.g.position.x - MINX) * BK - 3, (wb.g.position.z - MINZ) * BK - 3, 6, 6); }
-  for (const tr of YAMA) { const q = ringAt(tr.s); bctx.fillStyle = tr.dwell > 0 ? '#ffffff' : '#c8f080'; bctx.fillRect((q.x - MINX) * BK - 2.5, (q.z - MINZ) * BK - 2.5, 5, 5); }
-  for (const tr of JR_TRAINS) { bctx.fillStyle = tr.name === '京浜東北線' ? '#00b2e5' : '#ffffff'; bctx.fillRect((tr.head[0] - MINX) * BK - 2, (tr.head[1] - MINZ) * BK - 2, 4, 4); }
+  for (const wb of WB_BOATS) { bctx.fillStyle = wb.line.color; bctx.fillRect((wb.g.position.x - BX0) * BK - 3, (wb.g.position.z - BZ0) * BK - 3, 6, 6); }
+  for (const tr of YAMA) { const q = ringAt(tr.s); bctx.fillStyle = tr.dwell > 0 ? '#ffffff' : '#c8f080'; bctx.fillRect((q.x - BX0) * BK - 2.5, (q.z - BZ0) * BK - 2.5, 5, 5); }
+  for (const tr of JR_TRAINS) { bctx.fillStyle = tr.name === '京浜東北線' ? '#00b2e5' : '#ffffff'; bctx.fillRect((tr.head[0] - BX0) * BK - 2, (tr.head[1] - BZ0) * BK - 2, 4, 4); }
 }
 

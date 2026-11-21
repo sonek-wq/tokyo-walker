@@ -272,7 +272,7 @@ function update(dt, t) {
     P.wheel += Math.hypot(P.svx, P.svz) * dt / 0.22;
   } else if (moving) {
     const sp = run ? 11 : 4.5;
-    if (tryMove(ux * sp * dt, uz * sp * dt)) { P.climbing = true; P.y += sp * dt; } // 壁に向かって歩く → 同じ速さで「スイー」と登る
+    if (tryMove(ux * sp * dt, uz * sp * dt)) { P.climbing = true; P.y += sp * 0.5 * dt; } // 壁に向かって歩く → 歩く速さの半分で「スイー」と登る
     else if (P.grounded) P.bob += dt * (run ? 13 : 9);
   }
   const fl = floorAt(P.x, P.z, P.y);

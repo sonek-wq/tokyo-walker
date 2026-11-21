@@ -38,6 +38,8 @@ addEventListener('keydown', e => {
   if (e.code === 'Escape' && started && overlay.style.display === 'none') showPause();
   if (e.code === 'KeyN') { showMap = !showMap; mini.style.display = showMap ? 'block' : 'none'; }
   if (e.code === 'KeyM') toggleBig();
+  if (['Equal', 'Semicolon', 'NumpadAdd', 'BracketRight'].includes(e.code)) zoomBig(1);   // ＋ (日本語キーボードの「;+」も)
+  if (['Minus', 'NumpadSubtract', 'BracketLeft'].includes(e.code)) zoomBig(-1);
   if (e.code === 'KeyC' && !e.repeat) takePhoto();
   if (e.code === 'KeyB' && !e.repeat) toggleAlbum();
   if (e.code === 'KeyK' && !e.repeat) toggleNotebook();
