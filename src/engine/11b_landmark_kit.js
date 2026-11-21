@@ -160,7 +160,9 @@ function bakeFlush() {
     const g = new THREE.BufferGeometry(), at = { position: [], normal: [], uv: [] };
     for (const q of geos) for (const k in at) if (q.attributes[k]) at[k].push(...q.attributes[k].array);
     for (const k in at) g.setAttribute(k, new THREE.Float32BufferAttribute(at[k], k === 'uv' ? 2 : 3));
-    g.computeBoundingSphere(); scene.add(new THREE.Mesh(g, mat));
+    // 中心をメッシュの位置にする (小さなまとまりは、あとで「その場所のチャンク」に移されるため。原点のままだと遠くで消える)
+    g.computeBoundingSphere(); const c = g.boundingSphere.center.clone(); g.translate(-c.x, -c.y, -c.z);
+    const m = new THREE.Mesh(g, mat); m.position.copy(c); scene.add(m);
   }
   BAKE.clear();
 }
