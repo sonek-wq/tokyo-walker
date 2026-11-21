@@ -179,7 +179,7 @@ STATION({
       solid(cx - 4.5, cz - 1, cx + 3.5, cz + 1, 4.5, 11);
     }
     // 二重橋濠の向こう: 石垣と森 (皇居)
-    for (const [z0, z1] of [[-2200, -1880], [-1580, -1500]]) pushPrism('ISHIGAKI', 'GRASSTOP', rectPoly(-694, z0, -686, z1), 0, 3.5);   // 外苑との境の石垣
+    for (const [z0, z1] of [[-2200, -1880], [-1580, -1552]]) pushPrism('ISHIGAKI', 'GRASSTOP', rectPoly(-694, z0, -686, z1), 0, 3.5);   // 外苑との境の石垣
     for (const [z0, z1] of [[-1880, -1747], [-1731, -1580]]) pushPrism('ISHIGAKI', 'GRASSTOP', rectPoly(-694, z0, -680, z1), 0, 7);     // お濠に面した高い石垣
     // 正門 (閉ざされた鉄の門) と、奥の正門鉄橋
     pushPrism('CONC', 'CONC', rectPoly(-693, -1747, -684, -1731), 0, 3.6);
