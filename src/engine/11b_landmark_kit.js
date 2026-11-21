@@ -7,7 +7,10 @@
 const LM_ZONES = [];      // 凸多角形 [[x,z],...]: この中には自動生成の建物・木を置かない
 const LM_UPDATERS = [];   // (dt, t) => {}  毎フレーム呼ばれる
 const LM_ACH = [];        // [id, 名前, 説明, () => 達成したか]
-const LM_NOTES = {};      // 地名 → うんちく
+const LM_NOTES = {};      // 地名 → うんちく (「へぇ」と思える短い豆知識)
+const LM_TIPS = {};       // 地名 → 役立ち情報 (実際に行くときに役立つこと: 時間・場所・マナーなど)
+const LM_ACTIONS = [];    // E で使う仕掛け { at: () => 近くにいるか, prompt: () => 文字, act: () => {} }
+const LM_HEIGHT_AREAS = [];   // 高さで決まる地名 [名前, (x, z, y) => その場所か] (展望台など)
 const LM_CATS = [];       // ねこ [x, z, y]
 const LM_STREET = [];     // 季節で色が変わる街路樹 [x, z, s]
 const LM_LABELS = [];     // 全体マップのラベル (MAP_LABELS と同じ形)
@@ -184,4 +187,13 @@ function pushSlope(topKey, sideKey, a, b, hw, ya, yb, th) {
   pushFace(S, [p(a, 1, ya - th), p(b, 1, yb - th), p(b, -1, yb - th), p(a, -1, ya - th)], [0, -1, 0]);
   pushFace(S, [p(a, 1, ya), p(b, 1, yb), p(b, 1, yb - th), p(a, 1, ya - th)], [nx, 0, nz]);
   pushFace(S, [p(a, -1, ya), p(b, -1, yb), p(b, -1, yb - th), p(a, -1, ya - th)], [-nx, 0, -nz]);
+}
+// ---- E で使う仕掛け (おみくじ・エレベーターなど)。乗り物に乗っているあいだは使わない
+const lmNear = () => (P.ride || P.boat) ? null : LM_ACTIONS.find(a => a.at());
+function lmAction() { const a = lmNear(); if (!a) return false; a.act(); return true; }
+function lmPrompt() { const a = lmNear(); return a ? a.prompt() : ''; }
+// 暗転して別の場所へ (エレベーターなど)
+function lmWarp(x, y, z, yaw, msg) {
+  const f = document.getElementById('fade'); f.style.opacity = 1;
+  setTimeout(() => { Object.assign(P, { x, y, z, vy: 0 }); if (yaw !== undefined) P.yaw = P.heading = yaw; f.style.opacity = 0; if (msg) { toast(msg); toastTimer = 3.5; } }, 700);
 }

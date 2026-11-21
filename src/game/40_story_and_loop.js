@@ -145,7 +145,7 @@ function albumKey(e) {   // アルバム表示中のキー操作
 }
 // 撮影: 撮った写真は必ずアルバムへ。立ち位置・向き・時間帯がじいちゃんの写真と合えば一致
 function takePhoto() {
-  if (!started || cine || albumOpen) return;
+  if (!started || cine || albumOpen || noteOpen) return;
   if (STORY.shots.length >= SHOT_MAX) { toast('📷 これ以上写真を保存できない！ アルバム (B) で写真を削除しよう'); toastTimer = 3.5; return; }
   flashEl.style.transition = 'none'; flashEl.style.opacity = 0.85; requestAnimationFrame(() => { flashEl.style.transition = 'opacity .35s'; flashEl.style.opacity = 0; });
   let hit = null, msg = null;
@@ -180,7 +180,7 @@ const BOARD = [150, -30, 240, -16];
 const allTaken = () => PHOTOS.every(ph => STORY.photos[ph.id]);
 function tryBoard() {
   if (!started || cine || !allTaken() || !inR(BOARD, P.x, P.z) || P.y > 2) return;
-  started = false; P.scooter = P.glider = false; albumOpen = false; albumEl.style.display = 'none';
+  started = false; P.scooter = P.glider = false; albumOpen = false; albumEl.style.display = 'none'; noteOpen = false; notebookEl.style.display = 'none';
   cine = { mode: 'depart', t: 0 }; promptEl.style.display = 'none'; banner.style.opacity = 0; bannerTimer = 0; hintEl.textContent = '';
 }
 let hintTick = 0;
@@ -189,7 +189,7 @@ function updateStory(dt) {
   let near = null;
   if (started) for (const ph of PHOTOS) if (!STORY.photos[ph.id] && Math.hypot(P.x - ph.x, P.z - ph.z) < 28 && Math.abs(P.y - ph.y) < 8) near = ph;
   hintEl.textContent = near ? '📷 …この景色、写真で見た気がする' : '';
-  const sp = started ? (boatPrompt() || stationPrompt()) : '', boat = started && allTaken() && inR(BOARD, P.x, P.z) && P.y < 2;
+  const sp = started ? (boatPrompt() || stationPrompt() || lmPrompt()) : '', boat = started && allTaken() && inR(BOARD, P.x, P.z) && P.y < 2;
   promptEl.textContent = sp || 'E　帰りの船に乗る'; promptEl.style.display = sp || boat ? 'block' : 'none';
 }
 // 演出 (到着・出航)
@@ -251,7 +251,7 @@ function update(dt, t) {
   const mx = -Math.sin(P.yaw) * f + Math.cos(P.yaw) * s, mz = -Math.cos(P.yaw) * f - Math.sin(P.yaw) * s;
   const ml = Math.hypot(mx, mz);
   P.climbing = false;
-  const moving = ml > 0 && started && !albumOpen;
+  const moving = ml > 0 && started && !albumOpen && !noteOpen;
   const ux = moving ? mx / ml : 0, uz = moving ? mz / ml : 0;
   if (moving) { P.heading = Math.atan2(mx, mz); P.anim += dt * (P.glider ? 3 : P.scooter ? 4 : run ? 13 : 9); }
   // 水平移動 (x, z を別々に判定して壁に沿って滑る)。登れる壁に当たったら true
@@ -370,8 +370,8 @@ function update(dt, t) {
     if (a !== curArea) {
       curArea = a; areaEl.textContent = '📍 ' + a;
       const isNew = started && !P.ride && !P.boat && discover(a);
-      const note = NOTES[a.replace('（屋上）', '')] || '';
-      if (started) { bannerText.textContent = a; bannerSmall.textContent = isNew ? '★ NEW SPOT ★' : 'AREA'; noteEl.textContent = note; banner.style.opacity = 1; bannerTimer = (isNew ? 3.5 : 2.5) + (note ? 2.5 : 0); }
+      const nt = started ? noteFor(a.replace('（屋上）', '')) : null;   // 豆知識 (同じ場所は しばらく出さない)
+      if (started) { bannerText.textContent = a; bannerSmall.textContent = isNew ? '★ NEW SPOT ★' : 'AREA'; noteEl.innerHTML = nt ? nt.html : ''; banner.style.opacity = 1; bannerTimer = (isNew ? 3.5 : 2.5) + (nt ? nt.sec : 0); }
     }
   }
   if (bannerTimer > 0 && (bannerTimer -= dt) <= 0) banner.style.opacity = 0;
@@ -380,7 +380,7 @@ function update(dt, t) {
   modeEl.textContent = P.glider ? '🪂 ハンググライダー (Space で閉じる)' : P.scooter ? `🛴 電動スクーター ${Math.round(Math.hypot(P.svx, P.svz) * 3.6)} km/h` : '';
   altEl.textContent = P.y > 0.6 ? (P.climbing ? '🧗 ' : '⬆ ') + P.y.toFixed(0) + 'm' : '';
   if (toastTimer > 0 && (toastTimer -= dt) <= 0) toastEl.style.opacity = 0;
-  if (started && !albumOpen && overlay.style.display === 'none') gameH = (gameH + dt * HOURS_PER_SEC) % 24;
+  if (started && !albumOpen && !noteOpen && overlay.style.display === 'none') gameH = (gameH + dt * HOURS_PER_SEC) % 24;
   updateTime();
   updatePlayerLight();
 }

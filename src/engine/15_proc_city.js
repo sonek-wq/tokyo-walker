@@ -28,6 +28,7 @@ function cellLayout(ci, cj) {
     if (z2 && RANK[z2] > (RANK[zone] || 0)) zone = z2;
   }
   for (const [r, sty] of GEO_STYLES) if (inR(r, cx, cz)) zone = sty;
+  for (const rg of REGION_DEFS) for (const [r, sty] of rg.styles || []) if (inR(r, cx, cz)) zone = sty;
   if (zone !== 'core' && h < 0.06) zone = 'park'; else if (zone === 'resi' && h < 0.085) zone = 'temple';
   const L = { rect, inner, blk: blk2, zone, lots: [], trees: [], outside: !inside, major: [rect[0] === x0 && isMajor(ci), rect[1] === z0 && isMajor(cj), rect[2] === x0 + PC && isMajor(ci + 1), rect[3] === z0 + PC && isMajor(cj + 1)] };
   const bad = f => ringNearRect(f, 15) || STN_RES.some(r => overlap(r, f)) || zoneHitsRect(f) || riverHitsRect(f, 8) || BRIDGE_POLYS.some(([P]) => polyHitsRect(P, f));
@@ -61,6 +62,12 @@ function cellLayout(ci, cj) {
       if (q < 0.55) L.lots.push({ f, kind: 'box', h: rg(40, 130), key: pk(['glass', 'glassDark', 'office', 'office2', 'glass']) });
       else if (q < 0.85) L.lots.push({ f, kind: 'box', h: rg(10, 22), key: pk(SHOPS) });
       else { L.lots.push({ f, kind: 'plaza' }); L.trees.push([(f[0] + f[2]) / 2, (f[1] + f[3]) / 2, 1, 1]); } });
+  } else if (zone === 'shitamachi') {   // 下町: 低い商店と家が並び、ところどころに中くらいのマンション (浅草寺のまわりなど)
+    lots(9, 15, 0.8, f => { const q = R();
+      if (q < 0.45) L.lots.push({ f, kind: 'box', h: rg(6, 11), key: pk(SHOPS) });
+      else if (q < 0.75) L.lots.push({ f, kind: 'gable', h: rg(5.5, 7), rh: rg(2, 3), key: pk(HOUSES), roof: pk(ROOFS) });
+      else if (q < 0.93) L.lots.push({ f, kind: 'box', h: rg(10, 22), key: pk(['resi', 'resi2', 'brick']) });
+      else L.lots.push({ f, kind: 'parking' }); });
   } else if (zone === 'town') {
     lots(11, 20, 1.2, f => { const q = R();
       if (q < 0.4) L.lots.push({ f, kind: 'box', h: rg(7, 15), key: pk(SHOPS) });
@@ -83,7 +90,7 @@ function cellLayout(ci, cj) {
   LAYOUT.set(key, L); return L;
 }
 // 地面テクスチャ・地図への描画
-const ZONE_COL = { core: '#a8a29a', town: '#8f8b82', resi: '#8a867c', park: GRASS, temple: '#b8ad92', towers: '#9c978e', soko: '#8c8c86' };
+const ZONE_COL = { core: '#a8a29a', town: '#8f8b82', shitamachi: '#8f8b82', resi: '#8a867c', park: GRASS, temple: '#b8ad92', towers: '#9c978e', soko: '#8c8c86' };
 function procPaint(g, T, simple = false) {
   for (let ci = Math.floor(T[0] / PC); ci <= Math.floor((T[2] - 0.01) / PC); ci++) for (let cj = Math.floor(T[1] / PC); cj <= Math.floor((T[3] - 0.01) / PC); cj++) {
     const L = cellLayout(ci, cj); if (!L || L.outside) continue;

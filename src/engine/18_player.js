@@ -27,6 +27,7 @@ function blockedAt(x, z, y) {
 const keys = {};
 addEventListener('keydown', e => {
   if (albumOpen) { albumKey(e); e.preventDefault(); return; }
+  if (noteOpen) { if (e.code === 'KeyK' || e.code === 'Escape') toggleNotebook(); e.preventDefault(); return; }
   keys[e.code] = true;
   if (e.code === 'KeyP') { SET.pixel = (SET.pixel + 1) % PIXEL_LEVELS.length; applySettings(); toast('ドット絵効果: ' + PIXEL_LEVELS[SET.pixel].name); }
   if (e.code === 'KeyV') { SET.view = (SET.view + 1) % VIEWS.length; applySettings(); toast('視点: ' + VIEWS[SET.view].name); }
@@ -39,7 +40,8 @@ addEventListener('keydown', e => {
   if (e.code === 'KeyM') toggleBig();
   if (e.code === 'KeyC' && !e.repeat) takePhoto();
   if (e.code === 'KeyB' && !e.repeat) toggleAlbum();
-  if (e.code === 'KeyE' && !e.repeat && started && !cine) { if (!boatAction() && !stationAction()) tryBoard(); }
+  if (e.code === 'KeyK' && !e.repeat) toggleNotebook();
+  if (e.code === 'KeyE' && !e.repeat && started && !cine) { if (!boatAction() && !stationAction() && !lmAction()) tryBoard(); }
   if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) e.preventDefault();
 });
 addEventListener('keyup', e => keys[e.code] = false);
@@ -58,7 +60,7 @@ overlay.addEventListener('click', () => {   // ポーズからの再開
 document.getElementById('startBtns').addEventListener('click', e => e.stopPropagation());
 document.getElementById('btnNew').onclick = () => { overlay.style.display = 'none'; newGame(); };
 document.getElementById('btnCont').onclick = () => { overlay.style.display = 'none'; lockPointer(); continueGame(); };
-document.addEventListener('pointerlockchange', () => { if (!document.pointerLockElement && started && !cine && !albumOpen) showPause(); });
+document.addEventListener('pointerlockchange', () => { if (!document.pointerLockElement && started && !cine && !albumOpen && !noteOpen) showPause(); });
 canvas.addEventListener('mousedown', () => dragging = true);
 addEventListener('mouseup', () => dragging = false);
 addEventListener('mousemove', e => {

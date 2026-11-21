@@ -131,6 +131,41 @@ const PARASOLS = new THREE.Group(); scene.add(PARASOLS);
   }
 }
 Object.assign(NOTES, LM_NOTES);
+// ---- 役立ち情報 (実際に行くときに役立つこと) と 豆知識帳 (K)
+const TIPS = Object.assign({
+  '東京タワー': 'メインデッキ (150m) は9:00〜23:00 (最終入場22:30)。メインデッキまでは外の階段でも上れる',
+  '東京タワー 大展望台': 'ガラスの床「スカイウォークウィンドウ」から、真下の街をのぞける',
+  '築地場外市場': 'お店がよく開いているのは9〜13時ごろ。水・日曜・祝日は休みの店が多い。現金だけのお店もある',
+}, LM_TIPS);
+const HEE_KEY = 'tokyoWalker_hee', NOTE_LAST = {};
+const HEE = new Set((() => { try { return JSON.parse(localStorage.getItem(HEE_KEY) || '[]'); } catch (e) { return []; } })());
+const NOTE_NAMES = [...new Set([...Object.keys(NOTES), ...Object.keys(TIPS)])];
+const esc = s => s.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);
+function noteFor(name) {   // エリアに入ったときの豆知識。同じ場所は90秒のあいだ出さない (行ったり来たりで邪魔にならないように)
+  const hee = NOTES[name], tip = TIPS[name], now = performance.now() / 1000;
+  if (!hee && !tip) return null;
+  if (NOTE_LAST[name] && now - NOTE_LAST[name] < 90) return null;
+  NOTE_LAST[name] = now;
+  if (!HEE.has(name)) { HEE.add(name); try { localStorage.setItem(HEE_KEY, JSON.stringify([...HEE])); } catch (e) {} if (noteOpen) renderNotebook(); }
+  const len = (hee || '').length + (tip || '').length;
+  return { html: (hee ? `<div class="hee">💡 ${esc(hee)}</div>` : '') + (tip ? `<div class="tip">🧭 ${esc(tip)}</div>` : ''), sec: Math.min(9, Math.max(2.5, len / 9)) };
+}
+let noteOpen = false;
+const notebookEl = document.getElementById('notebook');
+function renderNotebook() {
+  const got = [...HEE].filter(n => NOTE_NAMES.includes(n)).reverse();
+  notebookEl.querySelector('.list').innerHTML = got.length ? got.map(n => `<div class="ent"><b>📍 ${esc(n)}</b>${NOTES[n] ? `<div>💡 ${esc(NOTES[n])}</div>` : ''}${TIPS[n] ? `<div class="tip">🧭 ${esc(TIPS[n])}</div>` : ''}</div>`).join('')
+    : '<div class="ent">まだ何もない。名所を歩くと、ここに豆知識がたまっていく</div>';
+  notebookEl.querySelector('.cnt').textContent = `${got.length} / ${NOTE_NAMES.length}`;
+}
+function toggleNotebook() {
+  if (!started || albumOpen) return;
+  noteOpen = !noteOpen; for (const k in keys) keys[k] = false;
+  if (noteOpen) { renderNotebook(); try { document.exitPointerLock(); } catch (e) {} } else lockPointer();
+  notebookEl.style.display = noteOpen ? 'flex' : 'none';
+}
+notebookEl.querySelector('.close').onclick = () => toggleNotebook();
+LM_ACH.push(['hee', '💡 へぇの達人', '豆知識を30個集める (K で豆知識帳)', () => HEE.size >= 30]);
 // 後から追加した名所も地名リスト・発見リストに反映
 for (const a of SPOT_AREAS) if (!AREAS.includes(a)) { AREAS.unshift(a); ALL_NAMES.add(a[0]); }
 function hokoActive() { return WEEKEND && gameH >= 12 && gameH < (MONTH >= 4 && MONTH <= 9 ? 18 : 17); }

@@ -23,7 +23,7 @@ const SPECIAL_NAMES = ['浜松町駅の小便小僧', '銀座 中央通り (歩�
   '東京モノレール 浜松町駅の屋根', '東京モノレールの軌道', '歩道橋 (第一京浜)', '歩道橋 (日比谷通り)', '汐留 ペデストリアンデッキ', '愛宕山 山頂 (愛宕神社)', '新橋 ガード下 (屋台の屋根)'];
 // 東側のエリアの地名 (いちばん近い地名を表示)
 const TOWNS = REGION_DEFS.flatMap(r => r.towns || []);
-const ALL_NAMES = new Set([...AREAS.map(a => a[0]), ...SPECIAL_NAMES, ...STN.map(st => st.town), ...TOWNS.map(t => t[0]), ...RIVERS.map(r => r.name), ...RIVERS.filter(r => r.plain).map(r => r.name + ' 河川敷'), ...BRIDGE_POLYS.map(b => b[1])]);
+const ALL_NAMES = new Set([...AREAS.map(a => a[0]), ...SPECIAL_NAMES, ...LM_HEIGHT_AREAS.map(a => a[0]), ...STN.map(st => st.town), ...TOWNS.map(t => t[0]), ...RIVERS.map(r => r.name), ...RIVERS.filter(r => r.plain).map(r => r.name + ' 河川敷'), ...BRIDGE_POLYS.map(b => b[1])]);
 const discEl = document.getElementById('disc'), discCap = document.getElementById('discCap');
 function updateDiscUI() {
   const n = [...DISC].filter(k => ALL_NAMES.has(k)).length;
@@ -40,6 +40,7 @@ function areaAt(x, z, y) {
   if (y > 9.5 && z > 291 && z < 313 && x < -476) return '首都高速 都心環状線';
   if (Math.abs(x - TOWER[0]) < 42 && Math.abs(z - TOWER[1]) < 42 && y > 19)
     return y > 300 ? '東京タワー アンテナ頂上' : y > 245 ? '東京タワー トップデッキ' : y > 140 ? '東京タワー 大展望台' : '東京タワー 鉄塔';
+  if (!P.ride && !P.boat) for (const [n, f] of LM_HEIGHT_AREAS) if (f(x, z, y)) return n;
   if (y > 5.5 && inR(JR, x, z)) return 'JR山手線・京浜東北線の線路の上';
   if (y > 7.5 && inR(MONO, x, z)) return '東京モノレール 浜松町駅の屋根';
   if (y > 8 && y < 11 && Math.abs(x - MONO_X) < 1) return '東京モノレールの軌道';
