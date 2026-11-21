@@ -67,7 +67,8 @@ function ringNearRect(f, m) {
 for (const st of STN) { const n = ringNearest(st.x, st.z); st.s = n.s; }
 const stationAtS = s => STN.find(st => Math.abs(sDiff(s, st.s)) < 100);
 // マップの範囲 = 既存エリア + 山手線の環の外側 約350m
-const MINX = Math.min(-1680, Math.floor((Math.min(...RP.map(p => p[0])) - 350) / 100) * 100), MAXX = Math.max(430, Math.ceil((Math.max(...RP.map(p => p[0])) + 350) / 100) * 100);
+// 西側は西新宿の高層ビル群・新宿中央公園が入るよう広めにとる
+const MINX = Math.min(-1680, Math.floor((Math.min(...RP.map(p => p[0])) - 750) / 100) * 100), MAXX = Math.max(430, Math.ceil((Math.max(...RP.map(p => p[0])) + 350) / 100) * 100);
 const MINZ = Math.min(-1300, Math.floor((Math.min(...RP.map(p => p[1])) - 350) / 100) * 100), MAXZ = Math.max(320, Math.ceil((Math.max(...RP.map(p => p[1])) + 350) / 100) * 100);
 const WW = MAXX - MINX, WH = MAXZ - MINZ;
 // 自動生成の街の陸地 (既存エリアの外側)。東は隅田川・東京湾
@@ -76,7 +77,24 @@ const isWaterXZ = (x, z) => (x > 430 && z > -1300 && z < 320) || (x > -320 && z 
 // 古川を渡る橋 (自動生成の街の大通り)
 const RIVER_BR = [];
 for (let x = Math.ceil(MINX / 400) * 400; x < -1680; x += 400) RIVER_BR.push([x - 10, 290, x + 10, 320]);
-WALK.push(...PROC_LAND, ...RIVER_BR); BRIDGES.push(...RIVER_BR);
+// 駅ファイルが指定した水面 (お濠など) を陸地から切り抜き、橋や歩ける場所を足す
+for (const st of STN) if (typeof st.land === 'function') st.land = st.land(st);   // 線路の位置から決まる橋など
+const LM_WATER = STN.flatMap(st => (st.land && st.land.water) || []);
+function carveRect(list, h) {
+  const out = [];
+  for (const r of list) {
+    if (!overlap(r, h)) { out.push(r); continue; }
+    if (h[1] > r[1]) out.push([r[0], r[1], r[2], h[1]]);
+    if (h[3] < r[3]) out.push([r[0], h[3], r[2], r[3]]);
+    const z0 = Math.max(r[1], h[1]), z1 = Math.min(r[3], h[3]);
+    if (h[0] > r[0]) out.push([r[0], z0, h[0], z1]);
+    if (h[2] < r[2]) out.push([h[2], z0, r[2], z1]);
+  }
+  return out;
+}
+{ const c = LM_WATER.reduce(carveRect, PROC_LAND); PROC_LAND.length = 0; PROC_LAND.push(...c); }
+const LM_BRIDGES = STN.flatMap(st => (st.land && st.land.bridges) || []), LM_WALK = STN.flatMap(st => (st.land && st.land.walk) || []);
+WALK.push(...PROC_LAND, ...RIVER_BR, ...LM_BRIDGES, ...LM_WALK); BRIDGES.push(...RIVER_BR, ...LM_BRIDGES);
 
 const LANDMARKS = [ // x0,z0,x1,z1,h,material
   [-145, -35, -55, 55, 18, 'glass'], [-130, -20, -72, 38, 200, 'glass'], [-205, 65, -172, 100, 76, 'resi'],

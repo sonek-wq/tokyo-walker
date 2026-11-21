@@ -345,7 +345,12 @@ function update(dt, t) {
   }
   // --- 車
   CARS.forEach((c, i) => {
-    const L = c.L; c.s += L.dir * c.v * dt;
+    const L = c.L; let mv = c.v * dt;
+    for (const sp of L.stops) if (sp.red()) {   // 赤信号: 停止線 (前に車がいればその後ろ) で止まる
+      const ahead = (sp.p - c.s) * L.dir;
+      if (ahead > -0.5 && ahead < 45) { let q = 0; for (const o of L.cars) { const a2 = (sp.p - o.s) * L.dir; if (o !== c && a2 > -0.5 && a2 < ahead) q++; } mv = Math.min(mv, Math.max(0, ahead - q * 6.5 - 0.5)); }
+    }
+    c.s += L.dir * mv;
     if (c.s > L.b) c.s = L.a; if (c.s < L.a) c.s = L.b;
     if (L.ns) { dmy.position.set(L.c, L.y || 0, c.s); dmy.rotation.set(0, L.dir > 0 ? 0 : Math.PI, 0); }
     else { dmy.position.set(c.s, L.y || 0, L.c); dmy.rotation.set(0, L.dir > 0 ? Math.PI / 2 : -Math.PI / 2, 0); }

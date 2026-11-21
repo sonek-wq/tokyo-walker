@@ -130,12 +130,14 @@ const PARASOLS = new THREE.Group(); scene.add(PARASOLS);
     box(1, 0.06, 1, white, 0, 0.75, 0, g); for (const dx of [-0.9, 0.9]) box(0.45, 0.45, 0.45, white, dx, 0.22, 0, g);
   }
 }
+Object.assign(NOTES, LM_NOTES);
 // 後から追加した名所も地名リスト・発見リストに反映
 for (const a of SPOT_AREAS) if (!AREAS.includes(a)) { AREAS.unshift(a); ALL_NAMES.add(a[0]); }
 function hokoActive() { return WEEKEND && gameH >= 12 && gameH < (MONTH >= 4 && MONTH <= 9 ? 18 : 17); }
 // ---- ねこ (街のどこかに12匹)
 const CAT_DEF = [[-450, -760, 0], [-575, -951, 0], [-1380, 70, 0], [-1278, -628, 26], [-246, -321, 0], [-300, 200, 0], [232, 40, 0],
   [-14, -640, 0], [-819, 204, 0], [-1566, 183, 0], [-294, -700, 7], [-1270, -285, 7.5], [196, -905, 0], [-141, 200, 5.2], [155, -1243, 26]];
+CAT_DEF.push(...LM_CATS);
 const CAT_KEY = 'tokyoWalker_cats';
 const CAT_FOUND = new Set((() => { try { return JSON.parse(localStorage.getItem(CAT_KEY) || '[]'); } catch (e) { return []; } })());
 const CATS = CAT_DEF.map(([x, z, y], i) => {
@@ -168,6 +170,7 @@ const ACH = [
   ['densha', '🚃 線路際の撮り鉄', '走る東海道新幹線のすぐそばに立つ'],
   ['photo', '📸 じいちゃんの東京', '写真をすべて撮って、帰りの船に乗る'],
 ];
+ACH.push(...LM_ACH.map(a => a.slice(0, 3)));
 const ACH_KEY = 'tokyoWalker_ach';
 const ACH_GOT = new Set((() => { try { return JSON.parse(localStorage.getItem(ACH_KEY) || '[]'); } catch (e) { return []; } })());
 const achPanel = document.getElementById('achPanel');
@@ -201,6 +204,7 @@ function updateSteps(dt) {
 }
 let funTick = 0, prevGameH = null;
 function updateFun(dt, t) {
+  for (const f of LM_UPDATERS) f(dt, t);
   // 時計の針 (ゲーム内時刻)
   for (const h of HANDS) { h.m.rotation.z = -(gameH % 1) * Math.PI * 2; h.h.rotation.z = -((gameH % 12) / 12) * Math.PI * 2; }
   // 日テレ大時計のからくり
@@ -250,6 +254,7 @@ function updateFun(dt, t) {
   if (gameH >= 5 && gameH < 9 && inR(TSUKIJI_MKT, P.x, P.z)) achieve('asaichi');
   if (inR([374, -1206, 386, -1182], P.x, P.z)) achieve('kachidoki');
   if (STEPS.n >= 10000) achieve('manpo');
+  for (const a of LM_ACH) if (a[3]()) achieve(a[0]);
   const sk = JR_TRAINS.find(tr => tr.name === '東海道新幹線');
   if (sk && Math.hypot(P.x - sk.head[0], P.z - sk.head[1]) < 30 && inRange(sk.u, sk.R)) achieve('densha');
 }

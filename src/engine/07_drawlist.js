@@ -19,6 +19,7 @@ function planks(x0, z0, x1, z1, c1, c2, alongX) {
 const GRASS = '#4f7a34', PATH = '#bba97e';
 
 for (const r of WALK) fr(...r, '#8f8b82');
+const DL_BASE = DL.length;   // ここまでが陸地の下地 (この上に自動生成の街 → 名所の順に描く)
 // --- 竹芝周辺
 planks(116, -170, 140, 320, '#7d6245', '#674f36', false);
 planks(140, -30, 240, 50, '#8a6c4c', '#715739', true);

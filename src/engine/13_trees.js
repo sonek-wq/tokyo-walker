@@ -53,6 +53,7 @@ const SEASON = MONTH >= 3 && MONTH <= 4 ? { name: '春', street: ['#f0b8cc', '#e
   : MONTH >= 11 || MONTH === 12 ? { name: '秋', street: ['#e8c040', '#d8a830', '#e0b838', '#c86a28', '#5f9a40'] }    // イチョウ並木の黄葉
   : MONTH >= 10 ? { name: '秋', street: ['#a8a038', '#7a9a38', '#c8902a'] }
   : MONTH <= 2 ? { name: '冬', street: ['#6a7a4a', '#5a6a40', '#7a6a4a'] } : { name: '夏', street: ['#4f8a38', '#5f9a40', '#3f7a32'] };
+STREET.push(...LM_STREET);
 plant(STREET, new THREE.IcosahedronGeometry(2.3, 0).translate(0, 4.6, 0), SEASON.street);
 plant(WILLOWS, new THREE.CylinderGeometry(0.5, 2.3, 4.8, 7).translate(0, 4.4, 0), ['#8ab84a', '#9ac85a', '#7aa840']); // しだれ柳
 

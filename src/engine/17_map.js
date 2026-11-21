@@ -7,8 +7,7 @@ const OV = document.createElement('canvas'); OV.width = Math.ceil(WW * OVS); OV.
   const g = OV.getContext('2d');
   g.setTransform(OVS, 0, 0, OVS, -MINX * OVS, -MINZ * OVS);
   g.fillStyle = '#2b5b78'; g.fillRect(MINX, MINZ, WW, WH);
-  for (const it of DL) it.f(g);
-  procPaint(g, [MINX, MINZ, MAXX, MAXZ], true);
+  paintWorld(g, [MINX, MINZ, MAXX, MAXZ], true);
 }
 const mini = document.getElementById('mini'), mctx = mini.getContext('2d');
 mctx.imageSmoothingEnabled = false;
@@ -23,8 +22,7 @@ function drawMini(px, pz, yaw, dt) {
     const g = miniBg.getContext('2d'), ox = px - VIEW / 2, oz = pz - VIEW / 2, W = [ox, oz, ox + VIEW, oz + VIEW];
     g.setTransform(1, 0, 0, 1, 0, 0); g.fillStyle = '#2b5b78'; g.fillRect(0, 0, 170, 170);
     g.setTransform(sc, 0, 0, sc, -ox * sc, -oz * sc);
-    for (const it of DL) if (overlap(it.bb, W)) it.f(g);
-    procPaint(g, W);
+    paintWorld(g, W);
     g.strokeStyle = '#80c241'; g.lineWidth = 3 / sc; g.beginPath(); let on = false;   // 山手線
     for (let i = 0; i <= RP.length; i++) { const q = RP[i % RP.length]; if (Math.abs(q[0] - px) < 200 && Math.abs(q[1] - pz) < 200) { if (on) g.lineTo(q[0], q[1]); else g.moveTo(q[0], q[1]); on = true; } else on = false; }
     g.stroke();
@@ -60,6 +58,7 @@ const MAP_LABELS = [
   ['築地本願寺', 155, -1260, '🛕'], ['場外市場', 195, -900, '🐟', '築地場外市場'], ['波除神社', 308, -870, '🦁'], ['市場跡地', 216, -650, '🚧', '築地市場跡地'],
   ['勝どき橋', 380, -1220, '🌉'], ['倉庫街', -141, 240, '📦', '海岸一丁目 倉庫街'],
 ];
+MAP_LABELS.push(...LM_LABELS);
 for (const st of STN) if (!st.straight) MAP_LABELS.unshift([st.name, st.x, st.z - 12, '🚉', st.name + '駅']);
 // 地区の大きな名前 (地図の背景に薄く表示)
 const MAP_DISTRICTS = [['築地', 210, -880], ['隅田川', 380, -700], ['竹芝', 40, -60], ['浜松町', -560, 60], ['芝大門', -830, -160], ['芝公園', -1290, -20], ['芝', -960, 200], ['新橋', -600, -700],

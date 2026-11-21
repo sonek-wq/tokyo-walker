@@ -14,8 +14,16 @@ for (const [x0, z0, x1, z1, d] of ROADS) {
 for (const [c, dir] of [[296, 1], [300, 1], [304, -1], [308, -1]]) LANES.push({ ns: false, c, dir, a: -3000, b: -532, y: SHUTO_Y });
 for (const [c, dir] of [[-516, 1], [-520, 1], [-524, -1], [-528, -1]]) LANES.push({ ns: true, c, dir, a: 312, b: 2490, y: SHUTO_Y });
 for (const L of LANES) L.hoko = L.ns && L.c > -140 && L.c < -116 && L.b < -400; // 銀座 中央通り
+for (const L of LANES) {   // 信号で止まる交差点 (渋谷スクランブル交差点など)
+  L.stops = [];
+  for (const sp of ROAD_STOPS) {
+    const r = sp.rect, hit = L.ns ? L.c > r[0] && L.c < r[2] && L.a < r[1] && L.b > r[3] : L.c > r[1] && L.c < r[3] && L.a < r[0] && L.b > r[2];
+    if (hit) L.stops.push({ p: L.dir > 0 ? (L.ns ? r[1] : r[0]) - 1 : (L.ns ? r[3] : r[2]) + 1, red: () => sp.red(L.ns) });
+  }
+}
 const CARS = [], carCols = [0xe8e8e8, 0x22252a, 0xb03030, 0x3a5a9a, 0xd8c060, 0x8a8f96, 0x2f6a4a, 0xf0f0f0, 0x1a1a1a];
 for (const L of LANES) { const n = Math.max(1, Math.round((L.b - L.a) / 230)); for (let i = 0; i < n; i++) CARS.push({ L, s: rr(L.a, L.b), v: rr(9, 15) }); }
+for (const L of LANES) L.cars = CARS.filter(c => c.L === L);
 const carParts = [
   new THREE.InstancedMesh(new THREE.BoxGeometry(1.8, 0.9, 4.3).translate(0, 0.75, 0), lam({ color: 0xffffff }), CARS.length + PARKED.length),
   new THREE.InstancedMesh(new THREE.BoxGeometry(1.6, 0.7, 2.2).translate(0, 1.55, -0.2), lam({ color: 0xffffff }), CARS.length + PARKED.length),
@@ -48,6 +56,7 @@ PPATH.push([110, -905, 280, -905], [110, -870, 280, -870], [200, -980, 200, -830
 for (let i = 0; i < 180; i++) {
   const p = i < 20 ? PPATH[PPATH.length - 7 + (i % 3)] : pick(PPATH); PEOPLE.push({ p, t: rnd(), v: rr(1, 1.6) / Math.hypot(p[2] - p[0], p[3] - p[1]), d: rnd() < 0.5 ? 1 : -1, ph: rr(0, 6) });
 }
+for (const [p, n] of LM_PEOPLE) for (let i = 0; i < n; i++) PEOPLE.push({ p, t: rnd(), v: rr(1, 1.6) / Math.hypot(p[2] - p[0], p[3] - p[1]), d: rnd() < 0.5 ? 1 : -1, ph: rr(0, 6) });
 const pplParts = [
   new THREE.InstancedMesh(new THREE.BoxGeometry(0.42, 0.8, 0.26).translate(0, 0.4, 0), lam({ color: 0xffffff }), PEOPLE.length),
   new THREE.InstancedMesh(new THREE.BoxGeometry(0.5, 0.7, 0.3).translate(0, 1.15, 0), lam({ color: 0xffffff }), PEOPLE.length),

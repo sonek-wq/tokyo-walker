@@ -24,7 +24,7 @@ function cellLayout(ci, cj) {
   let zone = sd < 170 ? 'core' : sd < 450 ? 'town' : 'resi';
   if (zone !== 'core' && h < 0.06) zone = 'park'; else if (zone === 'resi' && h < 0.085) zone = 'temple';
   const L = { rect, inner, blk: blk2, zone, lots: [], trees: [], outside: !inside, major: [rect[0] === x0 && isMajor(ci), rect[1] === z0 && isMajor(cj), rect[2] === x0 + PC && isMajor(ci + 1), rect[3] === z0 + PC && isMajor(cj + 1)] };
-  const bad = f => ringNearRect(f, 15) || STN_RES.some(r => overlap(r, f));
+  const bad = f => ringNearRect(f, 15) || STN_RES.some(r => overlap(r, f)) || zoneHitsRect(f);
   const lots = (minW, maxW, g, cb) => {
     for (let x = blk2[0]; x < blk2[2] - 4;) {
       let w = rg(minW, maxW); if (blk2[2] - (x + w) < minW * 0.7) w = blk2[2] - x;
@@ -66,7 +66,7 @@ function cellLayout(ci, cj) {
   if (L.major[2]) for (let z = ins[1] + 6; z < ins[3] - 3; z += 16) L.trees.push([ins[2] - 1.2, z, 0.9, 0]);
   if (L.major[1]) for (let x = ins[0] + 6; x < ins[2] - 3; x += 16) L.trees.push([x, ins[1] + 1.2, 0.9, 0]);
   if (L.major[3]) for (let x = ins[0] + 6; x < ins[2] - 3; x += 16) L.trees.push([x, ins[3] - 1.2, 0.9, 0]);
-  L.trees = L.trees.filter(([x, z]) => !ringNearRect([x, z, x, z], 9) && !STN_RES.some(r => inR(r, x, z)));
+  L.trees = L.trees.filter(([x, z]) => !ringNearRect([x, z, x, z], 9) && !STN_RES.some(r => inR(r, x, z)) && !inZone(x, z));
   LAYOUT.set(key, L); return L;
 }
 // 地面テクスチャ・地図への描画
@@ -90,6 +90,12 @@ function procPaint(g, T, simple = false) {
       g.fillRect(f[0], f[1], f[2] - f[0], f[3] - f[1]);
     }
   }
+}
+// 地面の描画: 陸地の下地 → 自動生成の街 → 名所や道路 (DL) の順に重ねる
+function paintWorld(g, W, simple = false) {
+  for (let i = 0; i < DL_BASE; i++) if (overlap(DL[i].bb, W)) DL[i].f(g);
+  procPaint(g, W, simple);
+  for (let i = DL_BASE; i < DL.length; i++) if (overlap(DL[i].bb, W)) DL[i].f(g);
 }
 // 建物の組み立て (200m チャンク単位)
 const PROC = new Map();

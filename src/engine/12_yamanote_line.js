@@ -60,6 +60,7 @@ function stationSignTex(st) {   // 駅名標
       for (const sd of [-1.6, 1.6]) { const m = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.5, 0.1), signFrame); m.position.set(q.x + q.tx * sd, 7.85, q.z + q.tz * sd); chunkAt(q.x, q.z).group.add(m); }
     }
     if (st.straight) { st.ent = st.ent || [st.x - 40, st.z]; if (st.build) st.build(st); continue; }
+    if (st.custom) { st.build(st); st.ent = st.ent || [p.x + p.nx * 40, p.z + p.nz * 40]; continue; }   // 駅舎も駅ファイルで作り込む駅
     // 駅舎 (外側) と駅前広場
     const ew = Math.abs(p.tx) > Math.abs(p.tz), w = ew ? 44 : 22, d = ew ? 22 : 44, depth = (Math.abs(p.nx) > Math.abs(p.nz) ? w : d) / 2;
     const cx = p.x + p.nx * (h + 8 + depth), cz = p.z + p.nz * (h + 8 + depth);
@@ -189,7 +190,7 @@ function stationAction() {   // E キー: 駅・電車まわりの操作。何�
       Object.assign(P, { x: st.ent[0], z: st.ent[1], y: 0, vy: 0 }); toast(`🚉 ${st.name}駅の改札を出た`); return true;
     }
   }
-  if (P.y < 3) for (const st of STN) if (Math.hypot(P.x - st.ent[0], P.z - st.ent[1]) < 26) {
+  if (P.y < 3) for (const st of STN) if ((st.ents || [st.ent]).some(e => Math.hypot(P.x - e[0], P.z - e[1]) < 26)) {
     const q = ringAt(st.s); Object.assign(P, { x: q.x, z: q.z, y: 7.1, vy: 0, yaw: q.ang + Math.PI, scooter: false });
     toast(`🚉 ${st.name}駅のホーム (電車が止まったら、乗りたい側を向いて E)`); toastTimer = 4; return true;
   }
@@ -203,7 +204,7 @@ function stationPrompt() {
     const t = Math.abs(look) > 0.45 && YAMA.find(t => t.dwell > 1 && t.at === st && Math.sign(t.lat) === Math.sign(look));
     return t ? `E　電車に乗る (${t.name}・${nextStation(t)[0].name}方面)` : 'E　改札を出る';
   }
-  if (P.y < 3) for (const st of STN) if (Math.hypot(P.x - st.ent[0], P.z - st.ent[1]) < 26) return `E　${st.name}駅のホームへ`;
+  if (P.y < 3) for (const st of STN) if ((st.ents || [st.ent]).some(e => Math.hypot(P.x - e[0], P.z - e[1]) < 26)) return `E　${st.name}駅のホームへ`;
   return '';
 }
 

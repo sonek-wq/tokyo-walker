@@ -37,8 +37,7 @@ function loadTile(t) {
   g.setTransform(TPX, 0, 0, TPX, -t.x0 * TPX, -t.z0 * TPX);
   g.fillStyle = '#2b5b78'; g.fillRect(t.x0, t.z0, CH, CH);
   const T = [t.x0, t.z0, t.x0 + CH, t.z0 + CH];
-  for (const it of DL) if (overlap(it.bb, T)) it.f(g);
-  procPaint(g, T);
+  paintWorld(g, T);
   g.setTransform(1, 0, 0, 1, 0, 0);
   const id = g.getImageData(0, 0, TILE_PX, TILE_PX), d = id.data;
   for (let k = 0; k < d.length; k += 4) { const n = (Math.random() - 0.5) * 16; d[k] += n; d[k + 1] += n; d[k + 2] += n; }
@@ -78,6 +77,18 @@ for (const [x0, z0, x1, z1] of BRIDGES) {
 }
 for (const [z0, z1] of [[-170, -30], [50, 320]]) box(0.25, 1.1, z1 - z0, dark, 139.8, 0.55, (z0 + z1) / 2);
 box(0.25, 1.1, 80, dark, 239.8, 0.55, 10);
+// お濠などの水面 (駅ファイルで指定)。石垣で囲む
+{
+  const moatTex = tex(16, 16, x => { x.fillStyle = '#3a6a5e'; x.fillRect(0, 0, 16, 16); for (let i = 0; i < 14; i++) { x.fillStyle = rnd() < 0.5 ? '#4f8070' : '#2e5a50'; x.fillRect(rnd() * 16 | 0, rnd() * 16 | 0, 3 + rnd() * 3 | 0, 1); } });
+  moatTex.repeat.set(1, 1);
+  const stoneW = lam({ map: tex(16, 16, x => { x.fillStyle = '#8a8478'; x.fillRect(0, 0, 16, 16); x.fillStyle = '#6e695f'; for (let j = 0; j < 16; j += 4) { x.fillRect(0, j, 16, 1); for (let i = (j / 4) % 2 * 3; i < 16; i += 6) x.fillRect(i, j, 1, 4); } }) });
+  for (const [x0, z0, x1, z1] of LM_WATER) {
+    const w = x1 - x0, d = z1 - z0, g = new THREE.PlaneGeometry(w, d).rotateX(-Math.PI / 2);
+    const uv = g.attributes.uv; for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) * w / 16, uv.getY(i) * d / 16);
+    const m = new THREE.Mesh(g, lam({ map: moatTex })); m.position.set((x0 + x1) / 2, -2.2, (z0 + z1) / 2); scene.add(m);
+    for (const [a, b, c, e] of [[x0, z0, x1, z0 + 0.6], [x0, z1 - 0.6, x1, z1], [x0, z0, x0 + 0.6, z1], [x1 - 0.6, z0, x1, z1]]) box(c - a, 3.6, e - b, stoneW, (a + c) / 2, -1.5, (b + e) / 2);
+  }
+}
 // 街の外周の地面 (100m の街区模様)
 {
   const skirtTex = tex(32, 32, x => {

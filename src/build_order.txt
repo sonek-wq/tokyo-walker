@@ -16,6 +16,7 @@ areas/10_shimbashi_ginza.js
 areas/20_takeshiba_blocks.js
 areas/30_tsukiji.js
 engine/11_ground.js
+engine/11b_landmark_kit.js
 areas/40_jr_hamamatsucho_shimbashi.js
 engine/12_yamanote_line.js
 engine/13_trees.js
