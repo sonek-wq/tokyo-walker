@@ -317,9 +317,9 @@ function update(dt, t) {
   waterTex.offset.set(t * 0.004, t * 0.0025); riverTex.offset.set(t * 0.006, 0);
 
   updateFun(dt, t);
-  // --- 東京モノレール (浜松町駅で停車 → 南へ)
+  // --- 東京モノレール (浜松町駅 ⇄ 天王洲アイル駅。どちらの駅でも止まって折り返す)
   if (mono.wait > 0) mono.wait -= dt;
-  else { mono.s += mono.dir * 20 * dt; if (mono.s > 1900) { mono.s = 1900; mono.dir = -1; mono.wait = 4; } if (mono.s < 30) { mono.s = 30; mono.dir = 1; mono.wait = 10; } }
+  else { mono.s += mono.dir * 20 * dt; if (mono.s > 1838) { mono.s = 1838; mono.dir = -1; mono.wait = 10; } if (mono.s < 30) { mono.s = 30; mono.dir = 1; mono.wait = 10; } }
   MONO_CARS.forEach((m, i) => m.position.set(MONO_X, 10.6, mono.s + i * 15.4));
 
   // --- 船・カモメ
