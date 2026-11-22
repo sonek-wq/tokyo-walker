@@ -9,6 +9,7 @@ function chuoFrame(i, t) {
 REGION({
   name: '四ツ谷・市ケ谷',
   towns: [['四谷', -1960, -2040], ['紀尾井町', -1860, -1990], ['五番町', -1560, -2280], ['市谷本村町', -1760, -2450], ['市谷田町', -1480, -2440], ['富士見', -1180, -2580]],
+  stations: ['四ツ谷', '市ケ谷'],   // 駅のまわりを作り込んだ駅 (ファストトラベルで緑の枠)
   labels: [],
   build(r) {
     const BR = WALL.BRONZE, WHITE = lam({ color: 0xf2eee4 }); let FISH_BB = null;

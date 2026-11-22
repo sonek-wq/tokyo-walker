@@ -72,6 +72,25 @@ for (const r of RIVERS) for (const [name, bx, bz] of r.bridges) {
   archBridge(mx - nx * half, mz - nz * half, mx + nx * half, mz + nz * half, 22, r.rise, name);
   BRIDGE_LIST.push([name, mx, mz, r.name]);
 }
+// 道路 (100m ごとの格子) と交わるところに自動でかける橋 (autoBridges を持つ川だけ)。橋は道路の向きにそろえる
+for (const r of RIVERS) if (r.autoBridges) {
+  const named = BRIDGE_LIST.filter(b => b[3] === r.name);
+  for (let i = 0; i + 1 < r.pts.length; i++) {
+    const [ax, az] = r.pts[i], [bx, bz] = r.pts[i + 1], l = Math.hypot(bx - ax, bz - az), nx = -(bz - az) / l, nz = (bx - ax) / l;
+    for (const axis of ['x', 'z']) {
+      const a0 = axis === 'x' ? ax : az, a1 = axis === 'x' ? bx : bz;
+      for (let k = Math.ceil(Math.min(a0, a1) / 100); k * 100 <= Math.max(a0, a1); k++) {
+        const t = (k * 100 - a0) / (a1 - a0); if (!(t >= 0 && t < 1)) continue;
+        const mx = ax + (bx - ax) * t, mz = az + (bz - az) * t;
+        if (named.some(b => Math.hypot(b[1] - mx, b[2] - mz) < 60) || ringNearest(mx, mz)?.d < 25) continue;
+        // 道路は axis = k*100 の線 (x の線なら南北の道、z の線なら東西の道)
+        const dx = axis === 'x' ? 0 : 1, dz = axis === 'x' ? 1 : 0, c = Math.max(0.35, Math.abs(dx * nx + dz * nz)), half = (r.w + 9) / c;
+        const major = ((k % 4) + 4) % 4 === 0;
+        archBridge(mx - dx * half, mz - dz * half, mx + dx * half, mz + dz * half, major ? 20 : 10, 0.8, r.autoBridges);
+      }
+    }
+  }
+}
 for (const [name, ax, az, bx, bz, W, rise] of GEO_BRIDGES.arch) { archBridge(ax, az, bx, bz, W, rise, name); BRIDGE_LIST.push([name, (ax + bx) / 2, (az + bz) / 2]); }
 for (const [name, x, z] of BRIDGE_LIST) LM_LABELS.push([name, x, z - 14, '🌉']);
 // ---- 勝どき橋: 中央の跳開部が少し高い (水上バスが下をくぐる)

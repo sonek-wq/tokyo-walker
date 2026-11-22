@@ -3,6 +3,7 @@
 REGION({
   name: '巣鴨・駒込',
   towns: [['巣鴨', -1340, -4760], ['本駒込', -1000, -4620], ['西ケ原', -960, -5160]],
+  stations: ['巣鴨', '駒込'],   // 駅のまわりを作り込んだ駅 (ファストトラベルで緑の枠)
   labels: [],
   build(r) {
     const BR = WALL.BRONZE, WH = lam({ color: 0xf0ece0 }), RED = lam({ color: 0xc8302a });
@@ -85,7 +86,7 @@ REGION({
       for (let k = 0; k < 6; k++) PINES.push([ix + rr(-7, 7), iz + rr(-4, 4), rr(0.8, 1)]);
       // 藤代峠 (園内でいちばん高い築山。てっぺんは富士見山)
       const [fx, fz] = FK.w(160, -196);
-      for (let i = 0; i < 12; i++) pushPrism('GRASSTOP', 'GRASSTOP', regularPoly(fx, fz, 19 - i * 1.4, 12), i * 0.55, (i + 1) * 0.55);
+      hill(fx, fz, 19, 6.6);
       // しだれ桜 (内庭大門の近く)
       const [sx, sz] = FK.w(70, -210), PINK = lam({ color: SAKURA_ON ? 0xf6c8d8 : 0x5a7a40 });
       bake(lam({ color: 0x5a4632 }), new THREE.CylinderGeometry(0.6, 0.8, 5, 6).translate(sx, 2.5, sz)); solid(sx - 0.8, sz - 0.8, sx + 0.8, sz + 0.8, 0, 5);

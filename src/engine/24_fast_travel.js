@@ -5,14 +5,15 @@ let ftOpen = false, FT_ITEMS = null;
 function ftBuild() {   // 行き先の一覧 (路線ごと)。作り込み済みかどうかは、まわりの名所ラベルの数で見る
   const groups = [], face = (x, z, tx, tz) => Math.atan2(-(tx - x), -(tz - z));
   const near = (x, z) => SPOT_AREAS.filter(s => typeof s[1] === 'number' && s.length >= 5 && Math.hypot((s[1] + s[3]) / 2 - x, (s[2] + s[4]) / 2 - z) < 380).length;
-  const done = (x, z) => near(x, z) >= 6;
+  const DONE = new Set(REGION_DEFS.flatMap(rg => rg.stations || []));   // エリアのファイルが「作り込んだ」と宣言した駅
+  const done = (x, z, n) => DONE.has(n) || near(x, z) >= 6;
   groups.push(['🟢 山手線', STN.map(st => {
-    const [x, z] = st.ent; return { name: st.name, x, z, yaw: face(x, z, st.x, st.z), done: done(x, z), msg: `🚀 ${st.name}駅 (山手線 ${st.code}) へ移動した` };
+    const [x, z] = st.ent; return { name: st.name, x, z, yaw: face(x, z, st.x, st.z), done: done(x, z, st.name), msg: `🚀 ${st.name}駅 (山手線 ${st.code}) へ移動した` };
   })]);
   for (const ln of TR_LINES) {
     const items = ln.stops.map(n => {
       const sp = STOPS[stopKey(ln, n)], [x, z] = sp.land;
-      return { name: n, x, z, yaw: face(x, z, ...sp.dock), done: done(x, z), msg: `🚀 ${sp.label}へ移動した` };
+      return { name: n, x, z, yaw: face(x, z, ...sp.dock), done: done(x, z, n), msg: `🚀 ${sp.label}へ移動した` };
     });
     groups.push([`${lineIcon(ln)} ${lineLabel(ln)}`, items]);
   }

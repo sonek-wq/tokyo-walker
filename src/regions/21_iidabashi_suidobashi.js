@@ -3,6 +3,7 @@
 REGION({
   name: '飯田橋・水道橋',
   towns: [['神楽坂', -1200, -2950], ['富士見', -970, -2730], ['後楽', -700, -3060]],
+  stations: ['飯田橋', '水道橋'],   // 駅のまわりを作り込んだ駅 (ファストトラベルで緑の枠)
   labels: [],
   build(r) {
     const SHU = lam({ color: 0xc8382a }), BLK = lam({ color: 0x24201e }), GOLD = lam({ color: 0xd8b040, emissive: 0x302000 });

@@ -12,6 +12,7 @@ function oRampV(F, key, u0, u1, v0, v1, y0, y1) {
 REGION({
   name: '品川・高輪',
   towns: [['港南', -1080, 1700], ['高輪', -1460, 1300]],
+  stations: ['品川', '高輪ゲートウェイ'],   // 駅のまわりを作り込んだ駅 (ファストトラベルで緑の枠)
   labels: [],
   build(r) {
     const WH = lam({ color: 0xf2f0ea });

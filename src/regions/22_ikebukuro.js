@@ -6,7 +6,7 @@
 function stnFrame(name) { const st = STN.find(s => s.name === name), q = ringAt(st.s); return frame(q.x, q.z, q.tx, q.tz, q.nx, q.nz); }
 // ---- 通りの両側の店 (看板つき)。F の u 方向が通り。sd = -1 / 1 の側に v0 から depth の奥行きで建てる
 function shopsAlong(F, u0, u1, v0, depth, words, opt = {}) {
-  const SWM = words.map(w => glow(new THREE.MeshLambertMaterial({ map: textTex(w, opt.bg || '#2a2420', opt.fg || '#fff4dc', 96, 24) }), '#ffe8c0', 0.6));
+  const bgs = opt.bgs || [opt.bg || '#2a2420'], SWM = words.map((w, i) => glow(new THREE.MeshLambertMaterial({ map: textTex(w, bgs[i % bgs.length], opt.fg || '#fff4dc', 96, 24) }), '#ffe8c0', 0.6));
   const walls = opt.walls || ['resi2', 'office2', 'JB_KS2', 'brick'], skip = opt.skip || [];
   for (const sd of opt.sides || [-1, 1]) {
     LM_ZONES.push(F.rect(u0, sd < 0 ? -v0 - depth - 1 : v0, u1, sd < 0 ? -v0 : v0 + depth + 1));
@@ -22,6 +22,15 @@ function shopsAlong(F, u0, u1, v0, depth, words, opt = {}) {
 // ---- 回転した長方形の名所 (地図の発見と、地上での場所の名前)。list: [名前, u0, v0, u1, v1] を小さいものから順に
 function rotSpots(F, list) {
   for (const [n, u0, v0, u1, v1] of list) { const R = F.rect(u0, v0, u1, v1); SPOT_AREAS.push([n, ...polyBB(R)]); LM_HEIGHT_AREAS.push([n, (x, z, y) => y < 4 && inPoly(R, x, z)]); }
+}
+// ---- 歩いて登れる築山 (見た目は段々の芝。当たり判定は 1m 角の細かい箱で、なめらかな円すいにする)。H / R は 0.4 以下に
+function hill(cx, cz, R, H, opt = {}) {
+  const lv = opt.levels || Math.ceil(H / 0.5);
+  for (let i = 0; i < lv; i++) pushPrism(opt.key || 'GRASSTOP', opt.key || 'GRASSTOP', regularPoly(cx, cz, R * (1 - i / lv), 14), i * H / lv, (i + 1) * H / lv, { solid: false });
+  for (let x = -R; x < R; x += 1) for (let z = -R; z < R; z += 1) {
+    const r = Math.hypot(x + 0.5, z + 0.5); if (r > R) continue;
+    const h = Math.min(H, H * (1 - (r - 0.7) / R)); solid(cx + x, cz + z, cx + x + 1, cz + z + 1, 0, h);
+  }
 }
 // ---- 屋上へのエレベーター (1階 ⇄ 屋上)
 function roofLift(base, top, upMsg, downMsg, opt = {}) {
@@ -42,6 +51,7 @@ function sideSign(F, u, v, sd, text, bg, fg, w, h, y, opt = {}) {   // u の向�
 REGION({
   name: '池袋',
   towns: [['東池袋', -2330, -4640], ['西池袋', -2700, -4560], ['南池袋', -2560, -4300]],
+  stations: ['池袋'],   // 駅のまわりを作り込んだ駅 (ファストトラベルで緑の枠)
   labels: [],
   build(r) {
     const F = stnFrame('池袋');
