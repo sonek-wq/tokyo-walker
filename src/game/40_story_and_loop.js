@@ -128,6 +128,7 @@ document.getElementById('pvDel').onclick = e => {   // 2回押しで削除 (誤�
 };
 document.getElementById('albPrev').onclick = () => { albumPage--; closePreview(); renderAlbum(); };
 document.getElementById('albNext').onclick = () => { albumPage++; closePreview(); renderAlbum(); };
+albumEl.addEventListener('click', e => { if (e.target === albumEl && albumOpen) toggleAlbum(); });   // 外側をクリックすると閉じる
 function toggleAlbum() {
   if (!started) return;
   albumOpen = !albumOpen;

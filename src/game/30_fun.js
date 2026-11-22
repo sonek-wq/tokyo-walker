@@ -139,10 +139,11 @@ const TIPS = Object.assign({
 }, LM_TIPS);
 const HEE_KEY = 'tokyoWalker_hee', NOTE_LAST = {};
 const HEE = new Set((() => { try { return JSON.parse(localStorage.getItem(HEE_KEY) || '[]'); } catch (e) { return []; } })());
-const NOTE_NAMES = [...new Set([...Object.keys(NOTES), ...Object.keys(TIPS)])];
+const SHOW_TIPS = false;   // 🧭 役立ち情報 (LM_TIPS) は表示しない (データは残してある)
+const NOTE_NAMES = [...new Set([...Object.keys(NOTES), ...(SHOW_TIPS ? Object.keys(TIPS) : [])])];
 const esc = s => s.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);
 function noteFor(name) {   // エリアに入ったときの豆知識。同じ場所は90秒のあいだ出さない (行ったり来たりで邪魔にならないように)
-  const hee = NOTES[name], tip = TIPS[name], now = performance.now() / 1000;
+  const hee = NOTES[name], tip = SHOW_TIPS ? TIPS[name] : null, now = performance.now() / 1000;
   if (!hee && !tip) return null;
   if (NOTE_LAST[name] && now - NOTE_LAST[name] < 90) return null;
   NOTE_LAST[name] = now;
@@ -154,7 +155,7 @@ let noteOpen = false;
 const notebookEl = document.getElementById('notebook');
 function renderNotebook() {
   const got = [...HEE].filter(n => NOTE_NAMES.includes(n)).reverse();
-  notebookEl.querySelector('.list').innerHTML = got.length ? got.map(n => `<div class="ent"><b>📍 ${esc(n)}</b>${NOTES[n] ? `<div>💡 ${esc(NOTES[n])}</div>` : ''}${TIPS[n] ? `<div class="tip">🧭 ${esc(TIPS[n])}</div>` : ''}</div>`).join('')
+  notebookEl.querySelector('.list').innerHTML = got.length ? got.map(n => `<div class="ent"><b>📍 ${esc(n)}</b>${NOTES[n] ? `<div>💡 ${esc(NOTES[n])}</div>` : ''}${SHOW_TIPS && TIPS[n] ? `<div class="tip">🧭 ${esc(TIPS[n])}</div>` : ''}</div>`).join('')
     : '<div class="ent">まだ何もない。名所を歩くと、ここに豆知識がたまっていく</div>';
   notebookEl.querySelector('.cnt').textContent = `${got.length} / ${NOTE_NAMES.length}`;
 }
@@ -165,7 +166,8 @@ function toggleNotebook() {
   notebookEl.style.display = noteOpen ? 'flex' : 'none';
 }
 notebookEl.querySelector('.close').onclick = () => toggleNotebook();
-LM_ACH.push(['hee', '💡 へぇの達人', '豆知識を30個集める (K で豆知識帳)', () => HEE.size >= 30]);
+notebookEl.addEventListener('click', e => { if (e.target === notebookEl && noteOpen) toggleNotebook(); });   // 外側をクリックすると閉じる
+LM_ACH.push(['hee', '💡 へぇの達人', '豆知識を30個集める (K で豆知識帳)', () => [...HEE].filter(n => NOTE_NAMES.includes(n)).length >= 30]);
 // 後から追加した名所も地名リスト・発見リストに反映
 for (const a of SPOT_AREAS) if (!AREAS.includes(a)) { AREAS.unshift(a); ALL_NAMES.add(a[0]); }
 function hokoActive() { return WEEKEND && gameH >= 12 && gameH < (MONTH >= 4 && MONTH <= 9 ? 18 : 17); }
@@ -214,8 +216,9 @@ const ACH_KEY = 'tokyoWalker_ach';
 const ACH_GOT = new Set((() => { try { return JSON.parse(localStorage.getItem(ACH_KEY) || '[]'); } catch (e) { return []; } })());
 const achPanel = document.getElementById('achPanel');
 function renderAch() {
-  achPanel.innerHTML = `<div class="ttl">🏆 実績 ${ACH_GOT.size} / ${ACH.length}　🐈 ねこ ${CAT_FOUND.size} / ${CAT_DEF.length}　🍴 グルメ ${GOURMET_FOUND.size} / ${GOURMET.length}　🐾 いきもの ${WILD_FOUND.size} / ${WILD_SP.length}</div>` +
-    `<div class="wild">${WILD_SP.map(sp => WILD_FOUND.has(sp.id) ? `<span title="${sp.fact}">${sp.emoji} ${sp.name}</span>` : '<span class="off">？？？</span>').join('')}</div>` +
+  const gotN = ACH.filter(a => ACH_GOT.has(a[0])).length;
+  achPanel.innerHTML = `<div class="ttl">🏆 実績 ${gotN} / ${ACH.length}　🐈 ねこ ${CAT_FOUND.size} / ${CAT_DEF.length}${SHOW_GOURMET_INFO ? `　🍴 グルメ ${GOURMET_FOUND.size} / ${GOURMET.length}` : ''}${SHOW_WILD_INFO ? `　🐾 いきもの ${WILD_FOUND.size} / ${WILD_SP.length}` : ''}</div>` +
+    (SHOW_WILD_INFO ? `<div class="wild">${WILD_SP.map(sp => WILD_FOUND.has(sp.id) ? `<span title="${sp.fact}">${sp.emoji} ${sp.name}</span>` : '<span class="off">？？？</span>').join('')}</div>` : '') +
     ACH.map(([id, n, d]) => `<span class="a ${ACH_GOT.has(id) ? '' : 'off'}">${ACH_GOT.has(id) ? n : '🔒 ？？？'}<br><small>${d}</small></span>`).join('');
 }
 function achieve(id) {
@@ -283,12 +286,12 @@ function updateFun(dt, t) {
   // 実績の判定 (0.5秒ごと)
   if ((funTick -= dt) > 0) return; funTick = 0.5;
   // 名物グルメ: お店の前を通ると図鑑に記録
-  for (const g of GOURMET) if (!GOURMET_FOUND.has(g.name) && P.y < 4 && Math.hypot(P.x - g.x, P.z - g.z) < 11) {
+  if (SHOW_GOURMET_INFO) for (const g of GOURMET) if (!GOURMET_FOUND.has(g.name) && P.y < 4 && Math.hypot(P.x - g.x, P.z - g.z) < 11) {
     GOURMET_FOUND.add(g.name); try { localStorage.setItem(GOURMET_KEY, JSON.stringify([...GOURMET_FOUND])); } catch (e) {}
     toast(`${g.emoji} ${g.area}の名物「${g.food}」のお店を見つけた！ (グルメ図鑑 ${GOURMET_FOUND.size} / ${GOURMET.length})`); renderAch();
   }
   // 野生の生きもの: 近くで見ると図鑑に記録して、豆知識を出す
-  for (const sp of WILD_SP) if (!WILD_FOUND.has(sp.id) && WILD_NEAR(sp) < sp.see) {
+  if (SHOW_WILD_INFO) for (const sp of WILD_SP) if (!WILD_FOUND.has(sp.id) && WILD_NEAR(sp) < sp.see) {
     WILD_FOUND.add(sp.id); try { localStorage.setItem(WILD_KEY, JSON.stringify([...WILD_FOUND])); } catch (e) {}
     const key = '🐾 ' + sp.name; if (!HEE.has(key)) { HEE.add(key); try { localStorage.setItem(HEE_KEY, JSON.stringify([...HEE])); } catch (e) {} }
     toast(`${sp.emoji} ${sp.name}を見つけた！ (いきもの図鑑 ${WILD_FOUND.size} / ${WILD_SP.length})`); toastTimer = 4;

@@ -5,6 +5,7 @@
    - 池のコイ (人が近づくと寄ってくる) / 甲羅干しのカメ (近づくと水にもぐる) / 夜だけ歩くタヌキ / 庭園のアゲハチョウ
    種類ごとに1つの InstancedMesh で描き、プレイヤーから遠い群れは動かさずに隠す (遠景のチャンク分けには入らない)。
    初めて近くで見ると「いきもの図鑑」に記録される (game/30_fun.js)。 */
+const SHOW_WILD_INFO = false;   // true にすると、いきもの図鑑 (発見の表示・豆知識・実績) が復活する (いまは生きものの姿と動きだけ)
 const WILD_SP = [];   // 図鑑の順番 [{ id, name, emoji, fact, see, list }]
 let WILD_NEAR = () => Infinity;   // (種) => プレイヤーからいちばん近い、見えている1匹までの距離
 REGION({
@@ -399,8 +400,8 @@ REGION({
       for (const a of sp.list) if (a.vis && a.c.on) best = Math.min(best, Math.hypot(P.x - a.x, P.y + 1.5 - a.y, P.z - a.z));
       return best;
     };
-    for (const sp of WILD_SP) LM_NOTES['🐾 ' + sp.name] = sp.fact;   // 豆知識帳にも載る (見つけたとき)
-    LM_ACH.push(['wild5', '🐦 いきもの観察', '野生の生きものを5種類見つける', () => WILD_FOUND.size >= 5],
+    if (SHOW_WILD_INFO) for (const sp of WILD_SP) LM_NOTES['🐾 ' + sp.name] = sp.fact;   // 豆知識帳にも載る (見つけたとき)
+    if (SHOW_WILD_INFO) LM_ACH.push(['wild5', '🐦 いきもの観察', '野生の生きものを5種類見つける', () => WILD_FOUND.size >= 5],
       ['wildAll', '🔭 いきもの博士', `野生の生きものを全部 (${WILD_SP.length}種類) 見つける`, () => WILD_FOUND.size >= WILD_SP.length]);
   },
 });

@@ -1,6 +1,7 @@
 /* 名物グルメ (歩いているだけで、その街の名物の食べものが分かる)
    エリアごとに名物のお店を1軒ずつ置く。屋根の上に大きな食べものの模型、軒先に看板とのれん、前に並ぶ人。
    近くを通ると「グルメ図鑑」に記録される (実績パネルに 🍴 の数)。お店の場所は、目印の近くの空いている場所を自動で探す */
+const SHOW_GOURMET_INFO = false;   // true にすると、名所の名前・地図・豆知識・グルメ図鑑・実績が復活する (いまはお店の見た目だけ)
 const GOURMET = [];   // [{ name, food, area, emoji, x, z }]  (見つけたかどうかは game/30_fun.js で記録)
 REGION({
   name: '名物グルメ',
@@ -222,12 +223,14 @@ REGION({
       LM_PEOPLE.push([[...qa, ...qb], 3], [[...F.w(-W / 2 - 1, D / 2 + 4.5), ...F.w(W / 2 + 1, D / 2 + 4.5)], 2]);
       // 名前・地図・豆知識
       const name = `${food} (${area}の名物)`;
-      SPOT_AREAS.unshift([name, ...polyBB(F.rect(-W / 2 - 1, -D / 2 - 1, W / 2 + 1, D / 2 + 7))]);
-      LM_LABELS.push([food, cx, cz, emoji, name]);
-      LM_NOTES[name] = note;
+      if (SHOW_GOURMET_INFO) {
+        SPOT_AREAS.unshift([name, ...polyBB(F.rect(-W / 2 - 1, -D / 2 - 1, W / 2 + 1, D / 2 + 7))]);
+        LM_LABELS.push([food, cx, cz, emoji, name]);
+        LM_NOTES[name] = note;
+      }
       GOURMET.push({ name, food, area, emoji, x: cx, z: cz });
     }
-    LM_ACH.push(['gourmet5', '🍴 食べ歩き', '名物グルメのお店を5軒見つける', () => typeof GOURMET_FOUND !== 'undefined' && GOURMET_FOUND.size >= 5],
+    if (SHOW_GOURMET_INFO) LM_ACH.push(['gourmet5', '🍴 食べ歩き', '名物グルメのお店を5軒見つける', () => typeof GOURMET_FOUND !== 'undefined' && GOURMET_FOUND.size >= 5],
       ['gourmet20', '🍱 食べ歩きの達人', '名物グルメのお店を20軒見つける', () => typeof GOURMET_FOUND !== 'undefined' && GOURMET_FOUND.size >= 20],
       ['gourmetAll', '👑 東京グルメ図鑑', '名物グルメのお店をすべて見つける', () => typeof GOURMET_FOUND !== 'undefined' && GOURMET_FOUND.size >= GOURMET.length]);
     bakeFlush();

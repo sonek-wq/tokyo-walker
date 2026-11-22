@@ -12,7 +12,6 @@ box(0.42, 0.46, 0.16, lam({ color: 0x2f62b8 }), 0, 1.24, -0.23, avatar);
 box(0.32, 0.32, 0.32, lam({ color: 0xe8c09a }), 0, 1.71, 0, avatar);
 box(0.36, 0.12, 0.36, lam({ color: 0xc0302a }), 0, 1.9, 0, avatar);
 box(0.3, 0.04, 0.16, lam({ color: 0xc0302a }), 0, 1.86, 0.24, avatar);
-box(0.2, 0.05, 0.02, lam({ color: 0x1a1a1a }), 0, 1.74, 0.165, avatar);
 const blob = new THREE.Mesh(new THREE.CircleGeometry(0.45, 10).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.35, depthWrite: false }));
 scene.add(blob);
 avatar.rotation.y = P.heading; avatar.rotation.order = 'YXZ';
