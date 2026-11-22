@@ -82,7 +82,7 @@ function makeYurikamome(n) {
 }
 const WB_BOATS = [];   // すべての便 (船と電車)
 for (const ln of RAIL_TR) {   // 鉄道: 路線ごとに1つの InstancedMesh (車両の数だけ)
-  ln.vehicles = Math.max(2, Math.min(4, Math.round(ln.len / 1600)));
+  ln.vehicles = ln.fleet || Math.max(2, Math.min(4, Math.round(ln.len / 1600)));   // fleet: 路線で台数を決める (都電は短い間隔で走る)
   ln.inst = new THREE.InstancedMesh(new THREE.BoxGeometry(2.9, 3.4, ln.carLen - 0.6), trainMats(ln.body || '#c8ccd0', ln.color), ln.vehicles * ln.cars);
   ln.inst.instanceMatrix.setUsage(THREE.DynamicDrawUsage); ln.inst.frustumCulled = false; scene.add(ln.inst);
 }
