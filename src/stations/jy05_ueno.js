@@ -111,8 +111,52 @@ STATION({
       const fl = lam({ color: 0xf0a0a8 }); for (let k = 0; k < 9; k++) { const g = new THREE.Group(); g.position.set(rr(170, 225), 0, rr(-3890, -3840)); scene.add(g); box(0.5, 0.45, 0.8, fl, 0, 1.3, 0, g); box(0.06, 1.1, 0.06, fl, 0, 0.55, 0, g); box(0.08, 0.7, 0.08, fl, 0, 1.75, 0.35, g); }
       fr(165, -3895, 230, -3835, '#2d6585');   // フラミンゴの池
       LM_UPDATERS.push((dt, t) => { for (const a of ANI) { const ang = t * a.v + a.ph; a.g.position.set(a.x + Math.cos(ang) * a.r, 0, a.z + Math.sin(ang) * a.r * 0.6); a.g.rotation.y = Math.atan2(-Math.sin(ang), Math.cos(ang) * 0.6); } });
-      // パンダのいない「パンダのもり」(2026年1月に双子のパンダが中国へ返還)
-      pushPrism(BEIGE, 'GRASSTOP', rectPoly(62, -3760, 122, -3735), 0, 5); fr(60, -3800, 130, -3762, '#7a9a5a'); for (let k = 0; k < 12; k++) PINES.push([rr(64, 126), rr(-3796, -3766), rr(0.7, 1)]);
+      // 「パンダのもり」(ゲームの中ではパンダが暮らしている。本物は2026年1月に双子のパンダが中国へ返還)
+      pushPrism(BEIGE, 'GRASSTOP', rectPoly(62, -3760, 122, -3735), 0, 5); fr(60, -3800, 130, -3762, '#7a9a5a');
+      {
+        const PY = [60, -3800, 130, -3762];   // 運動場
+        for (const r of [[PY[0], PY[1], PY[2], PY[1] + 0.4], [PY[0], PY[1], PY[0] + 0.4, PY[3]], [PY[2] - 0.4, PY[1], PY[2], PY[3]]]) pushPrism('CONC', 'CONC', rectPoly(...r), 0, 1.3);   // 低い柵 (中は見える)
+        for (let k = 0; k < 6; k++) PINES.push([rr(64, 126), rr(-3778, -3766), rr(0.7, 0.9)]);
+        const BAM = lam({ color: 0x5a9a3a }), BAM2 = lam({ color: 0x7ab84a });
+        for (let k = 0; k < 40; k++) { const x = k < 20 ? rr(62, 72) : rr(118, 128), z = rr(-3798, -3772), h = rr(4, 7); bake(BAM, new THREE.CylinderGeometry(0.08, 0.1, h, 5).translate(x, h / 2, z)); bake(BAM2, new THREE.ConeGeometry(0.7, 1.6, 5).translate(x, h, z)); }   // 竹やぶ
+        const WD = lam({ color: 0x8a6a42 });   // 丸太のやぐら
+        for (const [dx, dz] of [[-2, -2], [2, -2], [-2, 2], [2, 2]]) mesh(new THREE.CylinderGeometry(0.22, 0.22, 2.6, 6), WD, 108 + dx, 1.3, -3788 + dz);
+        pushPrism('WOOD', 'WOOD', rectPoly(105.5, -3790.5, 110.5, -3785.5), 2.4, 2.7);
+        const pW = lam({ color: 0xf4f2ea }), pB = lam({ color: 0x1c1c20 });
+        const panda = (s = 1) => {   // 体・足・肩の黒い帯・頭・耳・目のまわり
+          const g = new THREE.Group(), b = new THREE.Group(); g.add(b); scene.add(g);
+          const add = (geo, m, x, y, z, p = b) => { const o = new THREE.Mesh(geo, m); o.position.set(x * s, y * s, z * s); o.scale.setScalar(s); p.add(o); return o; };
+          add(new THREE.SphereGeometry(0.75, 10, 7).scale(1, 0.85, 1.25), pW, 0, 0.95, 0);
+          add(new THREE.BoxGeometry(1.55, 0.6, 0.55), pB, 0, 1.05, 0.45);
+          const legs = []; for (const [lx, lz] of [[-0.45, 0.6], [0.45, 0.6], [-0.45, -0.6], [0.45, -0.6]]) legs.push(add(new THREE.BoxGeometry(0.38, 0.7, 0.42), pB, lx, 0.35, lz));
+          const head = new THREE.Group(); head.position.set(0, 1.4 * s, 1.0 * s); b.add(head);
+          add(new THREE.SphereGeometry(0.55, 10, 7), pW, 0, 0, 0, head);
+          for (const sd of [-1, 1]) { add(new THREE.SphereGeometry(0.2, 6, 4), pB, sd * 0.4, 0.42, -0.05, head); add(new THREE.SphereGeometry(0.15, 6, 4).scale(1, 1.4, 0.6), pB, sd * 0.2, 0.05, 0.47, head); }
+          add(new THREE.SphereGeometry(0.08, 5, 4), pB, 0, -0.12, 0.55, head);
+          return { g, b, legs, head };
+        };
+        const PANDAS = [];
+        { const p = panda(1); p.g.position.set(86, 0, -3778); p.b.rotation.x = -0.9; p.b.position.y = 0.55;   // すわって竹を食べる
+          const bam = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 1.8, 5), BAM); bam.position.set(0.3, 1.9, 1.0); bam.rotation.z = 0.5; p.b.add(bam);
+          PANDAS.push({ p, kind: 'eat', bam, ph: 0 }); p.g.rotation.y = 0.6; }
+        { const p = panda(1); PANDAS.push({ p, kind: 'walk', cx: 96, cz: -3786, r: 9, ph: 1.5 }); }
+        { const p = panda(1); p.g.position.set(108, 2.7, -3788); p.b.rotation.z = Math.PI / 2 * 0.95; p.b.position.y = 0.55; PANDAS.push({ p, kind: 'sleep', ph: 0.7 }); }   // やぐらの上で昼寝
+        { const p = panda(0.5); PANDAS.push({ p, kind: 'roll', cx: 78, cz: -3790, ph: 0 }); }   // 子どものパンダがころころ
+        LM_UPDATERS.push((dt, t) => {
+          for (const a of PANDAS) {
+            const { p } = a;
+            if (a.kind === 'eat') { a.bam.position.y = 1.9 + Math.sin(t * 2.2) * 0.25; p.head.rotation.x = Math.sin(t * 2.2) * 0.15; }
+            if (a.kind === 'walk') { const ang = t * 0.12 + a.ph; p.g.position.set(a.cx + Math.cos(ang) * a.r, 0, a.cz + Math.sin(ang) * a.r * 0.6); p.g.rotation.y = Math.atan2(-Math.sin(ang), Math.cos(ang) * 0.6); p.legs.forEach((l, i) => l.rotation.x = Math.sin(t * 4 + i * Math.PI / 2 * (i % 2 ? 1 : -1)) * 0.4); p.head.rotation.y = Math.sin(t * 0.7) * 0.3; }
+            if (a.kind === 'sleep') { const br = 1 + Math.sin(t * 1.5) * 0.03; p.b.scale.set(br, br, 1); }
+            if (a.kind === 'roll') { const k = (t * 0.25) % 2, d = k < 1 ? k : 2 - k; p.g.position.set(a.cx + d * 12, 0.35, a.cz); p.b.rotation.z = -(k < 1 ? 1 : -1) * t * 2.4; p.g.rotation.y = Math.PI / 2; }
+          }
+        });
+        LM_PEOPLE.push([[64, -3804, 128, -3804], 12], [[128, -3806, 64, -3806], 8]);
+        SPOT_AREAS.unshift(['パンダのもり (上野動物園)', 56, -3808, 134, -3735]);
+        LM_LABELS.push(['パンダ', 96, -3780, '🐼', 'パンダのもり (上野動物園)']);
+        LM_NOTES['パンダのもり (上野動物園)'] = 'ゲームの中では、パンダたちがのんびり暮らしている。本物の上野動物園の双子のパンダ、シャオシャオとレイレイは2026年1月27日に中国へ返還され、日本からパンダがいなくなった (1972年に初めて来日して以来はじめて)';
+        LM_ACH.push(['panda', '🐼 パンダに会えた', '上野動物園のパンダのもりでパンダを見る', () => P.y < 3 && inR([56, -3810, 134, -3760], P.x, P.z)]);
+      }
       // 旧寛永寺五重塔 (1639年)
       const px = 196, pz = -3668; let y = 1.2;
       pushPrism(STONE, STONE, rectPoly(px - 6, pz - 6, px + 6, pz + 6), 0, 1.2);
@@ -221,7 +265,7 @@ STATION({
       '不忍池弁天堂': '琵琶湖の竹生島に見立てた島に建つ、弁才天のお堂',
       '上野東照宮': '1651年に徳川家光が建て替えた社殿は、金箔をふんだんに使った「金色殿」。戦争や大震災も乗り越えてきた',
       '旧寛永寺五重塔': '1639年に建てられた五重塔。今は上野動物園の中に立っている',
-      '上野動物園': '日本でいちばん古い動物園 (1882年)。2026年1月に双子のパンダが中国へ返り、日本のパンダは1972年以来はじめて0頭に',
+      '上野動物園': '日本でいちばん古い動物園 (1882年)。ゲームの中の「パンダのもり」にはパンダがいる (本物は2026年1月に双子のパンダが中国へ返り、日本のパンダは1972年以来はじめて0頭に)',
       '噴水広場': 'ここにはかつて寛永寺の本堂 (根本中堂) が建っていた',
       '東京国立博物館': '1872年創立。日本でいちばん長い歴史をもつ博物館で、国宝もたくさん所蔵している',
       '国立科学博物館': '1877年創立。日本館の建物は上から見ると飛行機の形。渋谷の忠犬ハチ公の剥製もここにある',
@@ -232,7 +276,7 @@ STATION({
     Object.assign(LM_TIPS, {
       '上野恩賜公園': '開園は5:00〜23:00。桜の見ごろは例年3月下旬〜4月上旬',
       '不忍池': '夏 (例年7月中旬〜8月中旬) は池一面のハスが見ごろ。ボート池ではボートに乗れる',
-      '上野東照宮': '社殿のまわり (透塀の中) は有料で、9:00〜16:30ごろ',
+      '上野東照宮': '9:00〜16:30ごろ',
       '上野動物園': '開園は9:30〜17:00 (入園は16:00まで)。月曜休園 (祝日のときは翌日)',
       '東京国立博物館': '開館は9:30〜17:00。月曜休館 (祝日のときは翌日)',
       '国立科学博物館': '忠犬ハチ公の剥製は日本館の2階',

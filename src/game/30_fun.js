@@ -135,7 +135,7 @@ Object.assign(NOTES, LM_NOTES);
 const TIPS = Object.assign({
   '東京タワー': 'メインデッキ (150m) は9:00〜23:00 (最終入場22:30)。メインデッキまでは外の階段でも上れる',
   '東京タワー 大展望台': 'ガラスの床「スカイウォークウィンドウ」から、真下の街をのぞける',
-  '築地場外市場': 'お店がよく開いているのは9〜13時ごろ。水・日曜・祝日は休みの店が多い。現金だけのお店もある',
+  '築地場外市場': 'お店がよく開いているのは9〜13時ごろ。水・日曜・祝日は休みの店が多い。',
 }, LM_TIPS);
 const HEE_KEY = 'tokyoWalker_hee', NOTE_LAST = {};
 const HEE = new Set((() => { try { return JSON.parse(localStorage.getItem(HEE_KEY) || '[]'); } catch (e) { return []; } })());
@@ -174,6 +174,8 @@ const CAT_DEF = [[-450, -760, 0], [-575, -951, 0], [-1380, 70, 0], [-1278, -628,
   [-14, -640, 0], [-819, 204, 0], [-1566, 183, 0], [-294, -700, 7], [-1270, -285, 7.5], [196, -905, 0], [-141, 200, 5.2], [155, -1243, 26]];
 CAT_DEF.push(...LM_CATS);
 const CAT_KEY = 'tokyoWalker_cats';
+const GOURMET_KEY = 'tokyoWalker_gourmet';
+const GOURMET_FOUND = new Set((() => { try { return JSON.parse(localStorage.getItem(GOURMET_KEY) || '[]'); } catch (e) { return []; } })());
 const CAT_FOUND = new Set((() => { try { return JSON.parse(localStorage.getItem(CAT_KEY) || '[]'); } catch (e) { return []; } })());
 const CATS = CAT_DEF.map(([x, z, y], i) => {
   const col = [0x2a2a2e, 0xe0a050, 0xf2f0ea, 0x8a8a90, 0xc87a3a, 0x3a3a3e][i % 6], m = lam({ color: col });
@@ -210,7 +212,7 @@ const ACH_KEY = 'tokyoWalker_ach';
 const ACH_GOT = new Set((() => { try { return JSON.parse(localStorage.getItem(ACH_KEY) || '[]'); } catch (e) { return []; } })());
 const achPanel = document.getElementById('achPanel');
 function renderAch() {
-  achPanel.innerHTML = `<div class="ttl">🏆 実績 ${ACH_GOT.size} / ${ACH.length}　🐈 ねこ ${CAT_FOUND.size} / ${CAT_DEF.length}</div>` +
+  achPanel.innerHTML = `<div class="ttl">🏆 実績 ${ACH_GOT.size} / ${ACH.length}　🐈 ねこ ${CAT_FOUND.size} / ${CAT_DEF.length}　🍴 グルメ ${GOURMET_FOUND.size} / ${GOURMET.length}</div>` +
     ACH.map(([id, n, d]) => `<span class="a ${ACH_GOT.has(id) ? '' : 'off'}">${ACH_GOT.has(id) ? n : '🔒 ？？？'}<br><small>${d}</small></span>`).join('');
 }
 function achieve(id) {
@@ -277,6 +279,11 @@ function updateFun(dt, t) {
   }
   // 実績の判定 (0.5秒ごと)
   if ((funTick -= dt) > 0) return; funTick = 0.5;
+  // 名物グルメ: お店の前を通ると図鑑に記録
+  for (const g of GOURMET) if (!GOURMET_FOUND.has(g.name) && P.y < 4 && Math.hypot(P.x - g.x, P.z - g.z) < 11) {
+    GOURMET_FOUND.add(g.name); try { localStorage.setItem(GOURMET_KEY, JSON.stringify([...GOURMET_FOUND])); } catch (e) {}
+    toast(`${g.emoji} ${g.area}の名物「${g.food}」のお店を見つけた！ (グルメ図鑑 ${GOURMET_FOUND.size} / ${GOURMET.length})`); renderAch();
+  }
   if (P.y > 330 && Math.hypot(P.x - TOWER[0], P.z - TOWER[1]) < 5) achieve('tower');
   if (P.scooter && P.y > 25 && Math.hypot(P.x - ATAGO.x, P.z - ATAGO.z) < 40) achieve('heikuro');
   if (P.y > 5.5 && inR(JR, P.x, P.z)) achieve('rail');
