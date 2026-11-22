@@ -23,7 +23,7 @@ const NOTES = {
   '烏森神社': '飲み屋街の路地裏にたたずむ神社。カラフルな御朱印で有名',
   '新橋 ガード下': '明治の赤レンガ高架の下に酒場が並ぶ',
   '旧新橋停車場 (0哩標識)': '1872年、日本初の鉄道はここから横浜へ。線路の起点「0哩標識」',
-  '日テレ大時計': '宮崎駿デザインの巨大からくり時計。決まった時刻に動き出す (12・15・18・20時、週末は10時も)',
+  '日テレ大時計': '宮崎駿デザインの巨大からくり時計。このゲームの中でも、12・15・18・20時 (週末は10時も) になると仕掛けが動き出す',
   '汐留 ペデストリアンデッキ': '超高層ビルを2階の高さで結ぶ空中回廊',
   '汐留イタリア街': '石畳とパステルカラーの街並み。東京の中のイタリア',
   '銀座 和光 (時計塔)': '1932年竣工の時計塔。針はゲーム内の時刻を指している',
@@ -133,9 +133,9 @@ const PARASOLS = new THREE.Group(); scene.add(PARASOLS);
 Object.assign(NOTES, LM_NOTES);
 // ---- 役立ち情報 (実際に行くときに役立つこと) と 豆知識帳 (K)
 const TIPS = Object.assign({
-  '東京タワー': 'メインデッキ (150m) は9:00〜23:00 (最終入場22:30)。メインデッキまでは外の階段でも上れる',
+  '東京タワー': 'メインデッキ (150m) までは、外の階段 (約600段) を歩いても上れる。足元のガラス床からは真下の地面が見える',
   '東京タワー 大展望台': 'ガラスの床「スカイウォークウィンドウ」から、真下の街をのぞける',
-  '築地場外市場': 'お店がよく開いているのは9〜13時ごろ。水・日曜・祝日は休みの店が多い。',
+  '築地場外市場': '約460のお店が並ぶ食の町。朝がいちばんにぎやかで、卵焼きや海鮮の食べ歩きが楽しい',
 }, LM_TIPS);
 const HEE_KEY = 'tokyoWalker_hee', NOTE_LAST = {};
 const HEE = new Set((() => { try { return JSON.parse(localStorage.getItem(HEE_KEY) || '[]'); } catch (e) { return []; } })());
@@ -175,6 +175,8 @@ const CAT_DEF = [[-450, -760, 0], [-575, -951, 0], [-1380, 70, 0], [-1278, -628,
 CAT_DEF.push(...LM_CATS);
 const CAT_KEY = 'tokyoWalker_cats';
 const GOURMET_KEY = 'tokyoWalker_gourmet';
+const WILD_KEY = 'tokyoWalker_wild';
+const WILD_FOUND = new Set((() => { try { return JSON.parse(localStorage.getItem(WILD_KEY) || '[]'); } catch (e) { return []; } })());
 const GOURMET_FOUND = new Set((() => { try { return JSON.parse(localStorage.getItem(GOURMET_KEY) || '[]'); } catch (e) { return []; } })());
 const CAT_FOUND = new Set((() => { try { return JSON.parse(localStorage.getItem(CAT_KEY) || '[]'); } catch (e) { return []; } })());
 const CATS = CAT_DEF.map(([x, z, y], i) => {
@@ -212,7 +214,8 @@ const ACH_KEY = 'tokyoWalker_ach';
 const ACH_GOT = new Set((() => { try { return JSON.parse(localStorage.getItem(ACH_KEY) || '[]'); } catch (e) { return []; } })());
 const achPanel = document.getElementById('achPanel');
 function renderAch() {
-  achPanel.innerHTML = `<div class="ttl">🏆 実績 ${ACH_GOT.size} / ${ACH.length}　🐈 ねこ ${CAT_FOUND.size} / ${CAT_DEF.length}　🍴 グルメ ${GOURMET_FOUND.size} / ${GOURMET.length}</div>` +
+  achPanel.innerHTML = `<div class="ttl">🏆 実績 ${ACH_GOT.size} / ${ACH.length}　🐈 ねこ ${CAT_FOUND.size} / ${CAT_DEF.length}　🍴 グルメ ${GOURMET_FOUND.size} / ${GOURMET.length}　🐾 いきもの ${WILD_FOUND.size} / ${WILD_SP.length}</div>` +
+    `<div class="wild">${WILD_SP.map(sp => WILD_FOUND.has(sp.id) ? `<span title="${sp.fact}">${sp.emoji} ${sp.name}</span>` : '<span class="off">？？？</span>').join('')}</div>` +
     ACH.map(([id, n, d]) => `<span class="a ${ACH_GOT.has(id) ? '' : 'off'}">${ACH_GOT.has(id) ? n : '🔒 ？？？'}<br><small>${d}</small></span>`).join('');
 }
 function achieve(id) {
@@ -283,6 +286,14 @@ function updateFun(dt, t) {
   for (const g of GOURMET) if (!GOURMET_FOUND.has(g.name) && P.y < 4 && Math.hypot(P.x - g.x, P.z - g.z) < 11) {
     GOURMET_FOUND.add(g.name); try { localStorage.setItem(GOURMET_KEY, JSON.stringify([...GOURMET_FOUND])); } catch (e) {}
     toast(`${g.emoji} ${g.area}の名物「${g.food}」のお店を見つけた！ (グルメ図鑑 ${GOURMET_FOUND.size} / ${GOURMET.length})`); renderAch();
+  }
+  // 野生の生きもの: 近くで見ると図鑑に記録して、豆知識を出す
+  for (const sp of WILD_SP) if (!WILD_FOUND.has(sp.id) && WILD_NEAR(sp) < sp.see) {
+    WILD_FOUND.add(sp.id); try { localStorage.setItem(WILD_KEY, JSON.stringify([...WILD_FOUND])); } catch (e) {}
+    const key = '🐾 ' + sp.name; if (!HEE.has(key)) { HEE.add(key); try { localStorage.setItem(HEE_KEY, JSON.stringify([...HEE])); } catch (e) {} }
+    toast(`${sp.emoji} ${sp.name}を見つけた！ (いきもの図鑑 ${WILD_FOUND.size} / ${WILD_SP.length})`); toastTimer = 4;
+    bannerText.textContent = `${sp.emoji} ${sp.name}`; bannerSmall.textContent = '★ いきもの発見 ★'; noteEl.innerHTML = `<div class="hee">💡 ${esc(sp.fact)}</div>`;
+    banner.style.opacity = 1; bannerTimer = 3 + Math.min(7, sp.fact.length / 9); renderAch(); break;
   }
   if (P.y > 330 && Math.hypot(P.x - TOWER[0], P.z - TOWER[1]) < 5) achieve('tower');
   if (P.scooter && P.y > 25 && Math.hypot(P.x - ATAGO.x, P.z - ATAGO.z) < 40) achieve('heikuro');
