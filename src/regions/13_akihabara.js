@@ -69,7 +69,7 @@ REGION({
       const K = [36, -2965, 120, -2878];
       LM_ZONES.push(rectPoly(...K)); fr(...K, '#b8ae98');
       tiles(32, MZ - 4, 60, MZ + 4, '#cfc6b0', '#c0b6a0', 2);
-      myojinTorii(34, MZ, false, 7.5, 7, WALL.BRONZE, r);   // 表参道の銅の鳥居
+      myojinTorii(34, MZ, false, 7.5, 7, WALL.BRONZE, 0.42);   // 表参道の銅の鳥居
       // 隨神門 (朱塗りの二層の門)
       const SHU = lam({ color: 0xc8382a }); if (!WALL.AKB_SHU) WALL.AKB_SHU = SHU;
       for (const dz of [-6, -2.5, 2.5, 6]) pushPrism('AKB_SHU', 'AKB_SHU', rectPoly(59, MZ + dz - 0.5, 60, MZ + dz + 0.5), 0, 6);

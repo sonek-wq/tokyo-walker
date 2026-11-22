@@ -298,7 +298,7 @@ function toggleScooter() {
   P.scooter = !P.scooter; P.svx = P.svz = 0;
   toast(P.scooter ? '🛴 電動スクーターに乗りました (R で降りる)' : '電動スクーターを降りました');
 }
-const GLIDER_MIN = 5;   // ハンググライダーを開ける高さ (足もとの地面・屋上からの高さ)
+const GLIDER_MIN = 2;   // ハンググライダー (パラシュート) を開ける高さ (足もとの地面・屋上からの高さ)。ふつうのジャンプは約1.1m なので平地では開けない
 function toggleGlider() {
   if (!started || P.grounded || P.climbing || P.ride || P.boat) return;   // 空中でのみ開閉できる
   if (!P.glider && P.y - floorAt(P.x, P.z, P.y) < GLIDER_MIN) { toast(`🪂 ここでは低すぎて開けない (足もとから${GLIDER_MIN}m以上の高さが必要)`); toastTimer = 2; return; }   // 平らな地面でジャンプしただけでは開かない

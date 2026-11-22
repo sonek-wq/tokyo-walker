@@ -48,6 +48,11 @@ for (const ln of RAIL_TR) {
       const rq = ringAt(ringNearest(...ys.ent).s), dx = ys.ent[0] - rq.x, dz = ys.ent[1] - rq.z, l = Math.hypot(dx, dz) || 1;
       land = [ys.ent[0] + dx / l * 36, ys.ent[1] + dz / l * 36];
     }
+    if (!opt.land && !ys && isWaterXZ(...land)) {   // 川の上に降りてしまう駅は、反対側か、もう少し外側の陸に乗り場を置く
+      const c = [];
+      for (const o of [-out, out]) for (let d = 7; d <= 48; d += 3) c.push([px - q.tz * o * d, pz + q.tx * o * d]);
+      land = c.find(p => !isWaterXZ(...p)) || land;
+    }
     return { name, s, lat, px, pz, y: q.y, tx: q.tx, tz: q.tz, opt, land };
   }).sort((a, b) => a.s - b.s);
   ln.stops = ln.stations.map(st => st.name);

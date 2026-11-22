@@ -20,7 +20,7 @@ REGION({
     {
       LM_ZONES.push(rectPoly(...K)); fr(...K, '#a8a088');
       tiles(NX - 3, -3930, NX + 3, K[3], '#cfc6b0', '#c0b6a0', 2);
-      myojinTorii(NX, K[3] - 2, true, 6, 6, SHU, r);
+      myojinTorii(NX, K[3] - 2, true, 6, 6, SHU, 0.38);
       // 池と神橋
       PONDS.push([NX - 10, -3868, 8, 5], [NX + 10, -3868, 8, 5]); fe(NX - 10, -3868, 8, 5, '#2f5f58'); fe(NX + 10, -3868, 8, 5, '#2f5f58');
       pushPrism('YN_SHU', 'WOOD', rectPoly(NX - 2.5, -3872, NX + 2.5, -3864), 0, 0.5);

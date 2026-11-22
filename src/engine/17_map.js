@@ -138,7 +138,12 @@ function layoutBig() {
   b.font = `${fs}px DotGothic16, monospace`; b.textAlign = 'right'; b.strokeText(m >= 1000 ? m / 1000 + 'km' : m + 'm', BW - 14, BH - 32); b.fillText(m >= 1000 ? m / 1000 + 'km' : m + 'm', BW - 14, BH - 32);
   bigZoomEl.textContent = '🔍 ' + '■'.repeat(bigZ + 1) + '□'.repeat(BIG_ZOOM.length - 1 - bigZ);
 }
-function toggleBig() { showBig = !showBig; if (showBig) layoutBig(); bigWrap.style.display = showBig ? 'flex' : 'none'; }
+function toggleBig() {   // 開いている間はマウスを解放して、地図の外側をクリックできるようにする
+  showBig = !showBig; if (showBig) layoutBig(); bigWrap.style.display = showBig ? 'flex' : 'none';
+  if (showBig) { try { document.exitPointerLock(); } catch (e) {} } else if (typeof lockPointer === 'function') lockPointer();
+}
+// 地図の外側 (暗いところ) をクリックしても閉じてプレイに戻る
+bigWrap.addEventListener('click', e => { if (showBig && e.target === bigWrap) toggleBig(); });
 function zoomBig(d) {
   const z = Math.max(0, Math.min(BIG_ZOOM.length - 1, bigZ + d)); if (z === bigZ || !showBig) return;
   bigZ = z; layoutBig(); toast(`🗺 地図の拡大 ${bigZ + 1} / ${BIG_ZOOM.length}`); toastTimer = 1.2;

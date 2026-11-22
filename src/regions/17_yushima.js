@@ -12,7 +12,7 @@ REGION({
     {
       LM_ZONES.push(rectPoly(...T)); fr(...T, '#bcb4a2');
       tiles(T[0], TZ - 4, 70, TZ + 4, '#cfc6b0', '#c0b6a0', 2);
-      myojinTorii(36, TZ, false, 6.5, 6, BR, r);   // 銅の鳥居
+      myojinTorii(36, TZ, false, 6.5, 6, BR, 0.4);   // 銅の鳥居
       // 社殿 (総檜の権現造。西を向く)
       pushPrism('TKSTONE', 'TKSTONE', rectPoly(70, TZ - 12, 94, TZ + 12), 0, 0.9);
       pushPrism('WOOD', 'ROOF', rectPoly(72, TZ - 10, 92, TZ + 10), 0.9, 7);
