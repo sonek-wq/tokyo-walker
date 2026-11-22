@@ -67,12 +67,12 @@ REGION({
       solid(T[0], T[1], T[2], T[1] + 0.3, 0.8, 1.8);
       // 茶室 (楽羽亭) と石灯籠
       pushPrism('WOOD', 'ROOF', rectPoly(-2450, -1800, -2432, -1788), 0, 3.4); jRoof('RF2', -2450, -1800, -2432, -1788, 3.4, 2.2, { over: 1 });
-      for (const [x, z] of [[-2610, -1784], [-2540, -1778], [-2468, -1740], [-2690, -1745]]) LANTERNS.push([x, z]);
+      for (const [x, z] of [[-2610, -1784], [-2540, -1778], [-2468, -1740], [-2690, -1745]]) STONE_LANTERNS.push([x, z]);
       for (let k = 0; k < 70; k++) { const x = rr(JP[0] + 4, JP[2] - 4), z = rr(JP[1] + 4, JP[3] - 4); if ([[-2690, -1784, -2606, -1744], [-2608, -1774, -2542, -1742], [-2538, -1786, -2442, -1742], [-2664, -1790, -2630, -1768]].some(q => inR(q, x, z))) continue; (rnd() < 0.55 ? MAPLES : rnd() < 0.5 ? PINES : ROUND).push([x, z, rr(0.9, 1.3)]); }
       LM_PEOPLE.push([[-2700, -1740, -2400, -1740], 6]);
     }
     // ===== 玉藻池 (内藤家の庭園「玉川園」の名残り) と 母と子の森 =====
-    { water(-2355, -1895, 24, 14); POND_LAND.push(['e', -2360, -1893, 5, 4]); for (const [x, z] of [[-2380, -1876], [-2332, -1878]]) LANTERNS.push([x, z]); for (let k = 0; k < 24; k++) { const a = rr(0, 6.28); MAPLES.push([-2355 + Math.cos(a) * rr(30, 40), -1895 + Math.sin(a) * rr(19, 26), rr(0.9, 1.2)]); } }
+    { water(-2355, -1895, 24, 14); POND_LAND.push(['e', -2360, -1893, 5, 4]); for (const [x, z] of [[-2380, -1876], [-2332, -1878]]) STONE_LANTERNS.push([x, z]); for (let k = 0; k < 24; k++) { const a = rr(0, 6.28); MAPLES.push([-2355 + Math.cos(a) * rr(30, 40), -1895 + Math.sin(a) * rr(19, 26), rr(0.9, 1.2)]); } }
     for (let k = 0; k < 120; k++) { const x = rr(-2870, -2725), z = rr(-1880, -1724); if (Math.abs(x + 2817) < 8 && z > -1795) continue; (rnd() < 0.6 ? ROUND : PINES).push([x, z, rr(1, 1.5)]); }
     for (let k = 0; k < 40; k++) { const x = rr(-2440, -2306), z = rr(-1860, -1726); (rnd() < 0.5 ? SAKURA : ROUND).push([x, z, rr(1, 1.4)]); }
     // ===== ドコモタワー (NTTドコモ代々木ビル。時計つきの高層ビル) =====

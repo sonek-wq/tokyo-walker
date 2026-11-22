@@ -34,7 +34,25 @@ scatter(30, -145, 60, -40, 125, 0);
 scatter(14, 30, 0, 110, 50, 0);
 
 const trunkGeo = new THREE.CylinderGeometry(0.25, 0.35, 3, 5).translate(0, 1.5, 0);
+// 宙に浮いた木・水の上の木をなくす: 高さつきの木 (屋上・テラス・築山) はその場所の床の高さにそろえ、
+// 地面の木で水の上にあるもの (池・川・お濠) は植えない
+const floorHere = (x, z, y) => {   // (engine/18_player.js の floorAt と同じ考え方。木や街灯を置く高さを決める)
+  let f = onLand(x, z) ? groundY(x, z) : -1.4;
+  for (const s of query(x - 0.3, z - 0.3, x + 0.3, z + 0.3)) if (s[5] <= y + 0.45 && s[5] > f && inR(s, x, z, 0.3)) f = s[5];
+  return f;
+};
+function settleTrees(list) {
+  const keep = [];
+  for (const t of list) {
+    const [x, z, , h] = t;
+    if (h) { const f = floorHere(x, z, h + 0.5); if (f < -0.5) continue; t[3] = f > 0.05 ? f : 0; }
+    else if (!onLand(x, z) && floorHere(x, z, 0.5) < 0) continue;
+    keep.push(t);
+  }
+  list.length = 0; list.push(...keep);
+}
 function plant(list, crownGeo, colors) {
+  settleTrees(list);
   const dummy = new THREE.Object3D(), trunk = new THREE.InstancedMesh(trunkGeo, lam({ color: 0x5a4430 }), list.length);
   const crown = new THREE.InstancedMesh(crownGeo, lam({ color: 0xffffff }), list.length);
   list.forEach(([x, z, s], i) => {

@@ -3,7 +3,8 @@
    (オフィス街 / 商店街 / 住宅街 / 雑居ビル街 / 神社 / 公園 / 駐車場 …)
    ============================================================ */
 const PINES = [], ROUND = [], MAPLES = [], GINKGO = [], SAKURA = [];   // SAKURA: 桜 (春は花、秋は紅葉)
-const LAMPS2 = [], DECKS = [];
+const LAMPS2 = [], DECKS = [];   // LAMPS2: [x, z, (高さ)] 街灯。デッキの上なら高さを書く
+const STONE_LANTERNS = [];   // [x, z] 庭園の石灯籠 (地面に立つ)
 const SIGNS = [], AWNINGS = [], POLES = [], WIRES = [], VENDS = [], LANTERNS = [], BENCHES = [], PARKED = [], HODO = [];
 const norm3 = (x, y, z) => { const l = Math.hypot(x, y, z); return [x / l, y / l, z / l]; };
 function pushTri(t, a, b, c, n, uvs) { t.pos.push(...a, ...b, ...c); for (let i = 0; i < 3; i++) t.nor.push(...n); t.uv.push(...uvs); }

@@ -25,63 +25,64 @@ REGION({
     pushPrism('CONC', 'ROOF', rectPoly(-140, -16, -112, 24), 165, 172);
     sgn('TOKYO PORTCITY TAKESHIBA', '#1e2430', '#f0f4f8', 26, 2.2, -100.6, 150, 4, Math.PI / 2);
     const TER = [   // [x0, x1, 天井の高さ, 名前, 景]
-      [-62, -36, 9, '竹芝新八景「雨」(スキップテラス)', 'rain'],
-      [-74, -62, 13, '竹芝新八景「菜園」(スキップテラス)', 'veg'],
-      [-86, -74, 17, '竹芝新八景「水田」(スキップテラス)', 'rice'],
-      [-98, -86, 21, '竹芝新八景「蜂」(スキップテラス)', 'bee'],
+      [-62, -36, 6, '竹芝新八景「雨」(スキップテラス)', 'rain'],
+      [-74, -62, 10, '竹芝新八景「菜園」(スキップテラス)', 'veg'],
+      [-86, -74, 14, '竹芝新八景「水田」(スキップテラス)', 'rice'],
+      [-98, -86, 18, '竹芝新八景「蜂」(スキップテラス)', 'bee'],
     ];
     const GLS = C('TK_TERGL', { color: 0x9ab8c8 });
     for (const [x0, x1, y] of TER) {
       pushPrism(GLS, 'GRASSTOP', rectPoly(x0, PC.z0, x1, PC.z1), 0, y);
       pushPrism('CONC', null, rectPoly(x1 - 0.3, PC.z0, x1, PC.z1), y, y + 1.05, { solid: false });   // 手すり (東の縁)
     }
-    solid(-36.3, PC.z0, -36, -2, 9, 10.1); solid(-36.3, 22, -36, PC.z1, 9, 10.1);   // いちばん下の手すり (デッキの入口はあけておく)
-    for (let k = 0; k < TER.length - 1; k++) { const [x0, , y] = TER[k]; stairs([x0, 44, x0 + 6, 50], TER[k + 1][2] - y, 'x-', y); }
-    stairs([-58, PC.z1, -44, PC.z1 + 14], 9, 'z-');   // 地上 (南の広場) から いちばん下のテラスへ
+    solid(-36.3, PC.z0, -36, 44, 6, 7.1); solid(-36.3, 52, -36, PC.z1, 6, 7.1);   // いちばん下の手すり (デッキの入口はあけておく)
+    for (let k = 0; k < TER.length - 1; k++) { const [x0, , y] = TER[k]; stairs([x0, 30, x0 + 6, 36], TER[k + 1][2] - y, 'x-', y); }
+    stairs([-58, PC.z1, -44, PC.z1 + 12], 6, 'z-');   // 地上 (南の広場) から いちばん下のテラスへ
     // テラスの植えこみ (いろいろな在来の木)
     for (const [x0, x1, y] of TER) for (let k = 0; k < 7; k++) pick([ROUND, MAPLES, ROUND]).push([rr(x0 + 2, x1 - 2), rr(PC.z0 + 3, 36), rr(0.55, 0.8), y]);
     for (let k = 0; k < 10; k++) ROUND.push([rr(-148, -100), rr(36, 60), 0.7, 29]);   // 低層部の屋上 (竹芝新八景「空」)
     // 「菜園」: 畑のうね
-    for (let z = PC.z0 + 4; z < 30; z += 3) bake(lam({ color: 0x6a4a30 }), new THREE.BoxGeometry(9, 0.3, 1.4).translate(-68, 13.15, z));
-    for (let k = 0; k < 40; k++) bake(lam({ color: pick([0x4a9a3a, 0x6ab048, 0xd04030]) }), new THREE.ConeGeometry(0.3, 0.6, 4).translate(rr(-72, -64), 13.6, PC.z0 + 4 + Math.floor(rr(0, 9)) * 3));
+    for (let z = PC.z0 + 4; z < 30; z += 3) bake(lam({ color: 0x6a4a30 }), new THREE.BoxGeometry(9, 0.3, 1.4).translate(-68, 10.15, z));
+    for (let k = 0; k < 40; k++) bake(lam({ color: pick([0x4a9a3a, 0x6ab048, 0xd04030]) }), new THREE.ConeGeometry(0.3, 0.6, 4).translate(rr(-72, -64), 10.6, PC.z0 + 4 + Math.floor(rr(0, 9)) * 3));
     // 「水田」: テラスの上の田んぼ (秋は黄金色の稲)
     {
       const PAD = [-85, PC.z0 + 2, -75, 30];
-      bake(lam({ color: 0x4a7a8a }), new THREE.PlaneGeometry(PAD[2] - PAD[0], PAD[3] - PAD[1]).rotateX(-Math.PI / 2).translate((PAD[0] + PAD[2]) / 2, 17.08, (PAD[1] + PAD[3]) / 2));
+      bake(lam({ color: 0x4a7a8a }), new THREE.PlaneGeometry(PAD[2] - PAD[0], PAD[3] - PAD[1]).rotateX(-Math.PI / 2).translate((PAD[0] + PAD[2]) / 2, 14.08, (PAD[1] + PAD[3]) / 2));
       const RICE = new THREE.InstancedMesh(new THREE.ConeGeometry(0.16, 0.8, 4).translate(0, 0.4, 0), lam({ color: 0xd8b848 }), 220), d = new THREE.Object3D(); let n = 0;
-      for (let x = PAD[0] + 0.6; x < PAD[2] - 0.4 && n < 220; x += 0.9) for (let z = PAD[1] + 0.6; z < PAD[3] - 0.4 && n < 220; z += 1.6) { d.position.set(x, 17, z); d.rotation.z = rr(-0.15, 0.15); d.updateMatrix(); RICE.setMatrixAt(n++, d.matrix); }
+      for (let x = PAD[0] + 0.6; x < PAD[2] - 0.4 && n < 220; x += 0.9) for (let z = PAD[1] + 0.6; z < PAD[3] - 0.4 && n < 220; z += 1.6) { d.position.set(x, 14, z); d.rotation.z = rr(-0.15, 0.15); d.updateMatrix(); RICE.setMatrixAt(n++, d.matrix); }
       RICE.count = n; scene.add(RICE);
-      for (const x of [PAD[0], PAD[2]]) bake(lam({ color: 0x8a6a48 }), new THREE.BoxGeometry(0.4, 0.4, PAD[3] - PAD[1]).translate(x, 17.2, (PAD[1] + PAD[3]) / 2));   // あぜ
+      for (const x of [PAD[0], PAD[2]]) bake(lam({ color: 0x8a6a48 }), new THREE.BoxGeometry(0.4, 0.4, PAD[3] - PAD[1]).translate(x, 14.2, (PAD[1] + PAD[3]) / 2));   // あぜ
     }
     // 「蜂」: ミツバチの巣箱と、まわりを飛ぶハチ
     const HIVES = [[-94, -20], [-94, -12], [-90, -20]], BEES = [];
     {
-      for (const [x, z] of HIVES) { bake(lam({ color: 0xe8d8b0 }), new THREE.BoxGeometry(1.4, 1.2, 1.1).translate(x, 21.6, z)); bake(lam({ color: 0x6a8a5a }), new THREE.BoxGeometry(1.6, 0.15, 1.3).translate(x, 22.28, z)); }
-      for (let k = 0; k < 24; k++) { const fl = new THREE.Mesh(new THREE.SphereGeometry(0.45, 5, 4), lam({ color: pick([0xf0d040, 0xe880a0, 0xb070e0, 0xffffff]) })); fl.position.set(rr(-97, -87), 21.3, rr(-4, 34)); fl.scale.y = 0.6; scene.add(fl); }
+      for (const [x, z] of HIVES) { bake(lam({ color: 0xe8d8b0 }), new THREE.BoxGeometry(1.4, 1.2, 1.1).translate(x, 18.6, z)); bake(lam({ color: 0x6a8a5a }), new THREE.BoxGeometry(1.6, 0.15, 1.3).translate(x, 19.28, z)); }
+      for (let k = 0; k < 24; k++) { const fl = new THREE.Mesh(new THREE.SphereGeometry(0.45, 5, 4), lam({ color: pick([0xf0d040, 0xe880a0, 0xb070e0, 0xffffff]) })); fl.position.set(rr(-97, -87), 18.3, rr(-4, 34)); fl.scale.y = 0.6; scene.add(fl); }
       const bm = new THREE.InstancedMesh(new THREE.SphereGeometry(0.09, 4, 3).scale(1, 0.8, 1.5), lam({ color: 0xe8b020, emissive: 0x302000 }), 18); bm.frustumCulled = false; scene.add(bm);
       const d = new THREE.Object3D();
       LM_UPDATERS.push((dt, t) => {
         if (Math.abs(P.x + 92) > 120 || Math.abs(P.z) > 140 || NIGHT > 0.5) { bm.visible = false; return; } bm.visible = true;
-        for (let i = 0; i < 18; i++) { const [hx, hz] = HIVES[i % 3], a = t * (1.6 + (i % 5) * 0.3) + i * 2.1, rad = 1.5 + (i % 4) * 0.9; d.position.set(hx + Math.cos(a) * rad, 22.2 + Math.sin(t * 3 + i) * 0.5, hz + Math.sin(a * 1.3) * rad); d.rotation.y = -a; d.updateMatrix(); bm.setMatrixAt(i, d.matrix); }
+        for (let i = 0; i < 18; i++) { const [hx, hz] = HIVES[i % 3], a = t * (1.6 + (i % 5) * 0.3) + i * 2.1, rad = 1.5 + (i % 4) * 0.9; d.position.set(hx + Math.cos(a) * rad, 19.2 + Math.sin(t * 3 + i) * 0.5, hz + Math.sin(a * 1.3) * rad); d.rotation.y = -a; d.updateMatrix(); bm.setMatrixAt(i, d.matrix); }
         bm.instanceMatrix.needsUpdate = true;
       });
     }
     // 「雨」: 雨水をしみこませる庭 (砂利と石)
-    for (let k = 0; k < 14; k++) bake(lam({ color: pick([0x9a968e, 0x8a867e, 0xb0aca4]) }), new THREE.DodecahedronGeometry(rr(0.4, 0.9), 0).translate(rr(-60, -40), 9.2, rr(-28, 34)));
-    LM_PEOPLE.push([[-60, 40, -38, 40, 9], 5], [[-72, 0, -64, 0, 13], 2], [[-96, 30, -88, 30, 21], 2], [[-150, 100, -40, 100], 12], [[-40, 70, -40, 126], 6]);
+    for (let k = 0; k < 14; k++) bake(lam({ color: pick([0x9a968e, 0x8a867e, 0xb0aca4]) }), new THREE.DodecahedronGeometry(rr(0.4, 0.9), 0).translate(rr(-60, -40), 6.2, rr(-28, 28)));
+    LM_PEOPLE.push([[-58, 20, -38, 20, 6], 5], [[-72, 0, -64, 0, 10], 2], [[-96, 24, -88, 24, 18], 2], [[-150, 100, -40, 100], 12], [[-40, 70, -40, 126], 6]);
 
-    // ===================== 竹芝デッキ (ゆりかもめ竹芝駅 → 海岸通りの上 → 竹芝ふ頭公園) =====================
-    // 駅の西側の歩道橋 (areas/50) はスキップテラスまで。ここでは駅の東側へのばして、ふ頭公園へ階段で降りる
+    // ===================== 竹芝デッキ (スキップテラス → 海岸通りとゆりかもめの高架の下 → 竹芝ふ頭公園) =====================
     {
-      const DY = 9, DZ0 = 8, DZ1 = 16;
-      pushPrism('TKSTONE', 'TKSTONE', rectPoly(25, DZ0, 60, DZ1), DY - 0.8, DY);
-      for (const z of [DZ0, DZ1 - 0.3]) pushPrism(C('TK_RAILGL', { color: 0x9fc4d4, transparent: true, opacity: 0.6 }), null, rectPoly(25, z, 60, z + 0.3), DY, DY + 1.1);
-      for (const x of [34, 52]) { pushPrism('CONC', null, rectPoly(x - 0.7, 11.3, x + 0.7, 12.7), 0, DY - 0.8); }
-      stairs([60, DZ0, 84, DZ1], DY, 'x-');
-      sgn('竹芝デッキ  TAKESHIBA DECK', '#24405a', '#ffffff', 10, 1.1, 42, DY + 2.4, DZ0 - 0.05, Math.PI, 0.8, 192);
-      for (let x = 28; x < 60; x += 8) LANTERNS.push([x, DZ0 + 0.6]);
-      LM_PEOPLE.push([[-50, 12, 58, 12, DY], 10], [[58, 14, -50, 14, DY], 8]);
-      LM_HEIGHT_AREAS.unshift(['竹芝デッキ', (x, z, y) => y > DY - 1 && y < DY + 3 && x > -56 && x < 84 && z > DZ0 - 1 && z < DZ1 + 1]);
+      const DY = 6, DZ0 = 44, DZ1 = 52, X0 = -36, X1 = 62;
+      pushPrism('TKSTONE', 'TKSTONE', rectPoly(X0, DZ0, X1, DZ1), DY - 0.8, DY);
+      for (const z of [DZ0, DZ1 - 0.3]) pushPrism(C('TK_RAILGL', { color: 0x9fc4d4, transparent: true, opacity: 0.6 }), null, rectPoly(X0, z, X1, z + 0.3), DY, DY + 1.1);
+      for (const x of [-22, 30, 52]) pushPrism('CONC', null, rectPoly(x - 0.8, 47.2, x + 0.8, 48.8), 0, DY - 0.8);
+      stairs([X1, DZ0, X1 + 18, DZ1], DY, 'x-');
+      sgn('竹芝デッキ  TAKESHIBA DECK', '#24405a', '#ffffff', 10, 1.1, -14, DY + 2.2, DZ0 - 0.05, Math.PI, 0.8, 192);
+      sgn('竹芝デッキ  TAKESHIBA DECK', '#24405a', '#ffffff', 10, 1.1, 40, DY + 2.2, DZ1 + 0.05, 0, 0.8, 192);
+      for (let x = X0 + 8; x < X1; x += 16) LAMPS2.push([x, DZ1 - 0.9, DY]);
+      LM_PEOPLE.push([[X0 - 20, 48, X1, 48, DY], 10], [[X1, 50, X0 - 20, 50, DY], 8]);
+      LM_HEIGHT_AREAS.unshift(['竹芝デッキ', (x, z, y) => y > DY - 1 && y < DY + 3 && x > X0 - 1 && x < X1 + 18 && z > DZ0 - 1 && z < DZ1 + 1]);
+      LM_LABELS.push(['竹芝デッキ', 12, 48, '🌉', '竹芝デッキ']);
     }
 
     // ===================== 竹芝客船ターミナル (帆のような白い屋根) =====================
@@ -215,7 +216,7 @@ REGION({
       for (let k = 0; k < 10; k++) { const a = rnd() * 6.283, dd = rr(4, 14); (rnd() < 0.5 ? PINES : MAPLES).push([-380 + Math.cos(a) * dd, 290 + Math.sin(a) * dd, rr(0.7, 1), 6.5 * Math.max(0, 1 - (dd - 0.7) / 16)]); }
       // 中島へ渡る石の堤 (中国の西湖の堤をまねたといわれる)
       pushPrism('TKSTONE', 'TKSTONE', rectPoly(-338, 226, -310, 230), 0, 0.4); POND_LAND.push(['r', -338, 226, -310, 230]);
-      LANTERNS.push([-333, 236]);
+      STONE_LANTERNS.push([-336, 228], [-312, 228]);
       LM_HEIGHT_AREAS.unshift(['大山 (旧芝離宮恩賜庭園)', (x, z, y) => y > 3 && Math.hypot(x + 380, z - 290) < 14]);
       LM_LABELS.push(['大山', -380, 290, '⛰', '大山 (旧芝離宮恩賜庭園)']);
     }
@@ -231,7 +232,7 @@ REGION({
       for (const [x0, x1] of [[SX - 0.3, SX], [SX + W, SX + W + 0.3]]) { pushPrism(C('TK_RAILGL', { color: 0x9fc4d4, transparent: true, opacity: 0.6 }), null, rectPoly(x0, -600, x1, -430), DY, DY + 1.1); }
       stairs([SX, -236, SX + W, -220], DY, 'z-');
       stairs([SX, -628, SX + W, -612], DY, 'z+');
-      for (let z = -600; z < -240; z += 14) LANTERNS.push([SX + W - 0.4, z]);
+      for (let z = -600; z < -240; z += 20) LAMPS2.push([SX + W - 0.6, z, DY]);
       LM_PEOPLE.push([[SX + 2, -610, SX + 2, -238, DY], 14], [[SX + 4, -238, SX + 4, -610, DY], 12]);
       LM_HEIGHT_AREAS.unshift(['汐留の歩行者デッキ', (x, z, y) => y > DY - 1 && y < DY + 3 && x > -350 && x < SX + W + 1 && z > -630 && z < -218]);
     }
@@ -240,7 +241,7 @@ REGION({
     for (const [x0, x1, y, name] of TER) LM_HEIGHT_AREAS.unshift([name, (x, z, yy) => yy > y - 1 && yy < y + 3 && x > x0 && x < x1 && z > PC.z0 && z < PC.z1]);
     LM_HEIGHT_AREAS.unshift(['竹芝新八景「空」(低層部の屋上)', (x, z, y) => y > 28 && y < 33 && x > PC.x0 && x < -98 && z > 30 && z < PC.z1]);
     SPOT_AREAS.unshift(['竹芝干潟', 140, -160, 172, -112], ['JR東日本四季劇場 [春][秋]', 76, -150, 116, -82], ['水辺の階段広場 (WATERS takeshiba)', 116, -170, 140, -80]);
-    LM_LABELS.push(['スキップテラス', -70, 14, '🌾', '竹芝新八景「水田」(スキップテラス)'], ['竹芝干潟', 156, -136, '🦀', '竹芝干潟'], ['四季劇場', 96, -116, '🎭', 'JR東日本四季劇場 [春][秋]'], ['竹芝デッキ', 42, 12, '🌉', '竹芝デッキ'], ['汐留デッキ', -303, -420, '🚶', '汐留の歩行者デッキ']);
+    LM_LABELS.push(['スキップテラス', -70, 14, '🌾', '竹芝新八景「水田」(スキップテラス)'], ['竹芝干潟', 156, -136, '🦀', '竹芝干潟'], ['四季劇場', 96, -116, '🎭', 'JR東日本四季劇場 [春][秋]'], ['汐留デッキ', -303, -420, '🚶', '汐留の歩行者デッキ']);
     Object.assign(LM_NOTES, {
       '東京ポートシティ竹芝': '2020年に完成した40階建てのビル。ソフトバンクの本社がある。海へ向かって段々にのぼる緑のテラスが目印',
       '竹芝デッキ': '浜松町駅から竹芝ふ頭までは、全長約500mの歩行者デッキでつながっている。車道を渡らずに海まで歩ける',
@@ -260,7 +261,7 @@ REGION({
     LM_NOTES['ジェットフォイルのりば (竹芝桟橋)'] = 'ジェットフォイルは、水中翼で船体を海面から浮かせて時速約80kmで走る「海を飛ぶ船」。竹芝から伊豆大島までの約120kmを1時間45分で結ぶ。ときどき東京湾へ飛び出していく';
     LM_NOTES['日の出桟橋'] += '。停まっている朱色の船は御座船「安宅丸」。3代将軍・徳川家光がつくらせた巨大な船を、いまの観光船としてよみがえらせたもの';
     LM_ACH.push(['jetfoil', '🚤 海を飛ぶ船', 'ジェットフォイルが海面から浮き上がって走るところを近くで見る', () => JF.foil && Math.hypot(P.x - JF.g.position.x, P.z - JF.g.position.z) < 160],
-      ['tanbo', '🌾 ビルの上の田んぼ', '東京ポートシティ竹芝のスキップテラスの田んぼに立つ', () => P.y > 16 && P.y < 19 && P.x > -86 && P.x < -74 && P.z > PC.z0 && P.z < PC.z1]);
+      ['tanbo', '🌾 ビルの上の田んぼ', '東京ポートシティ竹芝のスキップテラスの田んぼに立つ', () => P.y > 13 && P.y < 16 && P.x > -86 && P.x < -74 && P.z > PC.z0 && P.z < PC.z1]);
     bakeFlush();
   },
 });

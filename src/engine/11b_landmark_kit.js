@@ -51,10 +51,12 @@ function pushPrism(wallKey, topKey, P, y0, y1, opt = {}) {
     if ((b[1] - a[1]) * (d[0] - a[0]) - (b[0] - a[0]) * (d[1] - a[1]) < 0) [b, d] = [d, b];
     pushTri(tt, [a[0], y1, a[1]], [b[0], y1, b[1]], [d[0], y1, d[1]], [0, 1, 0], [a[0] / 16, -a[1] / 16, b[0] / 16, -b[1] / 16, d[0] / 16, -d[1] / 16]);
   }
-  if (opt.bottom) for (let i = 1; i < P.length - 1; i++) {   // 底面 (下から見える橋など)
+  // 底面: 地面から浮いた床・橋・デッキは、下から見ても透けないように底を張る (opt.bottom === false で省略)
+  const bottom = opt.bottom !== undefined ? opt.bottom : (tt && y0 > 0.05 ? true : false);
+  if (bottom) for (let i = 1; i < P.length - 1; i++) {
     let a = P[0], b = P[i], d = P[i + 1];
     if ((b[1] - a[1]) * (d[0] - a[0]) - (b[0] - a[0]) * (d[1] - a[1]) > 0) [b, d] = [d, b];
-    pushTri(bucket(H, opt.bottom === true ? wallKey : opt.bottom), [a[0], y0, a[1]], [b[0], y0, b[1]], [d[0], y0, d[1]], [0, -1, 0], [0, 0, 1, 0, 1, 1]);
+    pushTri(bucket(H, bottom === true ? wallKey : bottom), [a[0], y0, a[1]], [b[0], y0, b[1]], [d[0], y0, d[1]], [0, -1, 0], [0, 0, 1, 0, 1, 1]);
   }
   if (opt.solid !== false) polySolid(P, y0, y1);
   if (opt.fp) polyFr(P, opt.fp);

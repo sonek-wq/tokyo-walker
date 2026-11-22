@@ -47,7 +47,7 @@ REGION({
       // 庭園 (池と茶室、石灯籠)
       PONDS.push([-2262, -900, 16, 10]); fe(-2262, -900, 18, 12, '#a89c7c'); fe(-2262, -900, 16, 10, '#355e58');
       pushPrism('WOOD', null, rectPoly(-2290, -884, -2280, -876), 0, 3); oHip(AXIS, C('MU_KAYA', { color: 0x8a7a5a }), -2291, -885, -2279, -875, 3, 2.2, { over: 0.6 });
-      for (const [x, z] of [[-2280, -912], [-2246, -892], [-2276, -890]]) LANTERNS.push([x, z]);
+      for (const [x, z] of [[-2280, -912], [-2246, -892], [-2276, -890]]) STONE_LANTERNS.push([x, z]);
       for (let k = 0; k < 70; k++) { const x = rr(-2296, -2234), z = rr(-966, -872); if (Math.hypot((x + 2262) / 18, (z + 900) / 12) < 1.1 || inR([-2292, -886, -2278, -874], x, z)) continue; pick([MAPLES, ROUND, PINES, ROUND]).push([x, z, rr(1, 1.4)]); }
       sideSign(AXIS, -2352.9, -948, -1, 'NEZU MUSEUM', '#2a2a2a', '#e8e0d0', 6, 0.9, 4);
       LM_PEOPLE.push([[-2348, -968, -2348, -930], 4], [[-2290, -930, -2240, -930], 3]);
@@ -63,7 +63,7 @@ REGION({
       PONDS.push([-1960, 1010, 26, 18]); fe(-1960, 1010, 29, 21, '#a89c7c'); fe(-1960, 1010, 26, 18, '#355e58');
       pushPrism('WOOD', 'WOOD', rectPoly(-1962, 990, -1958, 1030), 0.2, 0.6, { solid: false }); POND_LAND.push(['r', -1962, 990, -1958, 1030]);
       pushPrism('WOOD', null, rectPoly(-1996, 1036, -1984, 1048), 0, 3.2); oHip(AXIS, C('MU_KAYA2', { color: 0x8a7a5a }), -1997, 1035, -1983, 1049, 3.2, 2.4, { over: 0.6 });   // 茶室
-      for (const [x, z] of [[-1990, 1000], [-1930, 1030], [-1970, 1034]]) LANTERNS.push([x, z]);
+      for (const [x, z] of [[-1990, 1000], [-1930, 1030], [-1970, 1034]]) STONE_LANTERNS.push([x, z]);
       for (let k = 0; k < 90; k++) { const x = rr(-2040, -1916), z = rr(976, 1060); if (Math.hypot((x + 1960) / 30, (z - 1010) / 22) < 1.05 || inR([-1998, 1034, -1982, 1050], x, z)) continue; pick([MAPLES, PINES, ROUND, SAKURA]).push([x, z, rr(1, 1.4)]); }
       LM_PEOPLE.push([[-2040, 978, -1916, 978], 6], [[-1920, 1058, -2036, 1058], 4]);
       SPOT_AREAS.unshift(['八芳園の庭園', -1990, 986, -1930, 1034], ['八芳園', ...HP]);

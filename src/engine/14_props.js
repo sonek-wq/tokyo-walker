@@ -34,11 +34,30 @@
   const vm = lam({ map: vt, emissive: 0xffffff, emissiveMap: vt, emissiveIntensity: 0 }); GLOW.push([vm, 0.8]);
   const vg = new THREE.BoxGeometry(1, 1.85, 0.75).translate(0, 0.925, 0);
   inst(vg, vm, VENDS, (it, i, m) => { d.position.set(it[0], 0, it[1]); d.rotation.y = it[2]; m.setColorAt(i, new THREE.Color(pick([0xffffff, 0xff8080, 0x80a0ff]))); solid(it[0] - 0.6, it[1] - 0.6, it[0] + 0.6, it[1] + 0.6, 0, 1.85); });
-  // 提灯
+  // 提灯 (軒先・電線につるす)。壁にも電線にもつながっていないものは、竿 (細い柱) で立てる
   inst(new THREE.BoxGeometry(0.42, 0.6, 0.42), glow(lam({ color: 0xe04030 }), 0xff5030, 1.2), LANTERNS, it => d.position.set(it[0], 4.2, it[1]));
+  {
+    const wired = new Set();
+    for (let i = 0; i < LANTERNS.length - 1; i++) { const a = LANTERNS[i], b = LANTERNS[i + 1]; if (Math.abs(a[1] - b[1]) < 0.1 && Math.abs(a[0] - b[0]) < 6) { wired.add(i); wired.add(i + 1); } }
+    const onWall = ([x, z]) => [...query(x - 1.4, z - 1.4, x + 1.4, z + 1.4)].some(s => s[4] <= 4.3 && s[5] >= 4.4 && x > s[0] - 1.4 && x < s[2] + 1.4 && z > s[1] - 1.4 && z < s[3] + 1.4 && (s[2] - s[0] > 1.5 || s[3] - s[1] > 1.5));
+    const free = LANTERNS.filter((p, i) => !wired.has(i) && !onWall(p));
+    inst(new THREE.CylinderGeometry(0.05, 0.07, 4.5, 4).translate(0, 2.25, 0), lam({ color: 0x3a2a20 }), free, it => d.position.set(it[0] + 0.25, 0, it[1]));
+    inst(new THREE.BoxGeometry(0.3, 0.06, 0.06).translate(0.12, 4.52, 0), lam({ color: 0x3a2a20 }), free, it => d.position.set(it[0], 0, it[1]));
+  }
+  // 庭園の石灯籠 (台座・竿・火袋・笠。夜は火袋がともる)
+  {
+    const ST = lam({ color: 0x8e8a80 }), FIRE = glow(lam({ color: 0xc8b898 }), 0xffd890, 0.9);
+    inst(new THREE.CylinderGeometry(0.55, 0.65, 0.3, 6).translate(0, 0.15, 0), ST, STONE_LANTERNS, it => d.position.set(it[0], 0, it[1]));
+    inst(new THREE.CylinderGeometry(0.16, 0.2, 1.1, 6).translate(0, 0.85, 0), ST, STONE_LANTERNS, it => d.position.set(it[0], 0, it[1]));
+    inst(new THREE.BoxGeometry(0.62, 0.12, 0.62).translate(0, 1.45, 0), ST, STONE_LANTERNS, it => d.position.set(it[0], 0, it[1]));
+    inst(new THREE.BoxGeometry(0.46, 0.45, 0.46).translate(0, 1.74, 0), FIRE, STONE_LANTERNS, it => d.position.set(it[0], 0, it[1]));
+    inst(new THREE.ConeGeometry(0.62, 0.42, 6).translate(0, 2.17, 0), ST, STONE_LANTERNS, it => d.position.set(it[0], 0, it[1]));
+    for (const [x, z] of STONE_LANTERNS) solid(x - 0.4, z - 0.4, x + 0.4, z + 0.4, 0, 2.3, true);
+  }
   // イタリア街・銀座の街灯
-  inst(new THREE.CylinderGeometry(0.09, 0.12, 4.2, 5).translate(0, 2.1, 0), lam({ color: 0x1c1c20 }), LAMPS2, it => d.position.set(it[0], 0, it[1]));
-  inst(new THREE.BoxGeometry(0.5, 0.6, 0.5).translate(0, 4.4, 0), glow(lam({ color: 0xfff0c0 }), 0xffe0a0, 1.5), LAMPS2, it => d.position.set(it[0], 0, it[1]));
+  { const keep = LAMPS2.filter(t => t[2] ? Math.abs(floorHere(t[0], t[1], t[2] + 0.5) - t[2]) < 0.7 : onLand(t[0], t[1])); LAMPS2.length = 0; LAMPS2.push(...keep); }   // 水の上の街灯は置かない
+  inst(new THREE.CylinderGeometry(0.09, 0.12, 4.2, 5).translate(0, 2.1, 0), lam({ color: 0x1c1c20 }), LAMPS2, it => d.position.set(it[0], it[2] || 0, it[1]));
+  inst(new THREE.BoxGeometry(0.5, 0.6, 0.5).translate(0, 4.4, 0), glow(lam({ color: 0xfff0c0 }), 0xffe0a0, 1.5), LAMPS2, it => d.position.set(it[0], it[2] || 0, it[1]));
   // ベンチ
   inst(new THREE.BoxGeometry(1.8, 0.45, 0.55).translate(0, 0.45, 0), lam({ color: 0x8a6a48 }), BENCHES, it => { d.position.set(it[0], 0, it[1]); d.rotation.y = it[2]; });
   // 信号機 (交差点の四隅)

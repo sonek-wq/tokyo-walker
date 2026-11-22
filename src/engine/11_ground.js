@@ -32,37 +32,48 @@ for (let i = Math.floor(MINX / CH); i < Math.ceil(MAXX / CH); i++) for (let j = 
   t.meshes = rects.map(r => groundMesh(...r, t.mat, (x, z) => [(x - t.x0) / CH, (z - t.z0) / CH], wet ? 5 : 10, wet ? (x, z) => inRiver(x, z) ? -3.2 : groundY(x, z) : null)); // DataTexture は上下反転しないので v = z方向そのまま
   GTILES.push(t);
 }
-function loadTile(t) {
-  const c = document.createElement('canvas'); c.width = c.height = TILE_PX;
-  const g = c.getContext('2d');
-  g.setTransform(TPX, 0, 0, TPX, -t.x0 * TPX, -t.z0 * TPX);
+// 遠くのタイルは小さい解像度 (LOW_PX) で先に塗っておき、近づいたら細かく塗り直す (高い所や速い移動で、無地の地面が見えないように)
+const LOW_PX = 128;
+function loadTile(t, px = TILE_PX) {
+  const c = document.createElement('canvas'); c.width = c.height = px;
+  const g = c.getContext('2d'), k = px / CH;
+  g.setTransform(k, 0, 0, k, -t.x0 * k, -t.z0 * k);
   g.fillStyle = '#2b5b78'; g.fillRect(t.x0, t.z0, CH, CH);
   const T = [t.x0, t.z0, t.x0 + CH, t.z0 + CH];
-  paintWorld(g, T);
+  paintWorld(g, T, px < TILE_PX);
   g.setTransform(1, 0, 0, 1, 0, 0);
-  const id = g.getImageData(0, 0, TILE_PX, TILE_PX), d = id.data;
+  const id = g.getImageData(0, 0, px, px), d = id.data;
   for (let k = 0; k < d.length; k += 4) { const n = (Math.random() - 0.5) * 16; d[k] += n; d[k + 1] += n; d[k + 2] += n; }
   // キャンバスを直接転送すると、描画直後はGPUに中身が正しく渡らず地面が無地になることがあるため、
   // 画素データ (ImageData) から DataTexture を作って確実に転送する
-  const tx = new THREE.DataTexture(d, TILE_PX, TILE_PX, THREE.RGBAFormat);
+  if (t.tex) { t.tex.dispose(); TEXTURES.splice(TEXTURES.indexOf(t.tex), 1); }
+  const tx = new THREE.DataTexture(d, px, px, THREE.RGBAFormat);
   tx.generateMipmaps = true; tx.wrapS = tx.wrapT = THREE.ClampToEdgeWrapping; tx.colorSpace = THREE.SRGBColorSpace;
   filterTex(tx); tx.needsUpdate = true; TEXTURES.push(tx);
-  t.tex = tx;
+  t.tex = tx; t.res = px;
   t.mat.map = t.tex;
 }
 function unloadTile(t) {
   t.mat.map = GROUND_PLACEHOLDER;
-  t.tex.dispose(); TEXTURES.splice(TEXTURES.indexOf(t.tex), 1); t.tex = null;
+  t.tex.dispose(); TEXTURES.splice(TEXTURES.indexOf(t.tex), 1); t.tex = null; t.res = 0;
 }
 function streamTiles(force, Rf = 380, keep = false) {
   const px = camera.position.x, pz = camera.position.z, R = force ? Rf : Math.min(1400, 480 + camera.position.y * 2);
-  let todo = null, best = Infinity;
+  let todo = null, best = Infinity; const low = [];
   for (const t of GTILES) {
-    const d = Math.hypot(t.cx - px, t.cz - pz);
-    if (t.tex && d > R + 300) { if (!keep) unloadTile(t); }
-    else if (!t.tex && d < R) { if (force) loadTile(t); else if (d < best) { best = d; todo = t; } }
+    const d = Math.hypot(t.cx - px, t.cz - pz), res = t.res || 0;
+    if (t.tex && d > R + 300) { if (!keep) unloadTile(t); continue; }
+    if (d >= R) continue;
+    const want = d < 700 ? TILE_PX : LOW_PX;
+    if (res >= want) continue;
+    if (force) { loadTile(t, want); continue; }
+    if (want === TILE_PX && res > 0) { if (d < best) { best = d; todo = t; } }   // 粗いタイルを細かく塗り直す
+    else if (!res) low.push([d, t]);                                              // まだ何も塗っていないタイル
   }
-  if (todo) loadTile(todo); // 1フレームに1枚だけ生成してカクつきを防ぐ
+  // まだ無地のタイルは、近いものから粗く (軽く) 1フレーム3枚まで。近くの粗いタイルの塗り直しは1フレーム1枚 (カクつきを防ぐ)
+  low.sort((a, b) => a[0] - b[0]);
+  for (const [, t] of low.slice(0, 3)) loadTile(t, LOW_PX);   // まず粗く塗って、無地の地面をなくす
+  if (todo) loadTile(todo);
 }
 
 const seawall = lam({ color: 0x8c877c });

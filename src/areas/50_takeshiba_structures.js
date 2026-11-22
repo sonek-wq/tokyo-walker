@@ -47,10 +47,8 @@ function pathAt(s) {
   box(7, 1.2, 60, concrete, 9, 10.2, 0); box(7, 1.2, 60, concrete, 21, 10.2, 0);
   box(22, 0.6, 64, lam({ color: 0xdfe4e8 }), 15, 16.3, 0);
   for (const z of [-28, -10, 10, 28]) for (const x of [6, 24]) box(0.4, 5.5, 0.4, white, x, 13.5, z);
-  box(63, 1, 8, concrete, -23.5, 8.5, 12);
-  for (const z of [8.2, 15.8]) box(63, 1.2, 0.2, lam({ color: 0x9fc4d4 }), -23.5, 9.6, z);
-  for (const x of [-45, -20]) { box(1.5, 8, 1.5, concrete, x, 4, 12); solid(x - 0.75, 11.25, x + 0.75, 12.75, 0, 8); }
-  solid(-55, 8, 8, 16, 8, 9); solid(5, -30, 25, 30, 3, 9);
+  // (駅から西へのびていた行き止まりの歩道橋は、regions/02_takeshiba_harbor.js の竹芝デッキに置きかえた)
+  solid(5, -30, 25, 30, 3, 9);
   solid(5.5, -30, 12.5, 30, 9.6, 10.8); solid(17.5, -30, 24.5, 30, 9.6, 10.8); solid(4, -32, 26, 32, 16, 16.6);
 }
 const yfront = tex(8, 8, x => { x.fillStyle = '#f0f0ec'; x.fillRect(0, 0, 8, 8); x.fillStyle = '#22303c'; x.fillRect(1, 1, 6, 3); x.fillStyle = '#1f6fc0'; x.fillRect(0, 5, 8, 2); });
