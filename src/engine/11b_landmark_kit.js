@@ -16,7 +16,7 @@ const inPondLand = (x, z) => POND_LAND.some(q => q[0] === 'e' ? inE(q.slice(1), 
 const LM_CATS = [];       // ねこ [x, z, y]
 const LM_STREET = [];     // 季節で色が変わる街路樹 [x, z, s]
 const LM_LABELS = [];     // 全体マップのラベル (MAP_LABELS と同じ形)
-const LM_PEOPLE = [];     // 歩く人 [[x0, z0, x1, z1], 人数, (いるときだけ true を返す関数)]
+const LM_PEOPLE = [];     // 歩く人 [[x0, z0, x1, z1, (高さ)], 人数, (いるときだけ true を返す関数)]
 const ROAD_STOPS = [];    // 信号で車が止まる交差点 { rect, red: ns => 赤信号か }
 
 const zbb = P => P.bb || (P.bb = polyBB(P));   // 範囲の外接長方形 (一度だけ計算)

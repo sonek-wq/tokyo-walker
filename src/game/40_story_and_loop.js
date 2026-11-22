@@ -357,7 +357,7 @@ function update(dt, t) {
   PEOPLE.forEach((pp, i) => {
     pp.t += pp.d * pp.v * dt; if (pp.t > 1) { pp.t = 1; pp.d = -1; } if (pp.t < 0) { pp.t = 0; pp.d = 1; }
     const [x0, z0, x1, z1] = pp.p;
-    dmy.position.set(x0 + (x1 - x0) * pp.t, Math.abs(Math.sin(t * 7 + pp.ph)) * 0.06, z0 + (z1 - z0) * pp.t);
+    dmy.position.set(x0 + (x1 - x0) * pp.t, (pp.p[4] || 0) + Math.abs(Math.sin(t * 7 + pp.ph)) * 0.06, z0 + (z1 - z0) * pp.t);   // p[4]: デッキの上などを歩く人の高さ
     dmy.rotation.set(0, Math.atan2((x1 - x0) * pp.d, (z1 - z0) * pp.d), 0); dmy.scale.setScalar((pp.hk && !hokoActive()) || (pp.hf && !pp.hf()) ? 0 : 1); dmy.updateMatrix();
     for (const m of pplParts) m.setMatrixAt(i, dmy.matrix);
   });

@@ -38,5 +38,6 @@ engine/20_time.js
 engine/21_area_display.js
 engine/22_avatar_camera.js
 engine/23_vehicles.js
+engine/24_fast_travel.js
 game/30_fun.js
 game/40_story_and_loop.js

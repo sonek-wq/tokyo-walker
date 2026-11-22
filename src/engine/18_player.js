@@ -62,7 +62,7 @@ overlay.addEventListener('click', () => {   // ポーズからの再開
 document.getElementById('startBtns').addEventListener('click', e => e.stopPropagation());
 document.getElementById('btnNew').onclick = () => { overlay.style.display = 'none'; newGame(); };
 document.getElementById('btnCont').onclick = () => { overlay.style.display = 'none'; lockPointer(); continueGame(); };
-document.addEventListener('pointerlockchange', () => { if (!document.pointerLockElement && started && !cine && !albumOpen && !noteOpen && !showBig) showPause(); });
+document.addEventListener('pointerlockchange', () => { if (!document.pointerLockElement && started && !cine && !albumOpen && !noteOpen && !showBig && !ftOpen) showPause(); });
 canvas.addEventListener('mousedown', () => dragging = true);
 addEventListener('mouseup', () => dragging = false);
 addEventListener('mousemove', e => {

@@ -11,6 +11,7 @@ REGION({
     const KA = [-1092, -2888], KB = [-1330, -3010];
     const KF = akRoad(KA, KB, 10, '神楽坂通り', { trees: false }), KL = Math.hypot(KB[0] - KA[0], KB[1] - KA[1]);
     const BZ = 128;   // 毘沙門天 (善國寺) の位置
+    LM_ZONES.push(KF.rect(0, -25, KL, 25));   // 通りの両側の店 (自動の街を重ねない)
     let ALLEY = null;
     {
       const SW = ['和菓子', '甘味処', 'そば', '天ぷら', 'うなぎ', 'ビストロ', 'ワイン', '肉まん', 'パン', '雑貨', '手ぬぐい', '喫茶', '和装小物', '料亭', 'おでん', 'ジェラート'];
