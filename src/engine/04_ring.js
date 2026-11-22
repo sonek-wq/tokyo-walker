@@ -140,10 +140,10 @@ function carveRect(list, h) {
 const LM_BRIDGES = STN.flatMap(st => (st.land && st.land.bridges) || []), LM_WALK = STN.flatMap(st => (st.land && st.land.walk) || []);
 WALK.push(...PROC_LAND, ...RIVER_BR, ...LM_BRIDGES, ...LM_WALK, ...GEO_BRIDGES.flat); BRIDGES.push(...RIVER_BR, ...LM_BRIDGES, ...GEO_BRIDGES.flat);
 
-const LANDMARKS = [ // x0,z0,x1,z1,h,material
-  [-145, -35, -55, 55, 18, 'glass'], [-130, -20, -72, 38, 200, 'glass'], [-205, 65, -172, 100, 76, 'resi'],
+const LANDMARKS = [ // x0,z0,x1,z1,h,material (material が null のものは regions/02_takeshiba_harbor.js で作り込む。ここでは場所の予約だけ)
+  [-145, -35, -55, 55, 18, null], [-130, -20, -72, 38, 200, null], [-205, 65, -172, 100, 76, 'resi'],
   [-398, 0, -338, 62, 235, 'glassDark'],
-  [30, -150, 70, -110, 110, 'office'], [76, -150, 116, -82, 24, 'theatre'], [60, -45, 116, -10, 10, 'terminal'],
+  [30, -150, 70, -110, 110, null], [76, -150, 116, -82, 24, null], [60, -45, 116, -10, 10, null],
   [48, 60, 116, 124, 85, 'hotel'], [46, 160, 112, 214, 100, 'glassDark'], [46, 232, 112, 300, 85, 'office'],
   [-415, -460, -365, -415, 210, 'glassDark'], [-355, -440, -310, -395, 170, 'glass'], [-415, -370, -365, -320, 190, 'office2'], [-355, -300, -310, -250, 140, 'glassDark'],
   [-1330, 165, -1180, 225, 40, 'hotel'],               // 東京プリンスホテル

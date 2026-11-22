@@ -72,7 +72,7 @@ function fillBlocks(blocks, reserved, opt = {}) {
     }
   }
 }
-for (const [x0, z0, x1, z1, h, k] of LANDMARKS) addBuilding(x0, z0, x1, z1, h, k);
+for (const [x0, z0, x1, z1, h, k] of LANDMARKS) if (k) addBuilding(x0, z0, x1, z1, h, k);
 const RESERVED = [...LANDMARKS.map(r => [r[0] - 3, r[1] - 3, r[2] + 3, r[3] + 3]),
   [-150, -48, -36, 128], [-404, 148, -262, 320], [-880, -92, -840, -28]];
 // 竹芝周辺の街区は、個性のある街区関数でつくり直した (下の「竹芝周辺の街区」)
