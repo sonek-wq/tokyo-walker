@@ -4,7 +4,9 @@
 
 ## 遊び方
 
-`dist/tokyo_walker.html` をブラウザで開くだけです (1ファイルで完結。Three.js は CDN から読み込みます)。
+**ブラウザで遊ぶ: https://sonek-wq.github.io/tokyo-walker/** (GitHub Pages)
+
+手元では `python3 build.py` で作った `dist/tokyo_walker.html` をブラウザで開くだけです (1ファイルで完結。Three.js は CDN から読み込みます)。GitHub Pages 用には同じものを `docs/index.html` に置いています (ソースを変えたら `python3 build.py` のあと `cp dist/tokyo_walker.html docs/index.html`)。
 
 名所に入ると、名前の下に短い豆知識 (💡 へぇ！と思える話) が出ます (🧭 役立ち情報 `LM_TIPS` は表示をやめた。データは残っていて、`game/30_fun.js` の `SHOW_TIPS` で戻せる)。
 一度読んだものは **K の豆知識帳** にたまっていきます (同じ場所の豆知識は90秒のあいだ出さない)。
