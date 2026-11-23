@@ -6,9 +6,9 @@ const PIXEL_LEVELS = [
   { name: '強 (240p・PS1)', h: 240 }, { name: '最強 (160p)', h: 160 },
 ];
 const VIEWS = [{ name: '一人称', dist: 0 }, { name: '三人称・近い', dist: 4 }, { name: '三人称・中', dist: 8 }, { name: '三人称・遠い', dist: 15 }];
-const SET = { jitter: true, pixel: 1, view: 2 };
+const SET = { jitter: true, pixel: 3, view: 2, v: 2 };
 const SAVE_KEY = 'tokyoWalker_v1';
-try { Object.assign(SET, JSON.parse(localStorage.getItem(SAVE_KEY) || '{}')); } catch (e) {}
+try { const sv = JSON.parse(localStorage.getItem(SAVE_KEY) || '{}'); if (sv.v !== 2) { delete sv.pixel; sv.v = 2; } Object.assign(SET, sv); } catch (e) {}   // 古い保存データはドット絵効果だけ新しい既定 (中) に戻す
 SET.pixel = Math.max(0, Math.min(PIXEL_LEVELS.length - 1, SET.pixel | 0));
 SET.view = Math.max(0, Math.min(VIEWS.length - 1, SET.view | 0));
 function resize() {
