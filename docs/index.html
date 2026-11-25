@@ -369,7 +369,7 @@ const STATION_DEFS = [];
 const STATION = d => STATION_DEFS.push(d);
 /* JY01 東京駅 (丸の内)
    赤レンガの丸の内駅舎 (南北のドーム) / 丸の内駅前広場 / 行幸通り / 丸ビル・新丸ビル・KITTE・オアゾ /
-   丸の内仲通り / 八重洲口のグランルーフとグラントウキョウ / 皇居外苑・二重橋・伏見櫓・楠木正成像・和田倉噴水公園
+   丸の内仲通り / 三菱一号館美術館と一号館広場 (KITTE の南の街区) / 八重洲口のグランルーフとグラントウキョウ / 皇居外苑・二重橋・伏見櫓・楠木正成像・和田倉噴水公園
    丸の内側は線路の向き (北北東) に合わせた座標系 F で作る: u = 北 (神田方面), v = 西 (皇居側) */
 function tkyFrame(st) {
   const A = ringAt(st.s - 170), B = ringAt(st.s + 170), p = ringAt(st.s);
@@ -482,13 +482,57 @@ STATION({
     LM_PEOPLE.push([[...F.w(-200, 212), ...F.w(320, 212)], 12]);
     for (const [a, b] of [[-212, -202], [-128, -118], [118, 128], [214, 224]]) oRoad(F, a, 124, b, 300, false);
     // 残りの街区: 低層部31m + タワー (皇居側にはみ出す街区は奥行きを詰める)
-    const blocks = [[-320, 128, -212, 204], [224, 128, 320, 204], [-320, 220, -212, 296], [-202, 220, -128, 296], [-118, 220, -31, 296], [31, 220, 118, 296], [128, 220, 214, 296], [224, 220, 320, 296]];
+    const blocks = [[224, 128, 320, 204], [-320, 220, -212, 296], [-202, 220, -128, 296], [-118, 220, -31, 296], [31, 220, 118, 296], [128, 220, 214, 296], [224, 220, 320, 296]];
     for (let [u0, v0, u1, v1] of blocks) {
       while (v1 - v0 > 30 && !okX(u0, v0, u1, v1)) v1 -= 6;
       if (!okX(u0, v0, u1, v1)) continue;
       const q = rnd(), key = pick(['glassDark', mGlass, 'office2', 'glass']);
       if (q < 0.65) tower(u0 + 2, v0 + 2, u1 - 2, v1 - 2, rr(110, 200), key);
       else oBox(F, mStone, u0 + 2, v0 + 2, u1 - 2, v1 - 2, 0, 31);
+    }
+
+    // ===== 三菱一号館美術館と一号館広場 (KITTE の南の街区。仲通りに面する) =====
+    // 実際の地図より丸の内が縮んでいるので、KITTE と東京国際フォーラムのあいだの街区にまとめて置く
+    {
+      const IB = LM_MAT('tkIchigo', (x, y) => {   // 赤レンガに白い石の窓まわり (クイーン・アン様式)
+        x.fillStyle = '#b05a40'; x.fillRect(0, 0, 32, 32);
+        x.fillStyle = 'rgba(70,24,12,.3)'; for (let j = 0; j < 32; j += 2) x.fillRect(0, j, 32, 1);
+        x.fillStyle = '#ece4d2'; x.fillRect(0, 31, 32, 1); x.fillRect(0, 0, 32, 1);
+        y.fillStyle = '#000'; y.fillRect(0, 0, 32, 32);
+        for (const i of [4, 20]) for (const [j0, j1] of [[4, 13], [17, 27]]) {
+          x.fillStyle = '#efe8d8'; x.fillRect(i - 1, j0 - 2, 10, j1 - j0 + 3);
+          x.fillStyle = '#2c3640'; x.fillRect(i, j0, 8, j1 - j0); x.fillStyle = '#efe8d8'; x.fillRect(i + 3.5, j0, 1, j1 - j0);
+          y.fillStyle = rnd() < 0.6 ? '#ffd890' : '#000'; y.fillRect(i, j0, 8, j1 - j0);
+        }
+      });
+      const H = 14.5;
+      // 北の棟 (馬場先通り側) と、仲通り側の棟でL字形
+      oBox(F, IB, -242, 138, -214, 186, 0, H); oHip(F, 'SLATE', -243, 137, -213, 187, H, 6.5, { over: 0.8 });
+      oBox(F, IB, -288, 166, -242, 186, 0, H); oHip(F, 'SLATE', -289, 165, -241, 187, H, 6, { over: 0.8 });
+      // 屋根から突き出す破風 (切妻) と煙突
+      for (const [u, v] of [[-228, 188], [-228, 136], [-262, 188], [-280, 188], [-244, 162]]) {
+        const out = v > 180 ? 1 : v < 140 ? -1 : 0, du = out ? 4 : 5, dv = out ? 4 : 4;
+        oBox(F, IB, u - du, v - dv, u + du, v + dv, 0, H + 2.5); oHip(F, 'SLATE', u - du - 0.3, v - dv - 0.3, u + du + 0.3, v + dv + 0.3, H + 2.5, 4, { over: 0.4 });
+      }
+      for (const [u, v] of [[-236, 150], [-222, 174], [-254, 176], [-276, 176]]) oBox(F, IB, u - 1, v - 1, u + 1, v + 1, H + 3, H + 9);
+      oBox(F, 'TKSTONE', -250, 166.5, -244, 168, 0, 4);   // 広場側の入口
+      // 一号館広場 (英国風の庭。約40種類のバラ)
+      oFr(F, -288, 132, -244, 164, GRASS); oTiles(F, -288, 146, -244, 152, '#d0c6b0', '#bfb59e', 1.5); oTiles(F, -268, 132, -262, 164, '#d0c6b0', '#bfb59e', 1.5);
+      const ROSES = [0xd8304a, 0xf07090, 0xf4e0a0, 0xffffff, 0xe85a2a, 0xc8285a];
+      for (let u = -286; u < -246; u += 2.2) for (const v of [144.5, 153.5]) { if (Math.abs(u + 265) < 4) continue; const [x, z] = F.w(u, v); bake(lam({ color: pick(ROSES) }), new THREE.SphereGeometry(0.55, 5, 4).scale(1, 0.75, 1).translate(x, 0.45, z)); }
+      for (const [u, v] of [[-284, 136], [-284, 160], [-250, 136], [-250, 160], [-276, 136], [-258, 160]]) ROUND.push([...F.w(u, v), 1.0]);
+      for (const [u, v] of [[-275, 149], [-255, 149]]) BENCHES.push([...F.w(u, v), F.ang]);
+      LM_PEOPLE.push([[...F.w(-286, 149), ...F.w(-246, 149)], 6], [[...F.w(-265, 134), ...F.w(-265, 186 + 22)], 4]);
+      // 丸の内パークビル (広場の南のタワー)
+      tower(-318, 130, -292, 186, 170, mGlass, mStone, 31, 3);
+      const bbI = (u0, v0, u1, v1) => polyBB(F.rect(u0, v0, u1, v1));
+      SPOT_AREAS.push(['三菱一号館美術館', ...bbI(-290, 134, -212, 190)]);
+      SPOT_AREAS.unshift(['一号館広場', ...bbI(-288, 132, -244, 164)]);
+      LM_LABELS.push(['三菱一号館美術館', ...F.w(-228, 162), '🧱']);
+      Object.assign(LM_NOTES, {
+        '三菱一号館美術館': '1894年にイギリス人建築家ジョサイア・コンドルの設計で建てられた、丸の内で最初の洋風の事務所ビル。1968年に取り壊されたが、2010年に同じ場所へもとの設計どおりに復元され、美術館になった。19世紀末のイギリスで流行したクイーン・アン様式。コンドルは上野の旧岩崎邸の洋館も設計している',
+        '一号館広場': '美術館の入口に面した英国式の庭。1894年ごろに発表されたオールドローズをはじめ、約40種類のバラが植えられている',
+      });
     }
 
     // ===== 八重洲口 =====
@@ -9870,6 +9914,72 @@ REGION({
       sign(1270, -2803, -1, '刀剣博物館', 9, 1.8, '#f0ece0', '#2a2a28');
       spot('刀剣博物館', R, '刀剣博物館', '⚔', '日本刀を守り伝える博物館。1968年に代々木で開館し、2018年に旧安田庭園の中の旧両国公会堂の跡地へ移った。池に張り出した円筒形の部分は、大正時代の公会堂の形を受け継いでいる', 1270, -2794);
     }
+    bakeFlush();
+  },
+});
+/* 明石町 (築地外国人居留地の跡)。佃大橋の西のたもと、隅田川べり
+   聖路加国際病院の旧館 (十字架の塔)・聖路加タワー・トイスラー記念館・慶應義塾発祥の地と日本洋学発祥の地の碑・アメリカ公使館跡の碑 */
+REGION({
+  name: '明石町',
+  towns: [['明石町', 330, -1420]],
+  labels: [],
+  build(r) {
+    const { spot, sign, TREE_LISTS } = SL_KIT();
+    const site = (R, col) => { LM_ZONES.push(rectPoly(...R)); for (const A of TREE_LISTS) { const keep = A.filter(p => !inR(R, p[0], p[1])); A.length = 0; A.push(...keep); } if (col) fr(...R, col); };
+    const R = [308, -1494, 384, -1432], R2 = [308, -1432, 370, -1410];
+    site(R, '#c8c2b2'); site(R2, '#c8c2b2');
+    tiles(308, -1464, 384, -1458, '#d6cebc', '#c4bcaa', 1.6);   // 聖ルカ通りに見立てた歩道
+    // ---- 聖路加国際病院 旧館 (1933年) と十字架の塔
+    const OLD = LM_MAT('AK_SEIRUKA', (x, y) => {
+      x.fillStyle = '#e8e0cc'; x.fillRect(0, 0, 32, 32); y.fillStyle = '#000'; y.fillRect(0, 0, 32, 32);
+      x.fillStyle = '#d8ceb6'; for (let j = 0; j < 32; j += 4) x.fillRect(0, j, 32, 1);
+      for (const i of [3, 13, 23]) for (const j0 of [5, 19]) { x.fillStyle = '#3e4852'; x.fillRect(i, j0, 6, 9); x.beginPath(); x.arc(i + 3, j0, 3, Math.PI, 0); x.fill(); y.fillStyle = rnd() < 0.6 ? '#ffe0a8' : '#000'; y.fillRect(i, j0, 6, 9); }
+    });
+    pushPrism(OLD, 'ROOF', rectPoly(312, -1492, 352, -1468), 0, 14);
+    jRoof('SLATE', 311, -1493, 353, -1467, 14, 3.5, { over: 0.6, kind: 'hip' });
+    pushPrism(OLD, 'TKSTONE', rectPoly(327, -1472, 337, -1464), 0, 30);       // 正面の塔
+    pushPrism(OLD, 'TKSTONE', rectPoly(328.5, -1470.5, 335.5, -1465.5), 30, 36);
+    jRoof('SLATE', 328, -1471, 336, -1465, 36, 4, { over: 0.3, kind: 'hip' });
+    { const M = lam({ color: 0xf0ece0, emissive: 0x30302a }); bake(M, new THREE.BoxGeometry(0.4, 4, 0.4).translate(332, 42, -1468)); bake(M, new THREE.BoxGeometry(2.2, 0.4, 0.4).translate(332, 42.8, -1468)); }   // 十字架
+    sign(332, -1463.7, 1, '聖路加国際病院', 9, 1.6, '#f4f0e6', '#3a3a38');
+    // ---- 聖路加タワー (佃大橋のたもと)
+    pushPrism('glass', 'CONC', rectPoly(356, -1494, 380, -1474), 0, 160);
+    pushPrism('CONC', 'CONC', rectPoly(358, -1492, 378, -1476), 160, 166);
+    // ---- トイスラー記念館 (1933年の宣教師館を移築・復原した木造の洋館)
+    const CLAP = LM_MAT('AK_TEUSLER', (x, y) => {
+      x.fillStyle = '#f0ead8'; x.fillRect(0, 0, 32, 32); y.fillStyle = '#000'; y.fillRect(0, 0, 32, 32);
+      x.fillStyle = '#d6ceb8'; for (let j = 0; j < 32; j += 3) x.fillRect(0, j, 32, 1);
+      for (const i of [5, 19]) { x.fillStyle = '#5a6a58'; x.fillRect(i - 1, 8, 10, 14); x.fillStyle = '#3a4650'; x.fillRect(i, 9, 8, 12); y.fillStyle = rnd() < 0.5 ? '#ffe0a8' : '#000'; y.fillRect(i, 9, 8, 12); }
+    });
+    pushPrism(CLAP, 'ROOF', rectPoly(354, -1452, 370, -1438), 0, 7.5);
+    jRoof('RF0', 353, -1453, 371, -1437, 7.5, 3.4, { over: 0.7, kind: 'irimoya' });
+    pushPrism('tkBrick', 'TKSTONE', rectPoly(366, -1448, 368, -1446), 7.5, 12);   // 煙突
+    // ---- 記念碑の広場
+    const BK = lam({ color: 0x24221f }), GR = lam({ color: 0x9a6a4a }), ST = lam({ color: 0xb8b4aa });
+    const monu = (x, z, kind) => {
+      if (kind === 'book') { bake(BK, new THREE.BoxGeometry(2.6, 1.0, 1.6).translate(x, 0.5, z)); bake(GR, new THREE.BoxGeometry(2.0, 0.5, 1.4).rotateZ(0.12).translate(x, 1.3, z)); }
+      else if (kind === 'stele') { bake(ST, new THREE.BoxGeometry(1.0, 0.4, 0.8).translate(x, 0.2, z)); bake(ST, new THREE.BoxGeometry(0.8, 1.6, 0.3).translate(x, 1.2, z)); }
+      else { bake(ST, new THREE.BoxGeometry(1.4, 1.2, 1.0).translate(x, 0.6, z)); bake(lam({ color: 0xe8e4da }), new THREE.SphereGeometry(0.45, 6, 4).translate(x, 1.6, z)); }
+      solid(x - 0.9, z - 0.6, x + 0.9, z + 0.6, 0, 1.6);
+    };
+    monu(318, -1450, 'book'); monu(324, -1450, 'book');          // 慶應義塾発祥の地 / 日本洋学発祥の地
+    monu(336, -1446, 'stele'); monu(342, -1446, 'stele'); monu(330, -1440, 'stele'); monu(318, -1418, 'stele');   // 学校の発祥の地の碑
+    monu(362, -1426, 'eagle'); monu(366, -1430, 'eagle');        // アメリカ公使館跡の石の彫刻
+    for (const [x, z] of [[312, -1454], [348, -1452], [312, -1436], [350, -1420], [360, -1416], [340, -1414], [376, -1436]]) ROUND.push([x, z, rr(0.9, 1.2)]);
+    for (const [x, z] of [[326, -1426], [340, -1428]]) BENCHES.push([x, z, 0]);
+    LM_PEOPLE.push([[310, -1461, 382, -1461], 8], [[320, -1456, 320, -1414], 4]);
+    // ---- 名所の範囲と説明
+    spot('明石町 (築地居留地跡)', [R[0], R[1], R[2], R2[3]], '明石町', '⛪', '明治時代に外国人居留地が置かれた町 (1899年に廃止)。立教・明治学院・青山学院・女子学院など多くのミッションスクールがここで生まれ、あちこちに「発祥の地」の碑が立つ', 340, -1440);
+    SPOT_AREAS.unshift(['聖路加国際病院 旧館', 310, -1494, 354, -1462], ['聖路加タワー', 354, -1496, 382, -1472], ['トイスラー記念館', 352, -1454, 372, -1436],
+      ['慶應義塾発祥の地の碑', 314, -1454, 328, -1446], ['アメリカ公使館跡の碑', 358, -1434, 370, -1422]);
+    Object.assign(LM_NOTES, {
+      '聖路加国際病院 旧館': 'アメリカ聖公会の宣教医師トイスラーが開いた病院がはじまりで、1902年に聖路加病院となった。旧館の十字架の塔からは、1日3回、カリヨンの鐘で聖歌のメロディーが流れる。「せいろか」ではなく「せいるか」と読む',
+      '聖路加タワー': '佃大橋のたもと、隅田川べりにそびえる高層ビル。明石町の外国人居留地の時代には、このあたりにアメリカ公使館があった',
+      'トイスラー記念館': '1933年に建てられた宣教師館を、1998年に移築・復原した木造の洋館。中央区の有形文化財',
+      '慶應義塾発祥の地の碑': '1858年、この地にあった中津藩の中屋敷で福澤諭吉が蘭学を教えはじめたのが慶應義塾の起源。本の形の石に「天は人の上に人を造らず」と刻まれ、となりには『解体新書』の翻訳にちなむ日本洋学発祥の地の碑が並ぶ',
+      'アメリカ公使館跡の碑': '1874年から1890年まで、居留地にはアメリカ公使館があった。建物を飾っていた白頭鷲や星条旗の石の彫刻が、記念碑として残されている',
+    });
+    LM_LABELS.push(['聖路加', 332, -1500, '⛪', '聖路加国際病院 旧館']);
     bakeFlush();
   },
 });
