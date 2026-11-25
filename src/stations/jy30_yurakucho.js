@@ -15,7 +15,7 @@ STATION({
       for (let j = 1; j < 32; j += rs) for (let i = 1; i < 32; i += cs) { x.fillStyle = win; x.fillRect(i, j, cw, rh); y.fillStyle = rnd() < lit ? pick(LIT) : '#000'; y.fillRect(i, j, cw, rh); }
     });
     const water = (cx, cz, rx, rz) => { PONDS.push([cx, cz, rx, rz]); fe(cx, cz, rx, rz, '#2d6585'); };
-    const clearTrees = r => { for (const A of [ROUND, PINES, GINKGO, SAKURA]) for (let i = A.length - 1; i >= 0; i--) if (inR(r, A[i][0], A[i][1])) A.splice(i, 1); };
+    const clearTrees = r => { for (const A of [ROUND, PINES, GINKGO, SAKURA, SHIDARE]) for (let i = A.length - 1; i >= 0; i--) if (inR(r, A[i][0], A[i][1])) A.splice(i, 1); };
     const trees = (r, n, keep = [], kind = 0.75) => { for (let k = 0; k < n; k++) { const x = rr(r[0] + 2, r[2] - 2), z = rr(r[1] + 2, r[3] - 2); if (keep.some(q => inR(q, x, z, 3))) continue; (rnd() < kind ? ROUND : PINES).push([x, z, rr(1, 1.5)]); } };
     const walkway = (r, c1 = '#c8c0b0', c2 = '#b6ae9e') => tiles(...r, c1, c2, 2);
     const DIET = M('KS_DIET', '#e2dccc', '#4e5660', 0.35, 1, 3, 4, 6), GOV1 = M('KS_GOV1', '#cfc8ba', '#46505c', 0.5, 2, 3, 2, 3), GOV2 = M('KS_GOV2', '#9aa2aa', '#3a4652', 0.55, 2, 3, 2, 3);

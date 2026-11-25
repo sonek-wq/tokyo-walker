@@ -88,7 +88,7 @@ REGION({
       const [fx, fz] = FK.w(160, -196);
       hill(fx, fz, 19, 6.6);
       // しだれ桜 (内庭大門の近く)
-      const [sx, sz] = FK.w(70, -210), PINK = lam({ color: SAKURA_ON ? 0xf6c8d8 : 0x5a7a40 });
+      const [sx, sz] = FK.w(70, -210), PINK = lam({ color: 0xf6c8d8 });   // しだれ桜は一年中満開にする
       bake(lam({ color: 0x5a4632 }), new THREE.CylinderGeometry(0.6, 0.8, 5, 6).translate(sx, 2.5, sz)); solid(sx - 0.8, sz - 0.8, sx + 0.8, sz + 0.8, 0, 5);
       bake(PINK, new THREE.SphereGeometry(5, 8, 5, 0, 6.283, 0, 1.4).translate(sx, 3.5, sz));
       for (let k = 0; k < 36; k++) { const a = k / 36 * 6.283, rad = rr(3.5, 7); bake(PINK, new THREE.BoxGeometry(0.4, rr(3, 5.5), 0.4).translate(sx + Math.cos(a) * rad, rr(2.5, 4.5), sz + Math.sin(a) * rad)); }

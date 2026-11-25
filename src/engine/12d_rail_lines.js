@@ -134,6 +134,6 @@ const RAIL_CONFLICTS = [];   // (確かめ用) 作り込み済みの場所と重
   const H = new Map(), HC = 40;
   for (const c of CORR) { const k = Math.floor(c[0] / HC) * 100003 + Math.floor(c[1] / HC); let a = H.get(k); if (!a) H.set(k, a = []); a.push(c); }
   const hit = (x, z) => { const ci = Math.floor(x / HC), cj = Math.floor(z / HC); for (let i = ci - 1; i <= ci + 1; i++) for (let j = cj - 1; j <= cj + 1; j++) for (const c of H.get(i * 100003 + j) || []) if (Math.hypot(c[0] - x, c[1] - z) < c[2]) return true; return false; };
-  for (const A of [ROUND, PINES, GINKGO, SAKURA, MAPLES, LM_STREET, LAMPS2, BENCHES, LANTERNS]) { const keep = A.filter(p => !hit(p[0], p[1])); A.length = 0; A.push(...keep); }
+  for (const A of [ROUND, PINES, GINKGO, SAKURA, SHIDARE, MAPLES, LM_STREET, LAMPS2, BENCHES, LANTERNS]) { const keep = A.filter(p => !hit(p[0], p[1])); A.length = 0; A.push(...keep); }
 }
 globalThis.RAIL_CONFLICTS = RAIL_CONFLICTS;

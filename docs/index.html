@@ -1693,7 +1693,7 @@ STATION({
       for (let j = 1; j < 32; j += rs) for (let i = 1; i < 32; i += cs) { x.fillStyle = win; x.fillRect(i, j, cw, rh); y.fillStyle = rnd() < lit ? pick(LIT) : '#000'; y.fillRect(i, j, cw, rh); }
     });
     const water = (cx, cz, rx, rz) => { PONDS.push([cx, cz, rx, rz]); fe(cx, cz, rx, rz, '#2d6585'); };
-    const clearTrees = r => { for (const A of [ROUND, PINES, GINKGO, SAKURA]) for (let i = A.length - 1; i >= 0; i--) if (inR(r, A[i][0], A[i][1])) A.splice(i, 1); };
+    const clearTrees = r => { for (const A of [ROUND, PINES, GINKGO, SAKURA, SHIDARE]) for (let i = A.length - 1; i >= 0; i--) if (inR(r, A[i][0], A[i][1])) A.splice(i, 1); };
     const trees = (r, n, keep = [], kind = 0.75) => { for (let k = 0; k < n; k++) { const x = rr(r[0] + 2, r[2] - 2), z = rr(r[1] + 2, r[3] - 2); if (keep.some(q => inR(q, x, z, 3))) continue; (rnd() < kind ? ROUND : PINES).push([x, z, rr(1, 1.5)]); } };
     const walkway = (r, c1 = '#c8c0b0', c2 = '#b6ae9e') => tiles(...r, c1, c2, 2);
     const DIET = M('KS_DIET', '#e2dccc', '#4e5660', 0.35, 1, 3, 4, 6), GOV1 = M('KS_GOV1', '#cfc8ba', '#46505c', 0.5, 2, 3, 2, 3), GOV2 = M('KS_GOV2', '#9aa2aa', '#3a4652', 0.55, 2, 3, 2, 3);
@@ -5657,7 +5657,7 @@ REGION({
       const [fx, fz] = FK.w(160, -196);
       hill(fx, fz, 19, 6.6);
       // しだれ桜 (内庭大門の近く)
-      const [sx, sz] = FK.w(70, -210), PINK = lam({ color: SAKURA_ON ? 0xf6c8d8 : 0x5a7a40 });
+      const [sx, sz] = FK.w(70, -210), PINK = lam({ color: 0xf6c8d8 });   // しだれ桜は一年中満開にする
       bake(lam({ color: 0x5a4632 }), new THREE.CylinderGeometry(0.6, 0.8, 5, 6).translate(sx, 2.5, sz)); solid(sx - 0.8, sz - 0.8, sx + 0.8, sz + 0.8, 0, 5);
       bake(PINK, new THREE.SphereGeometry(5, 8, 5, 0, 6.283, 0, 1.4).translate(sx, 3.5, sz));
       for (let k = 0; k < 36; k++) { const a = k / 36 * 6.283, rad = rr(3.5, 7); bake(PINK, new THREE.BoxGeometry(0.4, rr(3, 5.5), 0.4).translate(sx + Math.cos(a) * rad, rr(2.5, 4.5), sz + Math.sin(a) * rad)); }
@@ -7459,7 +7459,7 @@ REGION({
 /* 駅ごとの名所づくりの道具 (regions/42・43 で使う。build の中で呼ぶ) */
 function SL_KIT() {
     const C = (key, o) => { if (!WALL[key]) WALL[key] = lam(o); return key; };
-    const TREE_LISTS = [ROUND, PINES, MAPLES, GINKGO, SAKURA, LM_STREET, LAMPS2, BENCHES, LANTERNS, STONE_LANTERNS];
+    const TREE_LISTS = [ROUND, PINES, MAPLES, GINKGO, SAKURA, SHIDARE, LM_STREET, LAMPS2, BENCHES, LANTERNS, STONE_LANTERNS];
     // 敷地: 自動生成の街から外し、そこにある木や街灯をどける
     const site = (R, col) => {
       LM_ZONES.push(rectPoly(...R));
@@ -8058,7 +8058,7 @@ REGION({
       spot('旧三河島汚水処分場喞筒場施設', R, '喞筒場 (旧三河島)', '🧱', '1922年に動き出した、日本で最初の近代的な下水処理場のポンプ場。1999年まで77年間働き続け、2007年に国の重要文化財になった。赤レンガに見える外壁は化粧タイル');
       const AP = [476, -4994, 604, -4886];
       LM_ZONES.push(rectPoly(...AP));
-      for (const A of [ROUND, PINES, MAPLES, GINKGO, SAKURA, LM_STREET, LAMPS2, BENCHES]) { const keep = A.filter(p => !inR(AP, p[0], p[1])); A.length = 0; A.push(...keep); }
+      for (const A of [ROUND, PINES, MAPLES, GINKGO, SAKURA, SHIDARE, LM_STREET, LAMPS2, BENCHES]) { const keep = A.filter(p => !inR(AP, p[0], p[1])); A.length = 0; A.push(...keep); }
       pushPrism('CONC', 'GRASSTOP', rectPoly(486, -4984, 594, -4896), 0, 4);
       fr(...AP, '#9a9488');
       stairs([532, -4896, 548, -4884], 4, 'z-');
@@ -9117,7 +9117,7 @@ REGION({
     {
       const X0 = -992, X1 = -950, Z0 = -2506, Z1 = -2216, CX = (X0 + X1) / 2;
       LM_ZONES.push(rectPoly(-1014, Z0 - 2, X1 + 4, Z1 + 2));
-      for (const A of [ROUND, PINES, MAPLES, GINKGO, SAKURA, LM_STREET, LAMPS2, BENCHES]) { const keep = A.filter(p => !inR([-1014, Z0 - 2, X1 + 4, Z1 + 2], p[0], p[1])); A.length = 0; A.push(...keep); }
+      for (const A of [ROUND, PINES, MAPLES, GINKGO, SAKURA, SHIDARE, LM_STREET, LAMPS2, BENCHES]) { const keep = A.filter(p => !inR([-1014, Z0 - 2, X1 + 4, Z1 + 2], p[0], p[1])); A.length = 0; A.push(...keep); }
       fr(-1014, Z0 - 2, X0 - 1, Z1 + 2, '#b8ae98');   // 緑道
       fr(X0 - 1, Z0, X1 + 1, Z1, '#5a6a50');           // 土手
       fr(X0 + 1.5, Z0 + 2, X1 - 1.5, Z1 - 2, '#2f5f66');  // 水面
@@ -9684,6 +9684,103 @@ REGION({
       tiles(...S, '#8a8a88', '#7e7e7c', 2);
       for (let x = -2164; x < -2064; x += 12) LAMPS2.push([x, -1085]);
       spot('乃木坂', S, '乃木坂', '⛰', 'もとは「幽霊坂」と呼ばれていた坂で、乃木希典の葬儀にあわせて「乃木坂」と名前が改められた', -2110, -1080);
+    }
+    bakeFlush();
+  },
+});
+/* 桜の名所を増やす (桜は一年中満開。engine/13_trees.js)
+   - 増上寺: 境内の桜と、大殿の前のしだれ桜。三解脱門から見ると、大殿の後ろに東京タワーがそびえる
+   - 東京ミッドタウン: ガーデンテラス前の桜並木 (約200m)
+   - 六本木さくら坂: けやき坂の南に並んで通る桜並木と、さくら坂公園 (ロボットの形の塔)
+   - 播磨坂: 茗荷谷と小石川植物園のあいだの、中央に緑道がある広い坂道の桜並木 */
+REGION({
+  name: '桜の名所',
+  towns: [],
+  labels: [],
+  build(r) {
+    const { spot, TREE_LISTS } = SL_KIT();
+    const blocked = (x, z, m = 1.2) => [...query(x - m, z - m, x + m, z + m)].some(s => s[5] > 0.6 && inR(s, x, z, m));   // 建物や塀に重なる場所には植えない
+    const plantAt = (L, x, z, s) => { if (!blocked(x, z)) L.push([x, z, s]); };
+    const site = (R, col) => { LM_ZONES.push(rectPoly(...R)); for (const A of TREE_LISTS) { const keep = A.filter(p => !inR(R, p[0], p[1])); A.length = 0; A.push(...keep); } if (col) fr(...R, col); };
+
+    // ===== 増上寺 (境内に約200本の桜。東京タワーと桜を一緒に眺められる) =====
+    {
+      for (let x = -1415; x < -1150; x += 11) { plantAt(SAKURA, x + rr(-1, 1), -129, rr(1.05, 1.3)); plantAt(SAKURA, x + 5 + rr(-1, 1), 9, rr(1.05, 1.3)); }
+      for (let x = -1248; x < -1176; x += 9) for (const z of [-82, -38]) plantAt(SAKURA, x + rr(-1, 1), z, rr(1.0, 1.2));
+      SHIDARE.push([-1247, -110, 1.35], [-1247, -10, 1.25]);   // 大殿の前のしだれ桜
+      SPOT_AREAS.unshift(['増上寺のしだれ桜', -1256, -120, -1238, -100], ['増上寺のしだれ桜', -1256, -20, -1238, 0]);
+      LM_NOTES['増上寺のしだれ桜'] = '広い境内には、ソメイヨシノやしだれ桜など約200本の桜がある。春は、大殿の後ろにそびえる東京タワーと桜を一緒に眺められる';
+    }
+
+    // ===== 東京ミッドタウンの桜並木 (ガーデンテラス前。全長約200m) =====
+    {
+      tiles(-2084, -941, -1842, -936, '#d4ccb8', '#c4bca8', 2);
+      for (let x = -2080; x < -1846; x += 8) {
+        if (x > -2022 && x < -1954) continue;   // 21_21 DESIGN SIGHT の前はあける
+        plantAt(SAKURA, x, -946, rr(1.05, 1.25));
+        if (x < -2026 || x > -1950) plantAt(SAKURA, x + 4, -958, rr(1.0, 1.2));
+      }
+      LM_PEOPLE.push([[-2080, -938.5, -1846, -938.5], 8]);
+      SPOT_AREAS.unshift(['ミッドタウンの桜並木', -2084, -962, -1842, -936]);
+      LM_NOTES['ミッドタウンの桜並木'] = 'ミッドタウン・ガーデンに続く全長約200mの桜並木。防衛庁があったころから育ってきた桜を約40本引き継いでいて、毎年いまも花を咲かせている';
+    }
+
+    // ===== 六本木さくら坂 (けやき坂と並んで通る、ソメイヨシノ75本の桜並木) とさくら坂公園 =====
+    {
+      const R = [-2195, -322, -1960, -300];
+      site(R, '#9aa070');
+      tiles(-2195, -316, -1960, -306, '#c8bea8', '#b8ae98', 2);
+      for (let x = -2190; x < -1962; x += 8) { SAKURA.push([x, -319, rr(1.0, 1.2)], [x + 4, -303, rr(1.0, 1.2)]); if ((x | 0) % 3 === 0) LAMPS2.push([x + 2, -311]); }
+      LM_PEOPLE.push([[-2190, -312, -1962, -312], 8], [[-1962, -309, -2190, -309], 6]);
+      spot('六本木さくら坂', R, 'さくら坂', '🌸', 'けやき坂と並んで通る坂道で、約400mにわたってソメイヨシノ75本が並ぶ。六本木ヒルズができる前から根をおろす、となりの毛利庭園の老木の桜とあわせて花見の名所になっている', -2078, -311);
+      // さくら坂公園 (ブリキのおもちゃから着想を得た、ロボットの形の塔)
+      const K = [-2012, -298, -1962, -264], cx = -1987, cz = -282;
+      site(K, '#c8b898');
+      const RB = (c, w, h, d, x, y, z) => bake(lam({ color: c }), new THREE.BoxGeometry(w, h, d).translate(x, y, z));
+      RB(0xd84030, 1.4, 4, 1.4, cx - 1.6, 2, cz); RB(0xd84030, 1.4, 4, 1.4, cx + 1.6, 2, cz);   // 足
+      RB(0x3a78c8, 5.2, 4.2, 3.2, cx, 6.1, cz); RB(0xf0c838, 2.2, 1.2, 0.2, cx, 6.6, cz + 1.7);   // 胴体と胸のパネル
+      RB(0xe8e4dc, 3.4, 2.6, 2.8, cx, 9.6, cz); RB(0x222222, 0.6, 0.6, 0.2, cx - 0.8, 9.9, cz + 1.45); RB(0x222222, 0.6, 0.6, 0.2, cx + 0.8, 9.9, cz + 1.45);   // 頭と目
+      RB(0xf0c838, 0.3, 1.4, 0.3, cx, 11.6, cz);   // アンテナ
+      for (const s of [-1, 1]) RB(0x48a848, 1.0, 3.6, 1.0, cx + s * 3.2, 6.4, cz);   // 腕
+      solid(cx - 2.6, cz - 1.6, cx + 2.6, cz + 1.6, 0, 11);
+      // // すべり台
+      for (const [a, c] of [[Math.PI / 2, 0xe8d040], [-Math.PI / 2, 0xe86a30]]) { const g = new THREE.BoxGeometry(1.4, 0.5, 9).rotateX(-0.55).translate(0, 4.2, 6.6).rotateY(a).translate(cx, 0, cz); bake(lam({ color: c }), g); }   // 左右にすべり台
+      for (let k = 0; k < 8; k++) ROUND.push([K[0] + 3 + rnd() * 44, rnd() < 0.5 ? -296 : -266, rr(0.8, 1)]);
+      LM_PEOPLE.push([[-2008, -270, -1966, -270], 4]);
+      spot('さくら坂公園', K, 'さくら坂公園', '🤖', '六本木ヒルズの南端にある公園。ブリキのおもちゃから着想を得た、ロボットの形をした塔がシンボルで、すべり台がついている', cx, cz + 8);
+    }
+
+    // ===== 播磨坂 (茗荷谷と小石川植物園のあいだ。約120本の桜並木) =====
+    {
+      const X0 = -1300, X1 = -1102, R = [X0, -3716, X1, -3684];
+      site(R, null);
+      tiles(X0, -3716, X1, -3711, '#c8c0b0', '#b6ae9e', 2); tiles(X0, -3689, X1, -3684, '#c8c0b0', '#b6ae9e', 2);   // 歩道
+      for (const [z0, z1] of [[-3711, -3704], [-3696, -3689]]) { fr(X0, z0, X1, z1, '#3c3c42'); for (let x = X0; x < X1; x += 6) fr(x, (z0 + z1) / 2 - 0.15, x + 3, (z0 + z1) / 2 + 0.15, '#e8e6dc'); }   // 車道
+      fr(X0, -3704, X1, -3696, '#7e9a58');   // 中央の緑道
+      tiles(X0, -3701.5, X1, -3698.5, '#c4b89c', '#b4a88c', 1.5);
+      fr(-1206, -3704, -1194, -3696, '#3c3c42');   // 交差点 (緑道を切る)
+      for (let x = X0 + 4; x < X1 - 2; x += 8.5) {
+        SAKURA.push([x, -3713.5, rr(1.0, 1.25)], [x + 4, -3686.5, rr(1.0, 1.25)]);
+        if (Math.abs(x + 1200) > 9) SAKURA.push([x + 2, x % 17 < 8.5 ? -3702.5 : -3697.5, rr(1.0, 1.2)]);
+      }
+      // 鬱金(うこん)桜: 淡い黄緑色の花が咲く、めずらしい八重桜
+      const UK = [-1160, -3702.5];
+      bake(lam({ color: 0x5a4430 }), new THREE.CylinderGeometry(0.25, 0.35, 3, 5).translate(UK[0], 1.5, UK[1]));
+      bake(lam({ color: 0xe2eab0 }), new THREE.IcosahedronGeometry(2.4, 0).scale(1.2, 0.8, 1.2).translate(UK[0], 4.3, UK[1]));
+      solid(UK[0] - 0.5, UK[1] - 0.5, UK[0] + 0.5, UK[1] + 0.5, 0, 6.5);
+      // 彫刻 (「水と緑と彫刻のある散歩道」)
+      const BZ = WALL.BRONZE, ST = lam({ color: 0xb8b4aa });
+      for (const [x, kind] of [[-1272, 0], [-1236, 1], [-1132, 2]]) {
+        const z = -3700; bake(ST, new THREE.BoxGeometry(1.6, 0.8, 1.6).translate(x, 0.4, z)); solid(x - 0.8, z - 0.8, x + 0.8, z + 0.8, 0, 2.6);
+        if (kind === 0) bake(BZ, new THREE.TorusGeometry(0.8, 0.22, 6, 12).translate(x, 1.8, z));
+        else if (kind === 1) bake(BZ, new THREE.CylinderGeometry(0.2, 0.5, 2.2, 6).rotateZ(0.3).translate(x, 1.9, z));
+        else bake(ST, new THREE.SphereGeometry(0.75, 8, 6).scale(1, 1.3, 0.8).translate(x, 1.7, z));
+      }
+      for (const x of [-1284, -1252, -1220, -1180, -1148, -1118]) BENCHES.push([x, -3702.6, 0]);
+      LM_PEOPLE.push([[X0 + 4, -3700, X1 - 4, -3700], 8], [[X1 - 2, -3713.5, X0 + 2, -3713.5], 5], [[X0 + 2, -3686.5, X1 - 2, -3686.5], 5]);
+      spot('播磨坂', R, '播磨坂', '🌸', 'この地にあった松平播磨守の上屋敷にちなんだ名前の坂。1960年に坂を舗装したとき、「全区を花でうずめる運動」で桜の若木が植えられ、いまは約120本の桜並木になった。中央は彫刻の置かれた緑道', -1230, -3700);
+      SPOT_AREAS.unshift(['鬱金桜 (播磨坂)', UK[0] - 3, UK[1] - 3, UK[0] + 3, UK[1] + 3]);
+      LM_NOTES['鬱金桜 (播磨坂)'] = '播磨坂にはソメイヨシノのほかに、淡い黄緑色の花を咲かせる八重桜「鬱金(うこん)桜」など、めずらしい桜も植えられている';
     }
     bakeFlush();
   },
@@ -10809,7 +10906,7 @@ const RESERVED = [...LANDMARKS.map(r => [r[0] - 3, r[1] - 3, r[2] + 3, r[3] + 3]
    拡張エリアの街づくり: 街区ごとに性格を変えてメリハリを出す
    (オフィス街 / 商店街 / 住宅街 / 雑居ビル街 / 神社 / 公園 / 駐車場 …)
    ============================================================ */
-const PINES = [], ROUND = [], MAPLES = [], GINKGO = [], SAKURA = [];   // SAKURA: 桜 (春は花、秋は紅葉)
+const PINES = [], ROUND = [], MAPLES = [], GINKGO = [], SAKURA = [], SHIDARE = [];   // SAKURA: 桜・SHIDARE: しだれ桜 (どちらも花見の名所にだけ植え、一年中満開にする)
 const LAMPS2 = [], DECKS = [];   // LAMPS2: [x, z, (高さ)] 街灯。デッキの上なら高さを書く
 const STONE_LANTERNS = [];   // [x, z] 庭園の石灯籠 (地面に立つ)
 const SIGNS = [], AWNINGS = [], POLES = [], WIRES = [], VENDS = [], LANTERNS = [], BENCHES = [], PARKED = [], HODO = [];
@@ -12709,7 +12806,7 @@ const RAIL_CONFLICTS = [];   // (確かめ用) 作り込み済みの場所と重
   const H = new Map(), HC = 40;
   for (const c of CORR) { const k = Math.floor(c[0] / HC) * 100003 + Math.floor(c[1] / HC); let a = H.get(k); if (!a) H.set(k, a = []); a.push(c); }
   const hit = (x, z) => { const ci = Math.floor(x / HC), cj = Math.floor(z / HC); for (let i = ci - 1; i <= ci + 1; i++) for (let j = cj - 1; j <= cj + 1; j++) for (const c of H.get(i * 100003 + j) || []) if (Math.hypot(c[0] - x, c[1] - z) < c[2]) return true; return false; };
-  for (const A of [ROUND, PINES, GINKGO, SAKURA, MAPLES, LM_STREET, LAMPS2, BENCHES, LANTERNS]) { const keep = A.filter(p => !hit(p[0], p[1])); A.length = 0; A.push(...keep); }
+  for (const A of [ROUND, PINES, GINKGO, SAKURA, SHIDARE, MAPLES, LM_STREET, LAMPS2, BENCHES, LANTERNS]) { const keep = A.filter(p => !hit(p[0], p[1])); A.length = 0; A.push(...keep); }
 }
 globalThis.RAIL_CONFLICTS = RAIL_CONFLICTS;
 /* ============================================================
@@ -12765,10 +12862,10 @@ function settleTrees(list) {
   }
   list.length = 0; list.push(...keep);
 }
-function plant(list, crownGeo, colors) {
+function plant(list, crownGeo, colors, matOpt = {}) {
   settleTrees(list);
   const dummy = new THREE.Object3D(), trunk = new THREE.InstancedMesh(trunkGeo, lam({ color: 0x5a4430 }), list.length);
-  const crown = new THREE.InstancedMesh(crownGeo, lam({ color: 0xffffff }), list.length);
+  const crown = new THREE.InstancedMesh(crownGeo, lam({ color: 0xffffff, ...matOpt }), list.length);
   list.forEach(([x, z, s], i) => {
     dummy.position.set(x, list[i][3] || 0, z); dummy.scale.setScalar(s); dummy.rotation.y = rr(0, 6); dummy.updateMatrix();
     trunk.setMatrixAt(i, dummy.matrix); crown.setMatrixAt(i, dummy.matrix);
@@ -12787,9 +12884,56 @@ const SEASON = MONTH >= 3 && MONTH <= 4 ? { name: '春', street: ['#f0b8cc', '#e
   : MONTH <= 2 ? { name: '冬', street: ['#6a7a4a', '#5a6a40', '#7a6a4a'] } : { name: '夏', street: ['#4f8a38', '#5f9a40', '#3f7a32'] };
 STREET.push(...LM_STREET);
 plant(STREET, new THREE.IcosahedronGeometry(2.3, 0).translate(0, 4.6, 0), SEASON.street);
-plant(SAKURA, new THREE.IcosahedronGeometry(2.5, 0).scale(1.25, 0.8, 1.25).translate(0, 4.4, 0),
-  MONTH >= 3 && MONTH <= 4 ? ['#f6c4d4', '#f0b0c6', '#fad4e0', '#f4bccc'] : MONTH >= 10 && MONTH <= 11 ? ['#c8603a', '#d8883a', '#b8502e', '#a8a038']
-  : MONTH === 12 || MONTH <= 2 ? ['#8a7a5c', '#7a6c50', '#968660'] : ['#4f8a38', '#5f9a40', '#3f7a32']);
+// 桜は花見の名所にだけ植えているので、季節に関係なく一年中満開にする (街路樹やイチョウ・モミジは季節で変わる)
+const SAKURA_PINK = ['#f6c4d4', '#f0b0c6', '#fad4e0', '#f4bccc', '#fbe2ea'];
+plant(SAKURA, new THREE.IcosahedronGeometry(2.5, 0).scale(1.25, 0.8, 1.25).translate(0, 4.4, 0), SAKURA_PINK, { emissive: 0x40242c });   // 影になる面も桜色に見えるよう、少し自分で光らせる
+// しだれ桜: 枝が垂れ下がった釣り鐘のような形
+// しだれ桜: 丸い樹冠から、花のついた枝が滝のように垂れ下がる
+const SHIDARE_GEO = (() => {
+  const parts = [new THREE.IcosahedronGeometry(2.4, 0).scale(1.3, 0.7, 1.3).translate(0, 5.6, 0)];
+  for (let k = 0; k < 16; k++) {
+    const a = k / 16 * Math.PI * 2, r = k % 2 ? 3.0 : 2.3, len = k % 2 ? 3.6 : 3.0;
+    parts.push(new THREE.BoxGeometry(0.7, len, 0.5).translate(0, -len / 2, 0).rotateX(-0.12).rotateY(-a).translate(Math.sin(a) * r, 5.6, Math.cos(a) * r));
+  }
+  const pos = [], nor = [];
+  for (const g of parts) { const n = g.index ? g.toNonIndexed() : g; n.computeVertexNormals(); pos.push(...n.attributes.position.array); nor.push(...n.attributes.normal.array); }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3)); return g;
+})();
+plant(SHIDARE, SHIDARE_GEO, ['#f8cad8', '#f4b8cc', '#fad8e2'], { emissive: 0x40242c });
+// 桜吹雪: 桜の近くを歩くと、花びらがひらひらと舞い落ちる
+{
+  const ALL = [...SAKURA, ...SHIDARE], G = new Map(), key = (i, j) => i * 100003 + j;
+  for (const t of ALL) { const k = key(Math.floor(t[0] / 40), Math.floor(t[1] / 40)); if (!G.has(k)) G.set(k, []); G.get(k).push(t); }
+  const N = 320, IM = new THREE.InstancedMesh(new THREE.PlaneGeometry(0.17, 0.13), lam({ color: 0xfcdce6, side: THREE.DoubleSide }), N);
+  IM.frustumCulled = false; scene.add(IM);
+  const ps = Array.from({ length: N }, () => ({ x: 0, y: -99, z: 0, g: 0, vy: 0, ph: rnd() * 6.28, rest: 0 })), D = new THREE.Object3D();
+  let near = [], tick = 0;
+  LM_UPDATERS.push((dt, t) => {
+    dt = Math.min(dt, 0.1);
+    if ((tick -= dt) <= 0) {
+      tick = 0.5; near = [];
+      const i0 = Math.floor(P.x / 40), j0 = Math.floor(P.z / 40);
+      for (let i = i0 - 2; i <= i0 + 2; i++) for (let j = j0 - 2; j <= j0 + 2; j++) for (const tr of G.get(key(i, j)) || []) if (Math.hypot(tr[0] - P.x, tr[1] - P.z) < 55 && Math.abs((tr[3] || 0) - P.y) < 25) near.push(tr);
+    }
+    const active = Math.min(N, near.length * 12);
+    for (let k = 0; k < N; k++) {
+      const p = ps[k];
+      if (p.y < -50 || p.rest > 4) {   // 次の花びらを桜の枝から出す (桜から離れたら出さない。舞っている花びらは落ちきるまで動かす)
+        if (k >= active || !near.length) { p.y = -99; p.rest = 0; D.position.set(0, -99, 0); D.updateMatrix(); IM.setMatrixAt(k, D.matrix); continue; }
+        const tr = near[(rnd() * near.length) | 0], s = tr[2] || 1;
+        p.g = tr[3] || 0; p.x = tr[0] + rr(-2.8, 2.8) * s; p.z = tr[1] + rr(-2.8, 2.8) * s; p.y = p.g + rr(3, 5.8) * s; p.vy = rr(0.45, 0.85); p.rest = 0;
+      }
+      if (p.y <= p.g + 0.04) { p.rest += dt; D.position.set(p.x, p.g + 0.04, p.z); D.rotation.set(-Math.PI / 2, 0, p.ph); }   // 地面に落ちた花びら
+      else {
+        p.y = Math.max(p.g + 0.04, p.y - p.vy * dt);
+        p.x += (0.45 + Math.sin(t * 0.8 + p.ph) * 0.7) * dt; p.z += Math.cos(t * 1.3 + p.ph * 2) * 0.5 * dt;
+        D.position.set(p.x, p.y, p.z); D.rotation.set(t * 2.2 + p.ph, p.ph, t * 1.7 + p.ph * 3);
+      }
+      D.updateMatrix(); IM.setMatrixAt(k, D.matrix);
+    }
+    IM.instanceMatrix.needsUpdate = true;
+  });
+}
 plant(WILLOWS, new THREE.CylinderGeometry(0.5, 2.3, 4.8, 7).translate(0, 4.4, 0), ['#8ab84a', '#9ac85a', '#7aa840']); // しだれ柳
 
 /* ============================================================

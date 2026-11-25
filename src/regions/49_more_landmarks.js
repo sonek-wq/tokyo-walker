@@ -18,7 +18,7 @@ REGION({
     {
       const X0 = -992, X1 = -950, Z0 = -2506, Z1 = -2216, CX = (X0 + X1) / 2;
       LM_ZONES.push(rectPoly(-1014, Z0 - 2, X1 + 4, Z1 + 2));
-      for (const A of [ROUND, PINES, MAPLES, GINKGO, SAKURA, LM_STREET, LAMPS2, BENCHES]) { const keep = A.filter(p => !inR([-1014, Z0 - 2, X1 + 4, Z1 + 2], p[0], p[1])); A.length = 0; A.push(...keep); }
+      for (const A of [ROUND, PINES, MAPLES, GINKGO, SAKURA, SHIDARE, LM_STREET, LAMPS2, BENCHES]) { const keep = A.filter(p => !inR([-1014, Z0 - 2, X1 + 4, Z1 + 2], p[0], p[1])); A.length = 0; A.push(...keep); }
       fr(-1014, Z0 - 2, X0 - 1, Z1 + 2, '#b8ae98');   // 緑道
       fr(X0 - 1, Z0, X1 + 1, Z1, '#5a6a50');           // 土手
       fr(X0 + 1.5, Z0 + 2, X1 - 1.5, Z1 - 2, '#2f5f66');  // 水面

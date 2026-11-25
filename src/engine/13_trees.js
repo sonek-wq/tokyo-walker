@@ -51,10 +51,10 @@ function settleTrees(list) {
   }
   list.length = 0; list.push(...keep);
 }
-function plant(list, crownGeo, colors) {
+function plant(list, crownGeo, colors, matOpt = {}) {
   settleTrees(list);
   const dummy = new THREE.Object3D(), trunk = new THREE.InstancedMesh(trunkGeo, lam({ color: 0x5a4430 }), list.length);
-  const crown = new THREE.InstancedMesh(crownGeo, lam({ color: 0xffffff }), list.length);
+  const crown = new THREE.InstancedMesh(crownGeo, lam({ color: 0xffffff, ...matOpt }), list.length);
   list.forEach(([x, z, s], i) => {
     dummy.position.set(x, list[i][3] || 0, z); dummy.scale.setScalar(s); dummy.rotation.y = rr(0, 6); dummy.updateMatrix();
     trunk.setMatrixAt(i, dummy.matrix); crown.setMatrixAt(i, dummy.matrix);
@@ -73,8 +73,55 @@ const SEASON = MONTH >= 3 && MONTH <= 4 ? { name: '春', street: ['#f0b8cc', '#e
   : MONTH <= 2 ? { name: '冬', street: ['#6a7a4a', '#5a6a40', '#7a6a4a'] } : { name: '夏', street: ['#4f8a38', '#5f9a40', '#3f7a32'] };
 STREET.push(...LM_STREET);
 plant(STREET, new THREE.IcosahedronGeometry(2.3, 0).translate(0, 4.6, 0), SEASON.street);
-plant(SAKURA, new THREE.IcosahedronGeometry(2.5, 0).scale(1.25, 0.8, 1.25).translate(0, 4.4, 0),
-  MONTH >= 3 && MONTH <= 4 ? ['#f6c4d4', '#f0b0c6', '#fad4e0', '#f4bccc'] : MONTH >= 10 && MONTH <= 11 ? ['#c8603a', '#d8883a', '#b8502e', '#a8a038']
-  : MONTH === 12 || MONTH <= 2 ? ['#8a7a5c', '#7a6c50', '#968660'] : ['#4f8a38', '#5f9a40', '#3f7a32']);
+// 桜は花見の名所にだけ植えているので、季節に関係なく一年中満開にする (街路樹やイチョウ・モミジは季節で変わる)
+const SAKURA_PINK = ['#f6c4d4', '#f0b0c6', '#fad4e0', '#f4bccc', '#fbe2ea'];
+plant(SAKURA, new THREE.IcosahedronGeometry(2.5, 0).scale(1.25, 0.8, 1.25).translate(0, 4.4, 0), SAKURA_PINK, { emissive: 0x40242c });   // 影になる面も桜色に見えるよう、少し自分で光らせる
+// しだれ桜: 枝が垂れ下がった釣り鐘のような形
+// しだれ桜: 丸い樹冠から、花のついた枝が滝のように垂れ下がる
+const SHIDARE_GEO = (() => {
+  const parts = [new THREE.IcosahedronGeometry(2.4, 0).scale(1.3, 0.7, 1.3).translate(0, 5.6, 0)];
+  for (let k = 0; k < 16; k++) {
+    const a = k / 16 * Math.PI * 2, r = k % 2 ? 3.0 : 2.3, len = k % 2 ? 3.6 : 3.0;
+    parts.push(new THREE.BoxGeometry(0.7, len, 0.5).translate(0, -len / 2, 0).rotateX(-0.12).rotateY(-a).translate(Math.sin(a) * r, 5.6, Math.cos(a) * r));
+  }
+  const pos = [], nor = [];
+  for (const g of parts) { const n = g.index ? g.toNonIndexed() : g; n.computeVertexNormals(); pos.push(...n.attributes.position.array); nor.push(...n.attributes.normal.array); }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3)); return g;
+})();
+plant(SHIDARE, SHIDARE_GEO, ['#f8cad8', '#f4b8cc', '#fad8e2'], { emissive: 0x40242c });
+// 桜吹雪: 桜の近くを歩くと、花びらがひらひらと舞い落ちる
+{
+  const ALL = [...SAKURA, ...SHIDARE], G = new Map(), key = (i, j) => i * 100003 + j;
+  for (const t of ALL) { const k = key(Math.floor(t[0] / 40), Math.floor(t[1] / 40)); if (!G.has(k)) G.set(k, []); G.get(k).push(t); }
+  const N = 320, IM = new THREE.InstancedMesh(new THREE.PlaneGeometry(0.17, 0.13), lam({ color: 0xfcdce6, side: THREE.DoubleSide }), N);
+  IM.frustumCulled = false; scene.add(IM);
+  const ps = Array.from({ length: N }, () => ({ x: 0, y: -99, z: 0, g: 0, vy: 0, ph: rnd() * 6.28, rest: 0 })), D = new THREE.Object3D();
+  let near = [], tick = 0;
+  LM_UPDATERS.push((dt, t) => {
+    dt = Math.min(dt, 0.1);
+    if ((tick -= dt) <= 0) {
+      tick = 0.5; near = [];
+      const i0 = Math.floor(P.x / 40), j0 = Math.floor(P.z / 40);
+      for (let i = i0 - 2; i <= i0 + 2; i++) for (let j = j0 - 2; j <= j0 + 2; j++) for (const tr of G.get(key(i, j)) || []) if (Math.hypot(tr[0] - P.x, tr[1] - P.z) < 55 && Math.abs((tr[3] || 0) - P.y) < 25) near.push(tr);
+    }
+    const active = Math.min(N, near.length * 12);
+    for (let k = 0; k < N; k++) {
+      const p = ps[k];
+      if (p.y < -50 || p.rest > 4) {   // 次の花びらを桜の枝から出す (桜から離れたら出さない。舞っている花びらは落ちきるまで動かす)
+        if (k >= active || !near.length) { p.y = -99; p.rest = 0; D.position.set(0, -99, 0); D.updateMatrix(); IM.setMatrixAt(k, D.matrix); continue; }
+        const tr = near[(rnd() * near.length) | 0], s = tr[2] || 1;
+        p.g = tr[3] || 0; p.x = tr[0] + rr(-2.8, 2.8) * s; p.z = tr[1] + rr(-2.8, 2.8) * s; p.y = p.g + rr(3, 5.8) * s; p.vy = rr(0.45, 0.85); p.rest = 0;
+      }
+      if (p.y <= p.g + 0.04) { p.rest += dt; D.position.set(p.x, p.g + 0.04, p.z); D.rotation.set(-Math.PI / 2, 0, p.ph); }   // 地面に落ちた花びら
+      else {
+        p.y = Math.max(p.g + 0.04, p.y - p.vy * dt);
+        p.x += (0.45 + Math.sin(t * 0.8 + p.ph) * 0.7) * dt; p.z += Math.cos(t * 1.3 + p.ph * 2) * 0.5 * dt;
+        D.position.set(p.x, p.y, p.z); D.rotation.set(t * 2.2 + p.ph, p.ph, t * 1.7 + p.ph * 3);
+      }
+      D.updateMatrix(); IM.setMatrixAt(k, D.matrix);
+    }
+    IM.instanceMatrix.needsUpdate = true;
+  });
+}
 plant(WILLOWS, new THREE.CylinderGeometry(0.5, 2.3, 4.8, 7).translate(0, 4.4, 0), ['#8ab84a', '#9ac85a', '#7aa840']); // しだれ柳
 

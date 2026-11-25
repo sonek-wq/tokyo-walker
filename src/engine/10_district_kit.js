@@ -2,7 +2,7 @@
    拡張エリアの街づくり: 街区ごとに性格を変えてメリハリを出す
    (オフィス街 / 商店街 / 住宅街 / 雑居ビル街 / 神社 / 公園 / 駐車場 …)
    ============================================================ */
-const PINES = [], ROUND = [], MAPLES = [], GINKGO = [], SAKURA = [];   // SAKURA: 桜 (春は花、秋は紅葉)
+const PINES = [], ROUND = [], MAPLES = [], GINKGO = [], SAKURA = [], SHIDARE = [];   // SAKURA: 桜・SHIDARE: しだれ桜 (どちらも花見の名所にだけ植え、一年中満開にする)
 const LAMPS2 = [], DECKS = [];   // LAMPS2: [x, z, (高さ)] 街灯。デッキの上なら高さを書く
 const STONE_LANTERNS = [];   // [x, z] 庭園の石灯籠 (地面に立つ)
 const SIGNS = [], AWNINGS = [], POLES = [], WIRES = [], VENDS = [], LANTERNS = [], BENCHES = [], PARKED = [], HODO = [];

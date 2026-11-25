@@ -8,7 +8,7 @@
 /* 駅ごとの名所づくりの道具 (regions/42・43 で使う。build の中で呼ぶ) */
 function SL_KIT() {
     const C = (key, o) => { if (!WALL[key]) WALL[key] = lam(o); return key; };
-    const TREE_LISTS = [ROUND, PINES, MAPLES, GINKGO, SAKURA, LM_STREET, LAMPS2, BENCHES, LANTERNS, STONE_LANTERNS];
+    const TREE_LISTS = [ROUND, PINES, MAPLES, GINKGO, SAKURA, SHIDARE, LM_STREET, LAMPS2, BENCHES, LANTERNS, STONE_LANTERNS];
     // 敷地: 自動生成の街から外し、そこにある木や街灯をどける
     const site = (R, col) => {
       LM_ZONES.push(rectPoly(...R));

@@ -130,7 +130,7 @@ REGION({
       spot('旧三河島汚水処分場喞筒場施設', R, '喞筒場 (旧三河島)', '🧱', '1922年に動き出した、日本で最初の近代的な下水処理場のポンプ場。1999年まで77年間働き続け、2007年に国の重要文化財になった。赤レンガに見える外壁は化粧タイル');
       const AP = [476, -4994, 604, -4886];
       LM_ZONES.push(rectPoly(...AP));
-      for (const A of [ROUND, PINES, MAPLES, GINKGO, SAKURA, LM_STREET, LAMPS2, BENCHES]) { const keep = A.filter(p => !inR(AP, p[0], p[1])); A.length = 0; A.push(...keep); }
+      for (const A of [ROUND, PINES, MAPLES, GINKGO, SAKURA, SHIDARE, LM_STREET, LAMPS2, BENCHES]) { const keep = A.filter(p => !inR(AP, p[0], p[1])); A.length = 0; A.push(...keep); }
       pushPrism('CONC', 'GRASSTOP', rectPoly(486, -4984, 594, -4896), 0, 4);
       fr(...AP, '#9a9488');
       stairs([532, -4896, 548, -4884], 4, 'z-');
