@@ -13,9 +13,9 @@ REGION({
     });
     const water = (cx, cz, rx, rz) => { PONDS.push([cx, cz, rx, rz]); fe(cx, cz, rx, rz, '#2d6585'); };
     const C = [-1938, -610];
-    // 冬 (11月〜12月) の夜だけ灯るイルミネーション
+    // 夜に灯るイルミネーション
     const ILLUM = lam({ color: 0xbcd8ff, emissive: 0x9cc8ff, emissiveIntensity: 0 }), ILLUM2 = lam({ color: 0xfff4e0, emissive: 0xffe8c0, emissiveIntensity: 0 });
-    LM_UPDATERS.push(() => { const on = (MONTH === 11 || MONTH === 12) && NIGHT > 0.3 ? 1.4 : 0; ILLUM.emissiveIntensity = on; ILLUM2.emissiveIntensity = on; });
+    LM_UPDATERS.push(() => { const on = NIGHT > 0.3 ? 1.4 : 0; ILLUM.emissiveIntensity = on; ILLUM2.emissiveIntensity = on; });
 
     // ===== 道路 (六本木通りと外苑東通り) と首都高3号渋谷線 =====
     LM_HEIGHT_AREAS.push(['六本木交差点', (x, z, y) => y < 3 && Math.hypot(x - C[0], z - C[1]) < 22]);

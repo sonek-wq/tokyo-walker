@@ -6,7 +6,7 @@ REGION({
   labels: [],
   build(r) {
     acRoad([30, -3262, 320, -3250], 'ew', '春日通り (切通坂)'); akRoad([-29, -3286], [34, -3256], 12, '春日通り (切通坂)', { walk: false, trees: false });   // 本郷 (東大の南) からつなぐ
-    const BR = WALL.BRONZE, SPRING = MONTH === 2 || MONTH === 3;
+    const BR = WALL.BRONZE, SPRING = true;   // 梅はいつも咲いている姿にする
     // ===== 湯島天神 (湯島天満宮。学問の神様・菅原道真をまつる) =====
     const T = [30, -3240, 112, -3165], TZ = -3203;
     {

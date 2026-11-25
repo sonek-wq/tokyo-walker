@@ -170,7 +170,7 @@ notebookEl.addEventListener('click', e => { if (e.target === notebookEl && noteO
 LM_ACH.push(['hee', '💡 へぇの達人', '豆知識を30個集める (K で豆知識帳)', () => [...HEE].filter(n => NOTE_NAMES.includes(n)).length >= 30]);
 // 後から追加した名所も地名リスト・発見リストに反映
 for (const a of SPOT_AREAS) if (!AREAS.includes(a)) { AREAS.unshift(a); ALL_NAMES.add(a[0]); }
-function hokoActive() { return WEEKEND && gameH >= 12 && gameH < (MONTH >= 4 && MONTH <= 9 ? 18 : 17); }
+function hokoActive() { return WEEKEND && gameH >= 12 && gameH < 18; }
 // ---- ねこ (街のどこかに12匹)
 const CAT_DEF = [[-450, -760, 0], [-575, -951, 0], [-1380, 70, 0], [-1278, -628, 26], [-246, -321, 0], [-300, 200, 0], [232, 40, 0],
   [-14, -640, 0], [-819, 204, 0], [-1566, 183, 0], [-294, -700, 7], [-1270, -285, 7.5], [196, -905, 0], [-141, 200, 5.2], [155, -1243, 26]];

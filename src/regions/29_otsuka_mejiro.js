@@ -8,7 +8,7 @@ REGION({
   labels: [],
   build(r) {
     const WH = lam({ color: 0xf0ece0 }), STONE = lam({ color: 0x9a968c }), RED = lam({ color: 0xc8382a });
-    const ROSE_ON = MONTH === 5 || MONTH === 6 || MONTH === 10 || (MONTH === 11 && NOW.getDate() <= 15);
+    const ROSE_ON = true;   // 都電沿いのバラはいつも咲いている姿にする
 
     // ======================= 大塚 =======================
     const A = stnFrame('大塚');
@@ -88,7 +88,7 @@ REGION({
       const [hx, hz] = J.w(78, 112); pushPrism('WOOD', 'WOOD', regularPoly(hx, hz, 2.6, 6), 0, 0.5); pushPrism('ROOF', 'ROOF', regularPoly(hx, hz, 3.0, 6), 3.0, 3.4, { solid: false });   // 六角浮見堂
       for (let k = 0; k < 6; k++) { const a = k / 6 * 6.283; bake(lam({ color: 0x5a4632 }), new THREE.CylinderGeometry(0.12, 0.12, 2.5, 4).translate(hx + Math.cos(a) * 2.3, 1.75, hz + Math.sin(a) * 2.3)); }
       { const [qx, qz] = J.w(80, 100); POND_LAND.push(['e', hx, hz, 3.2, 3.2], ['r', Math.min(hx, qx) - 1.2, Math.min(hz, qz) - 1.2, Math.max(hx, qx) + 1.2, Math.max(hz, qz) + 1.2]); }   // 浮見堂へ渡る
-      const LIT = (MONTH === 11 && NOW.getDate() >= 21) || (MONTH === 12 && NOW.getDate() <= 6), LL = glow(lam({ color: 0xffe0a0 }), '#ffc870', 1);
+      const LIT = true, LL = glow(lam({ color: 0xffe0a0 }), '#ffc870', 1);
       for (let k = 0; k < 40; k++) { const [x, z] = J.w(rr(43, 101), rr(91, 147)); if (Math.hypot(x - px, z - pz) < 17 || inPoly(J.rect(46, 128, 68, 148), x, z)) continue; MAPLES.push([x, z, rr(0.9, 1.2)]); if (LIT && k % 2) bake(LL, new THREE.SphereGeometry(0.28, 4, 3).translate(x, 0.5, z)); }
       LM_PEOPLE.push([[...J.w(100, 119), ...J.w(56, 104)], 4]);
     }

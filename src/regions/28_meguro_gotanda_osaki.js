@@ -12,7 +12,7 @@ REGION({
 
     // ===== 目黒川の桜並木 (両岸に桜。冬は五反田のあたりにイルミネーション) =====
     {
-      const R = RIVERS.find(q => q.name === '目黒川'), ILL = MONTH === 11 || MONTH === 12, LB = glow(lam({ color: 0xffc8e8 }), '#ffb0d8', 1.0);
+      const R = RIVERS.find(q => q.name === '目黒川'), ILL = true, LB = glow(lam({ color: 0xffc8e8 }), '#ffb0d8', 1.0);
       const okAt = (x, z) => { const gx = ((x % 100) + 100) % 100, gz = ((z % 100) + 100) % 100; return Math.min(gx, 100 - gx) > 13 && Math.min(gz, 100 - gz) > 13 && !(ringNearest(x, z)?.d < 20) && !inZone(x, z) && !isWaterXZ(x, z) && !BRIDGE_POLYS.some(([Pb]) => inPoly(Pb, x, z)); };
       for (let i = 0; i + 1 < R.pts.length - 2; i++) {
         const [ax, az] = R.pts[i], [bx, bz] = R.pts[i + 1], l = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / l, uz = (bz - az) / l;
@@ -89,7 +89,7 @@ REGION({
       oBox(G, 'GRASSTOP', -120, -112, -36, -150, 0, 6, { top: 'GRASSTOP' });   // 高台
       oRampV(G, 'TKSTONE', -82, -76, -112, -88, 6, 0);   // 高台から池へ下る石段 (スロープ)
       const [px, pz] = G.w(-80, -74); fe(px, pz, 22, 14, '#9a8e70'); PONDS.push([px, pz, 19, 11]); fe(px, pz, 19, 11, '#355e58');
-      const LIT = MONTH === 11 || (MONTH === 12 && NOW.getDate() <= 10), LL = glow(lam({ color: 0xffe0a0 }), '#ffd080', 1);
+      const LIT = true, LL = glow(lam({ color: 0xffe0a0 }), '#ffd080', 1);
       for (let k = 0; k < 70; k++) {
         const u = rr(-118, -38), v = rr(-52, -148), [x, z] = G.w(u, v); if (Math.hypot(x - px, z - pz) < 21 || inPoly(G.rect(-84, -86, -74, -114), x, z)) continue;
         if (v < -112) continue;   // 高台の上は見た目だけの木にする (下で植える)

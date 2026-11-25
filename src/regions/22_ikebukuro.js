@@ -137,7 +137,7 @@ REGION({
     oBox(F, RIK, 186, 350, 230, 386, 0, 13); oHip(F, 'RF0', 186, 350, 230, 386, 13, 4.5, { over: 0.5 });
     const IVY = lam({ color: 0x3e6a2e });
     for (let k = 0; k < 14; k++) { const u = rr(132, 204), [x, z] = F.w(u, 329.9); bake(IVY, new THREE.PlaneGeometry(rr(3, 6), rr(4, 9)).rotateY(Math.atan2(-F.vx, -F.vz)).translate(x, rr(3, 7), z)); }
-    const CED = lam({ color: 0x2e4a32 }), XMAS = MONTH === 12;
+    const CED = lam({ color: 0x2e4a32 }), XMAS = true;   // ヒマラヤスギの電飾は一年中つけておく
     for (const u of [150, 186]) {
       const [x, z] = F.w(u, 314);
       for (let i = 0; i < 4; i++) bake(CED, new THREE.ConeGeometry(6 - i * 1.3, 6, 8).translate(x, 3 + i * 4, z));

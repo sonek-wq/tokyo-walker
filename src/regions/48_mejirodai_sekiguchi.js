@@ -94,8 +94,8 @@ REGION({
       // 永青文庫 (細川家の美術品を収める)
       pushPrism(windows('MJ_EISEI', '#ece8dc', '#5a5a52', 6, 6), 'RF2', rectPoly(-2004, -3548, -1978, -3532), 0, 9);
       jRoof('RF2', -2004, -3548, -1978, -3532, 9, 2.4, { over: 0.6, kind: 'hip' });
-      // 雪吊り (冬。松に放射状の縄を張る)
-      const winter = MONTH === 12 || MONTH <= 2;
+      // 雪吊り (松に放射状の縄を張る。冬の風物詩だが、庭の見どころとしていつも張っておく)
+      const winter = true;
       const ROPE = lam({ color: 0xd8c8a0 });
       for (const [x, z] of [[-1990, -3470], [-1952, -3474], [-1958, -3444], [-1940, -3462]]) {
         PINES.push([x, z, 0.9]);

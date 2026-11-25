@@ -14,7 +14,7 @@ const LM_HEIGHT_AREAS = [];
 const POND_LAND = [];      // 池の中の歩ける所 (島・橋): ['e', cx, cz, rx, rz] (楕円) / ['r', x0, z0, x1, z1] (長方形)
 const inPondLand = (x, z) => POND_LAND.some(q => q[0] === 'e' ? inE(q.slice(1), x, z) : inR(q.slice(1), x, z));   // 高さで決まる地名 [名前, (x, z, y) => その場所か] (展望台など)
 const LM_CATS = [];       // ねこ [x, z, y]
-const LM_STREET = [];     // 季節で色が変わる街路樹 [x, z, s]
+const LM_STREET = [];     // 街路樹 [x, z, s] (色は場所で決まる。engine/13_trees.js の FOLIAGE)
 const LM_LABELS = [];     // 全体マップのラベル (MAP_LABELS と同じ形)
 const LM_PEOPLE = [];     // 歩く人 [[x0, z0, x1, z1, (高さ)], 人数, (いるときだけ true を返す関数)]
 const ROAD_STOPS = [];    // 信号で車が止まる交差点 { rect, red: ns => 赤信号か }

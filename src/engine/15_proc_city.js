@@ -159,7 +159,7 @@ function buildProc(ki, kj) {
     const pines = trees.filter(t => t[3] === 2), pi = pines.length ? new THREE.InstancedMesh(pPine, pCrownM, pines.length) : null; let pk = 0;
     trees.forEach(([x, z, s, type], i) => {
       d.position.set(x, 0, z); d.scale.setScalar(s); d.rotation.set(0, hash2(x | 0, z | 0) * 6, 0); d.updateMatrix(); tr.setMatrixAt(i, d.matrix);
-      const col = new THREE.Color(type === 0 ? SEASON.street[i % SEASON.street.length] : ['#4f8a38', '#5f9a40', '#3f7a32'][i % 3]);
+      const col = new THREE.Color((pc => pc[i % pc.length])(type === 0 ? streetColors(x, z) : GREEN));
       if (type === 2) { pi.setMatrixAt(pk, d.matrix); pi.setColorAt(pk++, new THREE.Color(['#2f5a2a', '#3a6630'][i % 2])); d.scale.setScalar(0); d.updateMatrix(); }
       cr.setMatrixAt(i, d.matrix); cr.setColorAt(i, col);
       sol(x - 0.5 * s, z - 0.5 * s, x + 0.5 * s, z + 0.5 * s, 0, 6.8 * s, true);

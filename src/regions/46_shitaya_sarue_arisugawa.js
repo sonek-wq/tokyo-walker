@@ -54,7 +54,7 @@ REGION({
       for (const sx of [-1, 1]) pushPrism('WOOD', 'WOOD', rectPoly(760 + sx * 4 - 0.3, -3899.3, 760 + sx * 4 + 0.3, -3898.7), 0, 3.6);
       jRoof('RF2', 754.5, -3900.5, 765.5, -3897.5, 3.6, 1.6, { over: 0.6, kind: 'irimoya' });
       tiles(756, -3911, 764, -3895, '#d2c8b0', '#c0b69e', 1.4);
-      if (MONTH === 7) {   // 朝顔まつり
+      {   // 朝顔まつり (入谷の名物なので、いつも鉢を並べておく)
         const POT = lam({ color: 0x8a5a3a }), LF = lam({ color: 0x3a7a34 }), FLW = [0x4a5ad8, 0xc84a9a, 0x8a4ad0, 0xe8e8f8];
         for (let z = -3893; z > -3940; z -= 2.2) for (const x of [738.5, 781.5]) {
           bake(POT, new THREE.CylinderGeometry(0.35, 0.25, 0.4, 8).translate(x, 0.2, z));
@@ -80,7 +80,7 @@ REGION({
       const WD = lam({ color: 0x8a7050 }), VN = lam({ color: 0x4a8a3a });
       for (const [dx, dz] of [[0, 0], [8, 0], [0, 6], [8, 6]]) bake(WD, new THREE.BoxGeometry(0.15, 2.2, 0.15).translate(610 + dx, 1.1, -4036 + dz));
       bake(VN, new THREE.BoxGeometry(8.4, 0.2, 6.4).translate(614, 2.25, -4033));
-      if (MONTH >= 7 && MONTH <= 10) for (let k = 0; k < 6; k++) bake(lam({ color: 0x6a9a3a }), new THREE.CylinderGeometry(0.12, 0.1, 0.8, 6).translate(611 + rr(0, 6), 1.7, -4035 + rr(0, 4)));
+      for (let k = 0; k < 6; k++) bake(lam({ color: 0x6a9a3a }), new THREE.CylinderGeometry(0.12, 0.1, 0.8, 6).translate(611 + rr(0, 6), 1.7, -4035 + rr(0, 4)));
       trees(R, 4, ROUND, (x, z) => inR([604, -4058, 630, -4028], x, z), 0.6, 0.8);
       spot('子規庵', R, '子規庵', '🖋', '俳人・正岡子規が亡くなるまで暮らした家。病気で寝たきりになってからも、多くの俳人や歌人が集まり、俳句や短歌を新しくする運動の中心になった。戦争で焼けたあと建て直され、庭には子規が句に詠んだヘチマの棚がある');
     }
@@ -93,7 +93,7 @@ REGION({
       tiles(1165, -4140, 1175, -4108, '#d2c8b0', '#c0b69e', 1.5);
       pushPrism('TKSTONE', 'TKSTONE', rectPoly(1150, -4166, 1190, -4140), 0, 0.7);
       hall([1154, -4162, 1186, -4146], SHU, 0.7, 5.5, 'RF_COPPER', 5.5);
-      if (MONTH === 11) {   // 酉の市: 熊手の店
+      {   // 酉の市: 熊手の店 (鷲神社の名物なので、いつも出しておく)
         const KM = LM_MAT('SH_KUMADE', (x, y) => {
           x.fillStyle = '#3a2a1a'; x.fillRect(0, 0, 32, 32); y.fillStyle = '#000'; y.fillRect(0, 0, 32, 32);
           for (let i = 0; i < 2; i++) for (let j = 0; j < 2; j++) {

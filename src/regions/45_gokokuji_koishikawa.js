@@ -78,7 +78,7 @@ REGION({
       const AP = [-870, -3780];
       bake(lam({ color: 0x5a4430 }), new THREE.CylinderGeometry(0.25, 0.32, 2, 6).translate(AP[0], 1, AP[1]));
       bake(lam({ color: 0x4a7a34 }), new THREE.DodecahedronGeometry(2.2, 0).translate(AP[0], 3.1, AP[1]));
-      if (MONTH >= 8 && MONTH <= 10) for (let k = 0; k < 10; k++) bake(lam({ color: 0xc8282a }), new THREE.SphereGeometry(0.22, 6, 4).translate(AP[0] + rr(-1.9, 1.9), rr(2.2, 3.8), AP[1] + rr(-1.9, 1.9)));
+      for (let k = 0; k < 10; k++) bake(lam({ color: 0xc8282a }), new THREE.SphereGeometry(0.22, 6, 4).translate(AP[0] + rr(-1.9, 1.9), rr(2.2, 3.8), AP[1] + rr(-1.9, 1.9)));
       solid(AP[0] - 0.4, AP[1] - 0.4, AP[0] + 0.4, AP[1] + 0.4, 0, 2.6);
       const WD = lam({ color: 0x6a5238 }), VINE = lam({ color: 0x5a8a3a });
       for (const [dx, dz] of [[0, 0], [8, 0], [0, 5], [8, 5]]) bake(WD, new THREE.BoxGeometry(0.25, 2.4, 0.25).translate(-860 + dx, 1.2, -3786 + dz));

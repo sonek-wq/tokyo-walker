@@ -62,8 +62,8 @@ REGION({
       // 正面入口 (駅の側) の門
       pushPrism(KOKU, 'RF_COPPER', rectPoly(1205, -2648, 1233, -2640), 0, 7); jRoof('RF_COPPER', 1203, -2650, 1235, -2638, 7, 3, { over: 1.2 });
       const ks = glow(lam({ map: textTex('國技館', '#f4efe2', '#2a2a2a', 128, 30) }), 0xffffff, 0.5); mesh(new THREE.PlaneGeometry(7, 1.6), ks, 1219, 5.6, -2639.9);
-      // 本場所 (1月・5月・9月) の月は、のぼりと櫓
-      if ([1, 5, 9].includes(MONTH)) {
+      // 本場所のときの、のぼりと櫓 (両国の名物なので、いつも立てておく)
+      {
         const cols = [0xc82a2a, 0x2a5aa8, 0xe8c030, 0x2a8a4a, 0xf0ece0, 0x8a3aa0];
         cols.forEach((c, i) => { if (!WALL['RG_NOBORI' + i]) WALL['RG_NOBORI' + i] = lam({ color: c }); });
         for (let x = 1112; x < 1268; x += 4.5) for (const z of [-2636, -2626]) { pushPrism('BRONZE', null, rectPoly(x - 0.06, z - 0.06, x + 0.06, z + 0.06), 0, 6, { solid: false }); const k = 'RG_NOBORI' + Math.floor(rnd() * cols.length); pushPrism(k, k, rectPoly(x + 0.06, z - 0.03, x + 0.96, z + 0.03), 1.5, 5.7, { solid: false }); }

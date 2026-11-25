@@ -702,7 +702,7 @@ STATION({
       water(PC[0], PC[1], 92, 118);
       POND_LAND.push(['e', PC[0], PC[1], 20, 15], ['r', 126, PC[1] - 4, 206, PC[1] + 4]);
       DL.push({ bb: [PC[0] - 20, PC[1] - 15, 206, PC[1] + 15], f: g => { g.fillStyle = '#b8ae98'; g.beginPath(); g.ellipse(PC[0], PC[1], 20, 15, 0, 0, 7); g.fill(); g.fillRect(126, PC[1] - 4, 80, 8); } });
-      for (let k = 0; k < 60; k++) { const a = rr(0, 6.28), r = rr(0.2, 0.95), x = PC[0] + Math.cos(a) * 86 * r, z = PC[1] + 30 + Math.abs(Math.sin(a)) * 80 * r; if (z > PC[1] + 20 && Math.hypot((x - PC[0]) / 92, (z - PC[1]) / 118) < 0.95) DL.push({ bb: [x - 5, z - 5, x + 5, z + 5], f: g => { g.fillStyle = MONTH >= 6 && MONTH <= 9 ? '#4a8a3a' : '#6a7a4a'; g.beginPath(); g.arc(x, z, rr(2.5, 4.5), 0, 7); g.fill(); } }); }   // 蓮
+      for (let k = 0; k < 60; k++) { const a = rr(0, 6.28), r = rr(0.2, 0.95), x = PC[0] + Math.cos(a) * 86 * r, z = PC[1] + 30 + Math.abs(Math.sin(a)) * 80 * r; if (z > PC[1] + 20 && Math.hypot((x - PC[0]) / 92, (z - PC[1]) / 118) < 0.95) DL.push({ bb: [x - 5, z - 5, x + 5, z + 5], f: g => { g.fillStyle = '#4a8a3a'; g.beginPath(); g.arc(x, z, rr(2.5, 4.5), 0, 7); g.fill(); if (k % 3 === 0) { g.fillStyle = '#f0a8c0'; g.beginPath(); g.arc(x + 1, z - 1, 0.9, 0, 7); g.fill(); } /* ハスの葉と花 (いつも夏の姿) */ } }); }   // 蓮
       pushPrism(STONE, STONE, regularPoly(PC[0], PC[1], 9, 8), 0, 0.8);
       pushPrism(SHU, 'ROOF', regularPoly(PC[0], PC[1], 6, 8), 0.8, 5.5);
       mesh(new THREE.ConeGeometry(9, 4.5, 8), WALL[KAWARA], PC[0], 7.6, PC[1]); polySolid(regularPoly(PC[0], PC[1], 5, 8), 5.5, 8);
@@ -3293,9 +3293,9 @@ REGION({
     });
     const water = (cx, cz, rx, rz) => { PONDS.push([cx, cz, rx, rz]); fe(cx, cz, rx, rz, '#2d6585'); };
     const C = [-1938, -610];
-    // 冬 (11月〜12月) の夜だけ灯るイルミネーション
+    // 夜に灯るイルミネーション
     const ILLUM = lam({ color: 0xbcd8ff, emissive: 0x9cc8ff, emissiveIntensity: 0 }), ILLUM2 = lam({ color: 0xfff4e0, emissive: 0xffe8c0, emissiveIntensity: 0 });
-    LM_UPDATERS.push(() => { const on = (MONTH === 11 || MONTH === 12) && NIGHT > 0.3 ? 1.4 : 0; ILLUM.emissiveIntensity = on; ILLUM2.emissiveIntensity = on; });
+    LM_UPDATERS.push(() => { const on = NIGHT > 0.3 ? 1.4 : 0; ILLUM.emissiveIntensity = on; ILLUM2.emissiveIntensity = on; });
 
     // ===== 道路 (六本木通りと外苑東通り) と首都高3号渋谷線 =====
     LM_HEIGHT_AREAS.push(['六本木交差点', (x, z, y) => y < 3 && Math.hypot(x - C[0], z - C[1]) < 22]);
@@ -4219,7 +4219,7 @@ REGION({
   towns: [['外神田', 160, -2780], ['外神田一丁目', 230, -2700], ['神田須田町', 170, -2540], ['神田佐久間町', 400, -2660]],
   labels: [],
   build(r) {
-    const HOKO_ON = () => DOW === 0 && gameH >= 13 && gameH < (MONTH >= 4 && MONTH <= 9 ? 18 : 17);
+    const HOKO_ON = () => DOW === 0 && gameH >= 13 && gameH < 18;
     const CX0 = 180, CX1 = 200, CZ0 = -2925, CZ1 = -2642;   // 中央通り (歩行者天国の区間)
     acRoad([CX0, CZ0, CX1, CZ1], 'ns', '中央通り (秋葉原)', { trees: false });
     acRoad([CX0, -2604, CX1, -2430], 'ns', '中央通り (須田町)');
@@ -4519,8 +4519,8 @@ REGION({
       // 正面入口 (駅の側) の門
       pushPrism(KOKU, 'RF_COPPER', rectPoly(1205, -2648, 1233, -2640), 0, 7); jRoof('RF_COPPER', 1203, -2650, 1235, -2638, 7, 3, { over: 1.2 });
       const ks = glow(lam({ map: textTex('國技館', '#f4efe2', '#2a2a2a', 128, 30) }), 0xffffff, 0.5); mesh(new THREE.PlaneGeometry(7, 1.6), ks, 1219, 5.6, -2639.9);
-      // 本場所 (1月・5月・9月) の月は、のぼりと櫓
-      if ([1, 5, 9].includes(MONTH)) {
+      // 本場所のときの、のぼりと櫓 (両国の名物なので、いつも立てておく)
+      {
         const cols = [0xc82a2a, 0x2a5aa8, 0xe8c030, 0x2a8a4a, 0xf0ece0, 0x8a3aa0];
         cols.forEach((c, i) => { if (!WALL['RG_NOBORI' + i]) WALL['RG_NOBORI' + i] = lam({ color: c }); });
         for (let x = 1112; x < 1268; x += 4.5) for (const z of [-2636, -2626]) { pushPrism('BRONZE', null, rectPoly(x - 0.06, z - 0.06, x + 0.06, z + 0.06), 0, 6, { solid: false }); const k = 'RG_NOBORI' + Math.floor(rnd() * cols.length); pushPrism(k, k, rectPoly(x + 0.06, z - 0.03, x + 0.96, z + 0.03), 1.5, 5.7, { solid: false }); }
@@ -4715,7 +4715,7 @@ REGION({
   labels: [],
   build(r) {
     acRoad([30, -3262, 320, -3250], 'ew', '春日通り (切通坂)'); akRoad([-29, -3286], [34, -3256], 12, '春日通り (切通坂)', { walk: false, trees: false });   // 本郷 (東大の南) からつなぐ
-    const BR = WALL.BRONZE, SPRING = MONTH === 2 || MONTH === 3;
+    const BR = WALL.BRONZE, SPRING = true;   // 梅はいつも咲いている姿にする
     // ===== 湯島天神 (湯島天満宮。学問の神様・菅原道真をまつる) =====
     const T = [30, -3240, 112, -3165], TZ = -3203;
     {
@@ -4793,7 +4793,7 @@ REGION({
   towns: [['根津', -150, -3900], ['千駄木', -170, -4220], ['谷中', 0, -4150], ['上野桜木', 60, -3990], ['西日暮里三丁目', 40, -4380]],
   labels: [],
   build(r) {
-    const SHU = lam({ color: 0xc8382a }), BLK = lam({ color: 0x24201e }), GOLD = lam({ color: 0xd8b040, emissive: 0x302000 }), APRIL = MONTH === 4;
+    const SHU = lam({ color: 0xc8382a }), BLK = lam({ color: 0x24201e }), GOLD = lam({ color: 0xd8b040, emissive: 0x302000 }), APRIL = true;   // つつじはいつも咲いている姿にする
     if (!WALL.YN_SHU) WALL.YN_SHU = SHU; if (!WALL.YN_BLK) WALL.YN_BLK = BLK;
     // ===== 不忍通り (根津 → 千駄木) と団子坂 =====
     akRoad([-29, -3832], [-75, -3980], 16, '不忍通り (根津)');
@@ -5082,7 +5082,7 @@ REGION({
       'いちょう並木 (神宮外苑)': '黄葉の時期は「神宮外苑いちょう祭り」が開かれ、とても混む',
       '国立競技場 (MUFGスタジアム)': 'イベントのない日は、スタジアムツアーで中に入れることがある (日程は公式サイトで確認)',
     });
-    LM_ACH.push(['ichou', '🍂 黄金のトンネル', '黄葉の季節 (11〜12月) に、いちょう並木を歩く', () => (MONTH === 11 || MONTH === 12) && inR([EX - 21, IZ0, EX + 21, IZ1], P.x, P.z)],
+    LM_ACH.push(['ichou', '🍂 黄金のトンネル', '黄金色のいちょう並木を歩く', () => inR([EX - 21, IZ0, EX + 21, IZ1], P.x, P.z)],
       ['fujizuka', '🗻 小さな富士登山', '鳩森八幡神社の富士塚の頂上に立つ', () => P.y > 4.5 && Math.hypot(P.x + 2749, P.z + 1552) < 3]);
     bakeFlush();
   },
@@ -5529,7 +5529,7 @@ REGION({
     oBox(F, RIK, 186, 350, 230, 386, 0, 13); oHip(F, 'RF0', 186, 350, 230, 386, 13, 4.5, { over: 0.5 });
     const IVY = lam({ color: 0x3e6a2e });
     for (let k = 0; k < 14; k++) { const u = rr(132, 204), [x, z] = F.w(u, 329.9); bake(IVY, new THREE.PlaneGeometry(rr(3, 6), rr(4, 9)).rotateY(Math.atan2(-F.vx, -F.vz)).translate(x, rr(3, 7), z)); }
-    const CED = lam({ color: 0x2e4a32 }), XMAS = MONTH === 12;
+    const CED = lam({ color: 0x2e4a32 }), XMAS = true;   // ヒマラヤスギの電飾は一年中つけておく
     for (const u of [150, 186]) {
       const [x, z] = F.w(u, 314);
       for (let i = 0; i < 4; i++) bake(CED, new THREE.ConeGeometry(6 - i * 1.3, 6, 8).translate(x, 3 + i * 4, z));
@@ -5577,7 +5577,7 @@ REGION({
   build(r) {
     const BR = WALL.BRONZE, WH = lam({ color: 0xf0ece0 }), RED = lam({ color: 0xc8302a });
     const ENNICHI = NOW.getDate() % 10 === 4;   // 毎月4日・14日・24日は縁日
-    const BLOOM_TSUTSUJI = MONTH === 4 || MONTH === 5, SAKURA_ON = MONTH === 3 || MONTH === 4, ROSE_ON = MONTH === 5 || MONTH === 6 || MONTH === 10 || (MONTH === 11 && NOW.getDate() <= 15);
+    const BLOOM_TSUTSUJI = true, ROSE_ON = true;   // 季節では変えない: つつじもバラも、いちばん見ばえのする花の姿にする
     const flowerBush = (x, z, s, on, cols) => bake(lam({ color: on ? pick(cols) : 0x3e6a34 }), new THREE.SphereGeometry(s, 6, 4).scale(1, 0.6, 1).translate(x, s * 0.5, z));
 
     // ===== 巣鴨地蔵通り商店街 (「おばあちゃんの原宿」) =====
@@ -5636,7 +5636,7 @@ REGION({
     // ===== 六義園 (1695年に柳沢吉保がつくった、和歌の景色を写した大名庭園) =====
     const RG = FK.rect(0, -56, 190, -232), RGC = FK.w(96, -145);
     LM_ZONES.push(RG); polyFr(RG, '#6c9050');
-    const OPEN_SOMEI = [3, 4, 11, 12].includes(MONTH);   // 花見と紅葉の時期は染井門も開くことがある
+    const OPEN_SOMEI = false;   // 染井門はふだん閉まっている (出入りは正門から)
     {
       const w = (u0, v0, u1, v1) => oBox(FK, 'TKSTONE', u0, v0, u1, v1, 0, 2.4, { top: 'ROOF' });
       w(0, -56, 26, -57); w(OPEN_SOMEI ? 33 : 26, -56, 190, -57);              // 北 (染井門)
@@ -5804,9 +5804,9 @@ REGION({
         const a0 = k / 9 * Math.PI, a1 = (k + 1) / 9 * Math.PI, am = (a0 + a1) / 2, w = 2 * 22 * Math.sin((a1 - a0) / 2), [x, z] = F.w(181, -130 + Math.cos(am) * 22);
         bake(GL, new THREE.BoxGeometry(w, 0.05, 62).rotateZ(Math.atan2(-sv * Math.cos(am), Math.sin(am))).rotateY(F.ang).translate(x, Math.sin(am) * 22, z));
       }
-      // 冬 (11〜12月) は木に電飾
+      // 並木に電飾
       const ILL = glow(lam({ color: 0xfff0c0 }), '#ffe8a0', 1.0);
-      for (let u = 128; u < 296; u += 12) for (const v of [-74, -240]) { const [x, z] = F.w(u, v); ROUND.push([x, z, 1.0]); if (MONTH === 11 || MONTH === 12) for (let k = 0; k < 8; k++) bake(ILL, new THREE.SphereGeometry(0.15, 4, 3).translate(x + rr(-2, 2), rr(2.5, 6), z + rr(-2, 2))); }
+      for (let u = 128; u < 296; u += 12) for (const v of [-74, -240]) { const [x, z] = F.w(u, v); ROUND.push([x, z, 1.0]); for (let k = 0; k < 8; k++) bake(ILL, new THREE.SphereGeometry(0.15, 4, 3).translate(x + rr(-2, 2), rr(2.5, 6), z + rr(-2, 2))); }
     }
     oBox(F, GPT, 222, -96, 258, -132, 0, 167); oBox(F, 'CONC', 224, -98, 256, -130, 167, 168, { top: 'CONC' });
     frontSign(F, 240, -95.9, 1, 'YEBISU GARDEN PLACE', '#2a2a2a', '#e8c878', 18, 2.2, 12);
@@ -6210,7 +6210,7 @@ REGION({
 
     // ===== 目黒川の桜並木 (両岸に桜。冬は五反田のあたりにイルミネーション) =====
     {
-      const R = RIVERS.find(q => q.name === '目黒川'), ILL = MONTH === 11 || MONTH === 12, LB = glow(lam({ color: 0xffc8e8 }), '#ffb0d8', 1.0);
+      const R = RIVERS.find(q => q.name === '目黒川'), ILL = true, LB = glow(lam({ color: 0xffc8e8 }), '#ffb0d8', 1.0);
       const okAt = (x, z) => { const gx = ((x % 100) + 100) % 100, gz = ((z % 100) + 100) % 100; return Math.min(gx, 100 - gx) > 13 && Math.min(gz, 100 - gz) > 13 && !(ringNearest(x, z)?.d < 20) && !inZone(x, z) && !isWaterXZ(x, z) && !BRIDGE_POLYS.some(([Pb]) => inPoly(Pb, x, z)); };
       for (let i = 0; i + 1 < R.pts.length - 2; i++) {
         const [ax, az] = R.pts[i], [bx, bz] = R.pts[i + 1], l = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / l, uz = (bz - az) / l;
@@ -6287,7 +6287,7 @@ REGION({
       oBox(G, 'GRASSTOP', -120, -112, -36, -150, 0, 6, { top: 'GRASSTOP' });   // 高台
       oRampV(G, 'TKSTONE', -82, -76, -112, -88, 6, 0);   // 高台から池へ下る石段 (スロープ)
       const [px, pz] = G.w(-80, -74); fe(px, pz, 22, 14, '#9a8e70'); PONDS.push([px, pz, 19, 11]); fe(px, pz, 19, 11, '#355e58');
-      const LIT = MONTH === 11 || (MONTH === 12 && NOW.getDate() <= 10), LL = glow(lam({ color: 0xffe0a0 }), '#ffd080', 1);
+      const LIT = true, LL = glow(lam({ color: 0xffe0a0 }), '#ffd080', 1);
       for (let k = 0; k < 70; k++) {
         const u = rr(-118, -38), v = rr(-52, -148), [x, z] = G.w(u, v); if (Math.hypot(x - px, z - pz) < 21 || inPoly(G.rect(-84, -86, -74, -114), x, z)) continue;
         if (v < -112) continue;   // 高台の上は見た目だけの木にする (下で植える)
@@ -6364,7 +6364,7 @@ REGION({
   labels: [],
   build(r) {
     const WH = lam({ color: 0xf0ece0 }), STONE = lam({ color: 0x9a968c }), RED = lam({ color: 0xc8382a });
-    const ROSE_ON = MONTH === 5 || MONTH === 6 || MONTH === 10 || (MONTH === 11 && NOW.getDate() <= 15);
+    const ROSE_ON = true;   // 都電沿いのバラはいつも咲いている姿にする
 
     // ======================= 大塚 =======================
     const A = stnFrame('大塚');
@@ -6444,7 +6444,7 @@ REGION({
       const [hx, hz] = J.w(78, 112); pushPrism('WOOD', 'WOOD', regularPoly(hx, hz, 2.6, 6), 0, 0.5); pushPrism('ROOF', 'ROOF', regularPoly(hx, hz, 3.0, 6), 3.0, 3.4, { solid: false });   // 六角浮見堂
       for (let k = 0; k < 6; k++) { const a = k / 6 * 6.283; bake(lam({ color: 0x5a4632 }), new THREE.CylinderGeometry(0.12, 0.12, 2.5, 4).translate(hx + Math.cos(a) * 2.3, 1.75, hz + Math.sin(a) * 2.3)); }
       { const [qx, qz] = J.w(80, 100); POND_LAND.push(['e', hx, hz, 3.2, 3.2], ['r', Math.min(hx, qx) - 1.2, Math.min(hz, qz) - 1.2, Math.max(hx, qx) + 1.2, Math.max(hz, qz) + 1.2]); }   // 浮見堂へ渡る
-      const LIT = (MONTH === 11 && NOW.getDate() >= 21) || (MONTH === 12 && NOW.getDate() <= 6), LL = glow(lam({ color: 0xffe0a0 }), '#ffc870', 1);
+      const LIT = true, LL = glow(lam({ color: 0xffe0a0 }), '#ffc870', 1);
       for (let k = 0; k < 40; k++) { const [x, z] = J.w(rr(43, 101), rr(91, 147)); if (Math.hypot(x - px, z - pz) < 17 || inPoly(J.rect(46, 128, 68, 148), x, z)) continue; MAPLES.push([x, z, rr(0.9, 1.2)]); if (LIT && k % 2) bake(LL, new THREE.SphereGeometry(0.28, 4, 3).translate(x, 0.5, z)); }
       LM_PEOPLE.push([[...J.w(100, 119), ...J.w(56, 104)], 4]);
     }
@@ -7592,7 +7592,7 @@ REGION({
       hall([CX - 22, -2982, CX + 22, -2962], KS, 0.8, 5.5, 'RF_COPPER', 5);
       for (let dx = -20; dx <= 20; dx += 5) bake(lam({ color: 0x1e1a18 }), new THREE.BoxGeometry(0.5, 5.5, 0.5).translate(CX + dx, 3.55, -2961.6));
       // 藤棚 (4月下旬〜5月は紫の花房、ほかの季節は緑の葉)
-      const bloom = MONTH === 4 || MONTH === 5, FUJI = lam({ color: bloom ? 0xa682d8 : 0x5f8a3a }), POST = lam({ color: 0x6a5a48 });
+      const bloom = true, FUJI = lam({ color: bloom ? 0xa682d8 : 0x5f8a3a }), POST = lam({ color: 0x6a5a48 });
       for (const [x0, z0, x1, z1] of [[2158, -2902, 2198, -2890], [2222, -2902, 2262, -2890], [2158, -2942, 2198, -2930], [2222, -2942, 2262, -2930]]) {
         pushPrism(C('SL_FUJITANA', { color: 0x7a6650 }), C(bloom ? 'SL_FUJI_B' : 'SL_FUJI_G', { color: bloom ? 0xb894e4 : 0x6a9a44 }), rectPoly(x0, z0, x1, z1), 2.5, 2.75, { solid: false });
         for (let x = x0; x <= x1; x += 8) for (const z of [z0, z1]) bake(POST, new THREE.BoxGeometry(0.25, 2.5, 0.25).translate(x, 1.25, z));
@@ -8363,7 +8363,7 @@ REGION({
       jRoof('RF0', 1338, -1826, 1360, -1810, 3.6, 2.6, { over: 1.4, kind: 'irimoya' });
       // 築山「富士山」 (園内でいちばん高い築山。つつじが植わる)
       hill(1328, -1742, 13, 5.5);
-      for (let k = 0; k < 18; k++) { const a = rr(0, 6.28), d = rr(3, 11); bake(lam({ color: MONTH === 4 || MONTH === 5 ? 0xe0508a : 0x3e6a34 }), new THREE.DodecahedronGeometry(0.8, 0).scale(1, 0.6, 1).translate(1328 + Math.cos(a) * d, 5.5 * (1 - d / 13) + 0.3, -1742 + Math.sin(a) * d)); }
+      for (let k = 0; k < 18; k++) { const a = rr(0, 6.28), d = rr(3, 11); bake(lam({ color: 0xe0508a }), new THREE.DodecahedronGeometry(0.8, 0).scale(1, 0.6, 1).translate(1328 + Math.cos(a) * d, 5.5 * (1 - d / 13) + 0.3, -1742 + Math.sin(a) * d)); }
       // 名石と石灯籠
       for (let k = 0; k < 14; k++) { const a = rr(0, 6.28), x = PX + Math.cos(a) * (PRX + rr(5, 12)), z = PZ + Math.sin(a) * (PRZ + rr(5, 10)); if (!inR(R, x, z, -3) || Math.hypot(x - 1328, z + 1742) < 15) continue;
         bake(lam({ color: k === 0 ? 0x9a3a2a : pick([0x8a8478, 0x6a7078, 0x9a9488]) }), new THREE.DodecahedronGeometry(rr(0.7, 1.4), 0).scale(1.3, 0.8, 1).translate(x, 0.4, z)); }   // 佐渡の赤玉石もある
@@ -8588,7 +8588,7 @@ REGION({
       const AP = [-870, -3780];
       bake(lam({ color: 0x5a4430 }), new THREE.CylinderGeometry(0.25, 0.32, 2, 6).translate(AP[0], 1, AP[1]));
       bake(lam({ color: 0x4a7a34 }), new THREE.DodecahedronGeometry(2.2, 0).translate(AP[0], 3.1, AP[1]));
-      if (MONTH >= 8 && MONTH <= 10) for (let k = 0; k < 10; k++) bake(lam({ color: 0xc8282a }), new THREE.SphereGeometry(0.22, 6, 4).translate(AP[0] + rr(-1.9, 1.9), rr(2.2, 3.8), AP[1] + rr(-1.9, 1.9)));
+      for (let k = 0; k < 10; k++) bake(lam({ color: 0xc8282a }), new THREE.SphereGeometry(0.22, 6, 4).translate(AP[0] + rr(-1.9, 1.9), rr(2.2, 3.8), AP[1] + rr(-1.9, 1.9)));
       solid(AP[0] - 0.4, AP[1] - 0.4, AP[0] + 0.4, AP[1] + 0.4, 0, 2.6);
       const WD = lam({ color: 0x6a5238 }), VINE = lam({ color: 0x5a8a3a });
       for (const [dx, dz] of [[0, 0], [8, 0], [0, 5], [8, 5]]) bake(WD, new THREE.BoxGeometry(0.25, 2.4, 0.25).translate(-860 + dx, 1.2, -3786 + dz));
@@ -8686,7 +8686,7 @@ REGION({
       for (const sx of [-1, 1]) pushPrism('WOOD', 'WOOD', rectPoly(760 + sx * 4 - 0.3, -3899.3, 760 + sx * 4 + 0.3, -3898.7), 0, 3.6);
       jRoof('RF2', 754.5, -3900.5, 765.5, -3897.5, 3.6, 1.6, { over: 0.6, kind: 'irimoya' });
       tiles(756, -3911, 764, -3895, '#d2c8b0', '#c0b69e', 1.4);
-      if (MONTH === 7) {   // 朝顔まつり
+      {   // 朝顔まつり (入谷の名物なので、いつも鉢を並べておく)
         const POT = lam({ color: 0x8a5a3a }), LF = lam({ color: 0x3a7a34 }), FLW = [0x4a5ad8, 0xc84a9a, 0x8a4ad0, 0xe8e8f8];
         for (let z = -3893; z > -3940; z -= 2.2) for (const x of [738.5, 781.5]) {
           bake(POT, new THREE.CylinderGeometry(0.35, 0.25, 0.4, 8).translate(x, 0.2, z));
@@ -8712,7 +8712,7 @@ REGION({
       const WD = lam({ color: 0x8a7050 }), VN = lam({ color: 0x4a8a3a });
       for (const [dx, dz] of [[0, 0], [8, 0], [0, 6], [8, 6]]) bake(WD, new THREE.BoxGeometry(0.15, 2.2, 0.15).translate(610 + dx, 1.1, -4036 + dz));
       bake(VN, new THREE.BoxGeometry(8.4, 0.2, 6.4).translate(614, 2.25, -4033));
-      if (MONTH >= 7 && MONTH <= 10) for (let k = 0; k < 6; k++) bake(lam({ color: 0x6a9a3a }), new THREE.CylinderGeometry(0.12, 0.1, 0.8, 6).translate(611 + rr(0, 6), 1.7, -4035 + rr(0, 4)));
+      for (let k = 0; k < 6; k++) bake(lam({ color: 0x6a9a3a }), new THREE.CylinderGeometry(0.12, 0.1, 0.8, 6).translate(611 + rr(0, 6), 1.7, -4035 + rr(0, 4)));
       trees(R, 4, ROUND, (x, z) => inR([604, -4058, 630, -4028], x, z), 0.6, 0.8);
       spot('子規庵', R, '子規庵', '🖋', '俳人・正岡子規が亡くなるまで暮らした家。病気で寝たきりになってからも、多くの俳人や歌人が集まり、俳句や短歌を新しくする運動の中心になった。戦争で焼けたあと建て直され、庭には子規が句に詠んだヘチマの棚がある');
     }
@@ -8725,7 +8725,7 @@ REGION({
       tiles(1165, -4140, 1175, -4108, '#d2c8b0', '#c0b69e', 1.5);
       pushPrism('TKSTONE', 'TKSTONE', rectPoly(1150, -4166, 1190, -4140), 0, 0.7);
       hall([1154, -4162, 1186, -4146], SHU, 0.7, 5.5, 'RF_COPPER', 5.5);
-      if (MONTH === 11) {   // 酉の市: 熊手の店
+      {   // 酉の市: 熊手の店 (鷲神社の名物なので、いつも出しておく)
         const KM = LM_MAT('SH_KUMADE', (x, y) => {
           x.fillStyle = '#3a2a1a'; x.fillRect(0, 0, 32, 32); y.fillStyle = '#000'; y.fillRect(0, 0, 32, 32);
           for (let i = 0; i < 2; i++) for (let j = 0; j < 2; j++) {
@@ -9037,8 +9037,8 @@ REGION({
       // 永青文庫 (細川家の美術品を収める)
       pushPrism(windows('MJ_EISEI', '#ece8dc', '#5a5a52', 6, 6), 'RF2', rectPoly(-2004, -3548, -1978, -3532), 0, 9);
       jRoof('RF2', -2004, -3548, -1978, -3532, 9, 2.4, { over: 0.6, kind: 'hip' });
-      // 雪吊り (冬。松に放射状の縄を張る)
-      const winter = MONTH === 12 || MONTH <= 2;
+      // 雪吊り (松に放射状の縄を張る。冬の風物詩だが、庭の見どころとしていつも張っておく)
+      const winter = true;
       const ROPE = lam({ color: 0xd8c8a0 });
       for (const [x, z] of [[-1990, -3470], [-1952, -3474], [-1958, -3444], [-1940, -3462]]) {
         PINES.push([x, z, 0.9]);
@@ -9175,7 +9175,7 @@ REGION({
       fe(1850, -4192, 12, 8, '#a89c80'); fe(1850, -4192, 10, 6.5, '#3a6a64'); PONDS.push([1850, -4192, 10, 6.5]);
       POND_LAND.push(['r', 1845, -4194, 1855, -4190]); bake(lam({ color: 0x8a6a48 }), new THREE.BoxGeometry(10, 0.3, 4).translate(1850, 0.25, -4192));   // 池の橋
       // 萩のトンネル (竹のアーチ)
-      const BAM = lam({ color: 0xa89060 }), HAGI = lam({ color: MONTH === 9 ? 0xc85a9a : 0x5a8a3a });
+      const BAM = lam({ color: 0xa89060 }), HAGI = lam({ color: 0xc85a9a });   // 萩はいつも咲いている姿にする
       for (let z = -4210; z < -4170; z += 3) { bake(BAM, new THREE.TorusGeometry(2.2, 0.08, 4, 10, Math.PI).translate(1878, 0, z)); for (let k = 0; k < 4; k++) bake(HAGI, new THREE.DodecahedronGeometry(0.6, 0).translate(1878 + rr(-2.2, 2.2), rr(1.2, 2.3), z + rr(-1, 1))); }
       // 庭門と茶亭
       for (const dx of [-2, 2]) pushPrism('WOOD', 'WOOD', rectPoly(1850 + dx - 0.2, -4157.4, 1850 + dx + 0.2, -4157), 0, 3);
@@ -9396,7 +9396,7 @@ REGION({
       pushPrism('ISHIGAKI', 'TKSTONE', rectPoly(-668, -4040, -632, -4010), 0, 1.6);
       hall([-662, -4034, -638, -4020], 'WOOD', 1.6, 4.6, 'RF_COPPER', 4.2);
       fujizuka(-631, -4034, 5, 4, 0);
-      const AJ = MONTH === 6 ? [0x4a6ad8, 0x8a5ad0, 0xd86aa8, 0x6a9ae8] : [0x3e6a34, 0x4a7a3a];
+      const AJ = [0x4a6ad8, 0x8a5ad0, 0xd86aa8, 0x6a9ae8];   // あじさいはいつも咲いている姿にする
       for (let k = 0; k < 60; k++) { const x = rr(-674, -626), z = rr(-4044, -3996); if (inR([-669, -4041, -631, -4009], x, z) || Math.abs(x + 650) < 5 || Math.hypot(x + 631, z + 4034) < 6) continue; bake(lam({ color: pick(AJ) }), new THREE.DodecahedronGeometry(rr(0.6, 0.9), 0).translate(x, 0.6, z)); }
       trees(R, 6, ROUND, (x, z) => inR([-670, -4042, -630, -4004], x, z) || Math.abs(x + 650) < 5);
       spot('白山神社', R, '白山神社', '⛩', '平安時代に加賀 (石川県) の白山神社を迎えたのが始まりと伝わる神社。6月の「文京あじさいまつり」では、境内からとなりの白山公園まで約3000株のあじさいが咲き、ふだんは入れない富士塚もあじさいに包まれる', -650, -4025);
@@ -9425,7 +9425,7 @@ REGION({
       pushPrism('ISHIGAKI', 'TKSTONE', rectPoly(-2222, -3158, -2178, -3126), 0, 2);
       gate([-2210, -3132, -2190, -3126], 7, 'RF_COPPER', 3.6);   // 楼門 (随神門)
       hall([-2214, -3154, -2186, -3138], SHU, 2, 6, 'RF_COPPER', 5);
-      if (MONTH === 12 || MONTH === 1) LM_PEOPLE.push([[-2200, -3100, -2200, -3150, 0], 12]);   // お守りを求める行列
+      LM_PEOPLE.push([[-2200, -3096, -2200, -3115, 0], 8]);   // お守り (一陽来復) を求めて石段の下に並ぶ人
       trees(R, 8, GINKGO, (x, z) => inR([-2220, -3160, -2180, -3114], x, z));
       spot('穴八幡宮', R, '穴八幡宮', '⛩', '1062年、源義家が奥州からの凱旋の途中に兜と太刀を納めてまつったのが始まりとされる。冬至から節分までだけ授かれる「一陽来復」のお守りが有名で、その時期には長い行列ができる', -2200, -3140);
     }
@@ -9781,6 +9781,94 @@ REGION({
       spot('播磨坂', R, '播磨坂', '🌸', 'この地にあった松平播磨守の上屋敷にちなんだ名前の坂。1960年に坂を舗装したとき、「全区を花でうずめる運動」で桜の若木が植えられ、いまは約120本の桜並木になった。中央は彫刻の置かれた緑道', -1230, -3700);
       SPOT_AREAS.unshift(['鬱金桜 (播磨坂)', UK[0] - 3, UK[1] - 3, UK[0] + 3, UK[1] + 3]);
       LM_NOTES['鬱金桜 (播磨坂)'] = '播磨坂にはソメイヨシノのほかに、淡い黄緑色の花を咲かせる八重桜「鬱金(うこん)桜」など、めずらしい桜も植えられている';
+    }
+    bakeFlush();
+  },
+});
+/* 北の丸・向島・両国に名所を追加
+   - 東京国立近代美術館 (北の丸公園の東、皇居東御苑の北。日本で最初の国立美術館)
+   - 三囲神社 (向島。隅田公園の東。三柱鳥居と、池袋の三越にあったライオン像)
+   - 刀剣博物館 (両国。旧安田庭園の北。旧両国公会堂の形を受け継いだ円筒の建物) */
+REGION({
+  name: '近代美術館・三囲神社・刀剣博物館',
+  towns: [['向島二丁目', 1800, -3770]],
+  labels: [],
+  build(r) {
+    const { spot, sign, SHU, hall, windows, TREE_LISTS } = SL_KIT();
+    const site = (R, col) => { LM_ZONES.push(rectPoly(...R)); for (const A of TREE_LISTS) { const keep = A.filter(p => !inR(R, p[0], p[1])); A.length = 0; A.push(...keep); } if (col) fr(...R, col); };
+
+    // ===== 東京国立近代美術館 =====
+    {
+      const R = [-698, -2514, -606, -2454];
+      site(R, '#c8c2b4');
+      tiles(-698, -2514, -606, -2506, '#bab4a6', '#aca698', 2);   // 北側の歩道
+      const WL = windows('KM_MOMAT', '#6e6a62', '#3a4048', 8, 3);
+      if (!WALL.KM_MOMATG) WALL.KM_MOMATG = lam({ color: 0x5a6e7a, emissive: 0x101820 });
+      pushPrism('KM_MOMATG', 'CONC', rectPoly(-686, -2500, -620, -2472), 0, 4.5);   // 1階: ガラス張りのロビー
+      pushPrism(WL, 'CONC', rectPoly(-690, -2504, -616, -2468), 4.5, 15);
+      pushPrism('CONC', 'CONC', rectPoly(-694, -2508, -612, -2464), 15, 15.8);   // 水平に張り出す屋根
+      pushPrism('CONC', 'CONC', rectPoly(-670, -2496, -636, -2476), 15.8, 19);   // 屋上の「眺めのよい部屋」
+      for (const x of [-674, -632]) pushPrism('CONC', 'CONC', rectPoly(x - 0.6, -2507, x + 0.6, -2505.8), 0, 15);   // 庇を支える柱
+      sign(-653, -2507.5, -1, '東京国立近代美術館', 14, 2.2, '#2a2a28', '#f0ece0');
+      for (let x = -694; x < -608; x += 9) ROUND.push([x, -2459, rr(1, 1.3)]);
+      LM_PEOPLE.push([[-696, -2510, -608, -2510], 6]);
+      spot('東京国立近代美術館', R, '近代美術館', '🖼', '1952年に日本で最初の国立美術館として京橋で開館し、1969年にいまの北の丸公園へ移った。建物は谷口吉郎の設計。入口の前には、空を指さすような2本の柱、イサム・ノグチの彫刻「門」が立つ', -653, -2486);
+    }
+
+    // ===== 三囲神社 (向島) =====
+    {
+      const R = [1728, -3802, 1792, -3746], CZ = -3774;
+      site(R, '#c4bca6');
+      tiles(1728, CZ - 4, 1768, CZ + 4, '#d2c8b0', '#c0b69e', 1.4);
+      myojinTorii(1734, CZ, false, 5, 6, WALL.TKSTONE, 0.32);   // 墨堤に面した石の鳥居
+      pushPrism('TKSTONE', 'TKSTONE', rectPoly(1766, CZ - 12, 1790, CZ + 12), 0, 0.8);
+      hall([1770, CZ - 9, 1788, CZ + 9], 'WOOD', 0.8, 5, 'RF_COPPER', 4.6);
+      // 三柱鳥居: 3つの鳥居を三角形に組み合わせた珍しい形
+      {
+        const cx = 1748, cz = -3792, Rr = 2.2, H = 3.4, M = WALL.TKSTONE, P = [];
+        for (let k = 0; k < 3; k++) { const a = k / 3 * Math.PI * 2 + Math.PI / 2; P.push([cx + Math.cos(a) * Rr, cz + Math.sin(a) * Rr]); }
+        for (const [x, z] of P) { bake(M, new THREE.CylinderGeometry(0.16, 0.2, H, 8).translate(x, H / 2, z)); solid(x - 0.2, z - 0.2, x + 0.2, z + 0.2, 0, H); }
+        for (let k = 0; k < 3; k++) {
+          const [ax, az] = P[k], [bx, bz] = P[(k + 1) % 3], L = Math.hypot(bx - ax, bz - az) + 0.8, ang = Math.atan2(bz - az, bx - ax);
+          bake(M, new THREE.BoxGeometry(L, 0.22, 0.3).rotateY(-ang).translate((ax + bx) / 2, H + 0.1, (az + bz) / 2));       // 笠木
+          bake(M, new THREE.BoxGeometry(L - 0.9, 0.14, 0.18).rotateY(-ang).translate((ax + bx) / 2, H - 0.6, (az + bz) / 2)); // 貫
+        }
+        pushPrism('TKSTONE', 'TKSTONE', regularPoly(cx, cz, 0.6, 8), 0, 0.7);   // 中央の石
+        SPOT_AREAS.unshift(['三柱鳥居 (三囲神社)', cx - 4, cz - 4, cx + 4, cz + 4]);
+        LM_NOTES['三柱鳥居 (三囲神社)'] = '3つの鳥居を上から見て三角形になるように組み合わせた、めずらしい形の鳥居。三井家の屋敷にあったものが神社に寄贈された';
+      }
+      // ライオン像 (池袋の三越にあったもの)
+      {
+        const lx = 1750, lz = -3757, BR = WALL.BRONZE;
+        pushPrism('TKSTONE', 'TKSTONE', rectPoly(lx - 1.2, lz - 2.2, lx + 1.2, lz + 2.2), 0, 1.2);
+        bake(BR, new THREE.BoxGeometry(1.4, 0.7, 3.2).translate(lx, 1.55, lz + 0.2));      // 伏せた体
+        bake(BR, new THREE.BoxGeometry(1.2, 1.2, 1.0).translate(lx, 2.1, lz - 1.3));       // たてがみ
+        bake(BR, new THREE.BoxGeometry(0.7, 0.6, 0.5).translate(lx, 2.0, lz - 1.95));      // 鼻づら
+        for (const s of [-1, 1]) bake(BR, new THREE.BoxGeometry(0.35, 0.3, 1.1).translate(lx + s * 0.45, 1.35, lz - 2.0));   // 前足
+        SPOT_AREAS.unshift(['三囲神社のライオン像', lx - 3, lz - 3, lx + 3, lz + 3]);
+        LM_NOTES['三囲神社のライオン像'] = '池袋の三越の玄関にいたライオン像。店が閉まったあと、三井家とゆかりの深いこの神社にやってきた';
+      }
+      // コンコンさん (狐の像)
+      for (const s of [-1, 1]) { const x = 1764, z = CZ + s * 6; pushPrism('TKSTONE', 'TKSTONE', rectPoly(x - 0.6, z - 0.6, x + 0.6, z + 0.6), 0, 1.1); const W = lam({ color: 0xe8e4da }); bake(W, new THREE.BoxGeometry(0.5, 0.8, 0.7).translate(x, 1.5, z)); bake(W, new THREE.ConeGeometry(0.28, 0.6, 4).rotateZ(Math.PI / 2).translate(x - 0.5, 2.0, z)); }
+      GINKGO.push([1736, -3798, 1.2], [1786, -3798, 1.1], [1736, -3750, 1.1]);
+      for (let k = 0; k < 8; k++) { const x = rr(1740, 1790), z = rr(-3800, -3748); if (Math.abs(z - CZ) > 12 && !inR([1742, -3798, 1756, -3786], x, z) && !inR([1746, -3762, 1756, -3752], x, z)) ROUND.push([x, z, rr(0.9, 1.2)]); }
+      LM_PEOPLE.push([[1730, CZ + 1.5, 1766, CZ + 1.5], 4]);
+      spot('三囲神社', R, '三囲神社', '⛩', '名前は、土の中から見つかった神像のまわりを白い狐が3回めぐったという言い伝えから。「囲」の字が「井」を囲むことから「三井を守る」とされ、江戸時代から三井家の守り神としてあつく信仰されてきた', 1779, CZ);
+    }
+
+    // ===== 刀剣博物館 (両国。旧安田庭園の北) =====
+    {
+      const R = [1250, -2808, 1290, -2770];
+      site(R, '#c8c4b8');
+      const WH = windows('RG_TOKEN', '#e4e2dc', '#4a525a', 6, 2);
+      pushPrism(WH, 'CONC', rectPoly(1252, -2802, 1288, -2786), 0, 9);   // 東西にのびる翼部
+      pushPrism(WH, 'CONC', regularPoly(1270, -2780, 7, 20), 0, 12);   // 庭園の池に向かって張り出す円筒部
+      // 最上階の展示室は、かまぼこ型のヴォールト屋根 (屋上庭園になっている)
+      const v = new THREE.CylinderGeometry(4.5, 4.5, 34, 16, 1, false, 0, Math.PI).rotateZ(Math.PI / 2).rotateX(Math.PI / 2);
+      bake(lam({ color: 0xd8d8d2 }), v.translate(1270, 9, -2794));
+      solid(1252, -2798.5, 1288, -2789.5, 9, 13.5);
+      sign(1270, -2803, -1, '刀剣博物館', 9, 1.8, '#f0ece0', '#2a2a28');
+      spot('刀剣博物館', R, '刀剣博物館', '⚔', '日本刀を守り伝える博物館。1968年に代々木で開館し、2018年に旧安田庭園の中の旧両国公会堂の跡地へ移った。池に張り出した円筒形の部分は、大正時代の公会堂の形を受け継いでいる', 1270, -2794);
     }
     bakeFlush();
   },
@@ -11774,7 +11862,7 @@ const LM_HEIGHT_AREAS = [];
 const POND_LAND = [];      // 池の中の歩ける所 (島・橋): ['e', cx, cz, rx, rz] (楕円) / ['r', x0, z0, x1, z1] (長方形)
 const inPondLand = (x, z) => POND_LAND.some(q => q[0] === 'e' ? inE(q.slice(1), x, z) : inR(q.slice(1), x, z));   // 高さで決まる地名 [名前, (x, z, y) => その場所か] (展望台など)
 const LM_CATS = [];       // ねこ [x, z, y]
-const LM_STREET = [];     // 季節で色が変わる街路樹 [x, z, s]
+const LM_STREET = [];     // 街路樹 [x, z, s] (色は場所で決まる。engine/13_trees.js の FOLIAGE)
 const LM_LABELS = [];     // 全体マップのラベル (MAP_LABELS と同じ形)
 const LM_PEOPLE = [];     // 歩く人 [[x0, z0, x1, z1, (高さ)], 人数, (いるときだけ true を返す関数)]
 const ROAD_STOPS = [];    // 信号で車が止まる交差点 { rect, red: ns => 赤信号か }
@@ -12869,22 +12957,39 @@ function plant(list, crownGeo, colors, matOpt = {}) {
   list.forEach(([x, z, s], i) => {
     dummy.position.set(x, list[i][3] || 0, z); dummy.scale.setScalar(s); dummy.rotation.y = rr(0, 6); dummy.updateMatrix();
     trunk.setMatrixAt(i, dummy.matrix); crown.setMatrixAt(i, dummy.matrix);
-    crown.setColorAt(i, new THREE.Color(pick(colors)).multiplyScalar(rr(0.8, 1.15)));
+    crown.setColorAt(i, new THREE.Color(pick(typeof colors === 'function' ? colors(x, z) : colors)).multiplyScalar(rr(0.8, 1.15)));
     const ty = list[i][3] || 0; solid(x - 0.5 * s, z - 0.5 * s, x + 0.5 * s, z + 0.5 * s, ty, ty + 6.8 * s, true);
   });
   scene.add(trunk, crown);
 }
+// ---- 木の色は季節では変えず、場所ごとに決める: 緑が映える場所は緑、紅葉や黄葉が映える場所は紅葉・黄葉
+const GREEN = ['#4f8a38', '#5f9a40', '#3f7a32', '#58923c'];
+const KOUYOU = ['#c8402a', '#d8602a', '#b83020', '#e08a30', '#e0b038'];   // 紅葉 (赤・橙・黄が混ざる)
+const ICHOU = ['#e8c040', '#d8b030', '#f0d050', '#e0b838'];               // イチョウの黄葉
+// [名所の名前, 'momiji' (紅葉) | 'ichou' (黄葉), 園内の丸い木を色づかせる割合, 街路樹まで含める範囲の広げ方 (m)]
+// ここに無い場所は緑のまま (明治神宮の森・代々木公園・表参道やけやき坂のケヤキ並木など)
+const FOLIAGE = [
+  ['六義園', 'momiji', 0.6, 0], ['小石川後楽園', 'momiji', 0.6, 0], ['旧古河庭園', 'momiji', 0.5, 0], ['肥後細川庭園', 'momiji', 0.6, 0],
+  ['椿山荘の庭園', 'momiji', 0.5, 0], ['目白庭園', 'momiji', 0.6, 0], ['池田山公園', 'momiji', 0.6, 0], ['根津美術館の庭園', 'momiji', 0.6, 0],
+  ['八芳園の庭園', 'momiji', 0.5, 0], ['旧安田庭園', 'momiji', 0.5, 0], ['清澄庭園', 'momiji', 0.35, 0], ['日本庭園', 'momiji', 0.6, 0],
+  ['二の丸庭園', 'momiji', 0.5, 0], ['北の丸公園', 'momiji', 0.4, 0], ['有栖川宮記念公園', 'momiji', 0.45, 0], ['東京都庭園美術館', 'momiji', 0.4, 0],
+  ['大隈庭園', 'momiji', 0.4, 0], ['おとめ山公園', 'momiji', 0.45, 0], ['小石川植物園', 'momiji', 0.3, 0], ['殿ヶ谷戸庭園', 'momiji', 0.5, 0],
+  ['行幸通り', 'ichou', 1, 6], ['銀杏並木 (東大)', 'ichou', 1, 6], ['東京大学 本郷キャンパス', 'ichou', 0.35, 20], ['明治神宮外苑', 'ichou', 0.3, 20],
+  ['国会議事堂', 'ichou', 0.5, 40], ['国会前庭 (北庭)', 'ichou', 0.4, 12], ['国会前庭 (南庭)', 'ichou', 0.4, 12], ['日比谷公園', 'ichou', 0.25, 0],
+];
+const FOL_R = [];
+for (const [n, mode, p, pad] of FOLIAGE) for (const a of SPOT_AREAS) if (a[0] === n) FOL_R.push([a[1], a[2], a[3], a[4], mode, p, pad]);
+const folAt = (x, z, street) => FOL_R.find(r => inR(r, x, z, street ? r[6] : 0));
+const streetColors = (x, z) => { const f = folAt(x, z, true); return !f ? GREEN : f[4] === 'ichou' ? ICHOU : hash2((x * 7) | 0, (z * 7) | 0) < f[5] ? KOUYOU : GREEN; };   // 同じ場所はいつも同じ色
+// 紅葉・黄葉の名所の中の丸い木は、割合に応じてモミジやイチョウに植えかえる
+{ const keep = []; for (const t of ROUND) { const f = folAt(t[0], t[1]); if (f && rnd() < f[5]) (f[4] === 'ichou' ? GINKGO : MAPLES).push(t); else keep.push(t); } ROUND.length = 0; ROUND.push(...keep); }
 plant(PINES, new THREE.ConeGeometry(2.8, 4.2, 6).translate(0, 4.6, 0), ['#2f5a2a', '#3a6630', '#28502a']);
-plant(ROUND, new THREE.IcosahedronGeometry(2.3, 0).translate(0, 4.6, 0), ['#4f8a38', '#5f9a40', '#3f7a32']);
-plant(MAPLES, new THREE.IcosahedronGeometry(2.3, 0).translate(0, 4.6, 0), ['#c8402a', '#d8602a', '#b83020', '#e08a30']);
-plant(GINKGO, new THREE.ConeGeometry(3, 6, 7).translate(0, 5.4, 0), ['#e8c040', '#d8b030', '#f0d050']);
-const SEASON = MONTH >= 3 && MONTH <= 4 ? { name: '春', street: ['#f0b8cc', '#e8a8c0', '#f4c8d8', '#5f9a40'] }        // 桜
-  : MONTH >= 11 || MONTH === 12 ? { name: '秋', street: ['#e8c040', '#d8a830', '#e0b838', '#c86a28', '#5f9a40'] }    // イチョウ並木の黄葉
-  : MONTH >= 10 ? { name: '秋', street: ['#a8a038', '#7a9a38', '#c8902a'] }
-  : MONTH <= 2 ? { name: '冬', street: ['#6a7a4a', '#5a6a40', '#7a6a4a'] } : { name: '夏', street: ['#4f8a38', '#5f9a40', '#3f7a32'] };
+plant(ROUND, new THREE.IcosahedronGeometry(2.3, 0).translate(0, 4.6, 0), GREEN);
+plant(MAPLES, new THREE.IcosahedronGeometry(2.3, 0).translate(0, 4.6, 0), KOUYOU);
+plant(GINKGO, new THREE.ConeGeometry(3, 6, 7).translate(0, 5.4, 0), ICHOU);
 STREET.push(...LM_STREET);
-plant(STREET, new THREE.IcosahedronGeometry(2.3, 0).translate(0, 4.6, 0), SEASON.street);
-// 桜は花見の名所にだけ植えているので、季節に関係なく一年中満開にする (街路樹やイチョウ・モミジは季節で変わる)
+plant(STREET, new THREE.IcosahedronGeometry(2.3, 0).translate(0, 4.6, 0), streetColors);
+// 桜は花見の名所にだけ植えているので、いつも満開にする
 const SAKURA_PINK = ['#f6c4d4', '#f0b0c6', '#fad4e0', '#f4bccc', '#fbe2ea'];
 plant(SAKURA, new THREE.IcosahedronGeometry(2.5, 0).scale(1.25, 0.8, 1.25).translate(0, 4.4, 0), SAKURA_PINK, { emissive: 0x40242c });   // 影になる面も桜色に見えるよう、少し自分で光らせる
 // しだれ桜: 枝が垂れ下がった釣り鐘のような形
@@ -13194,7 +13299,7 @@ function buildProc(ki, kj) {
     const pines = trees.filter(t => t[3] === 2), pi = pines.length ? new THREE.InstancedMesh(pPine, pCrownM, pines.length) : null; let pk = 0;
     trees.forEach(([x, z, s, type], i) => {
       d.position.set(x, 0, z); d.scale.setScalar(s); d.rotation.set(0, hash2(x | 0, z | 0) * 6, 0); d.updateMatrix(); tr.setMatrixAt(i, d.matrix);
-      const col = new THREE.Color(type === 0 ? SEASON.street[i % SEASON.street.length] : ['#4f8a38', '#5f9a40', '#3f7a32'][i % 3]);
+      const col = new THREE.Color((pc => pc[i % pc.length])(type === 0 ? streetColors(x, z) : GREEN));
       if (type === 2) { pi.setMatrixAt(pk, d.matrix); pi.setColorAt(pk++, new THREE.Color(['#2f5a2a', '#3a6630'][i % 2])); d.scale.setScalar(0); d.updateMatrix(); }
       cr.setMatrixAt(i, d.matrix); cr.setColorAt(i, col);
       sol(x - 0.5 * s, z - 0.5 * s, x + 0.5 * s, z + 0.5 * s, 0, 6.8 * s, true);
@@ -14223,7 +14328,7 @@ notebookEl.addEventListener('click', e => { if (e.target === notebookEl && noteO
 LM_ACH.push(['hee', '💡 へぇの達人', '豆知識を30個集める (K で豆知識帳)', () => [...HEE].filter(n => NOTE_NAMES.includes(n)).length >= 30]);
 // 後から追加した名所も地名リスト・発見リストに反映
 for (const a of SPOT_AREAS) if (!AREAS.includes(a)) { AREAS.unshift(a); ALL_NAMES.add(a[0]); }
-function hokoActive() { return WEEKEND && gameH >= 12 && gameH < (MONTH >= 4 && MONTH <= 9 ? 18 : 17); }
+function hokoActive() { return WEEKEND && gameH >= 12 && gameH < 18; }
 // ---- ねこ (街のどこかに12匹)
 const CAT_DEF = [[-450, -760, 0], [-575, -951, 0], [-1380, 70, 0], [-1278, -628, 26], [-246, -321, 0], [-300, 200, 0], [232, 40, 0],
   [-14, -640, 0], [-819, 204, 0], [-1566, 183, 0], [-294, -700, 7], [-1270, -285, 7.5], [196, -905, 0], [-141, 200, 5.2], [155, -1243, 26]];

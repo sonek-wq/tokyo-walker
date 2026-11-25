@@ -8,7 +8,7 @@ REGION({
   build(r) {
     const BR = WALL.BRONZE, WH = lam({ color: 0xf0ece0 }), RED = lam({ color: 0xc8302a });
     const ENNICHI = NOW.getDate() % 10 === 4;   // 毎月4日・14日・24日は縁日
-    const BLOOM_TSUTSUJI = MONTH === 4 || MONTH === 5, SAKURA_ON = MONTH === 3 || MONTH === 4, ROSE_ON = MONTH === 5 || MONTH === 6 || MONTH === 10 || (MONTH === 11 && NOW.getDate() <= 15);
+    const BLOOM_TSUTSUJI = true, ROSE_ON = true;   // 季節では変えない: つつじもバラも、いちばん見ばえのする花の姿にする
     const flowerBush = (x, z, s, on, cols) => bake(lam({ color: on ? pick(cols) : 0x3e6a34 }), new THREE.SphereGeometry(s, 6, 4).scale(1, 0.6, 1).translate(x, s * 0.5, z));
 
     // ===== 巣鴨地蔵通り商店街 (「おばあちゃんの原宿」) =====
@@ -67,7 +67,7 @@ REGION({
     // ===== 六義園 (1695年に柳沢吉保がつくった、和歌の景色を写した大名庭園) =====
     const RG = FK.rect(0, -56, 190, -232), RGC = FK.w(96, -145);
     LM_ZONES.push(RG); polyFr(RG, '#6c9050');
-    const OPEN_SOMEI = [3, 4, 11, 12].includes(MONTH);   // 花見と紅葉の時期は染井門も開くことがある
+    const OPEN_SOMEI = false;   // 染井門はふだん閉まっている (出入りは正門から)
     {
       const w = (u0, v0, u1, v1) => oBox(FK, 'TKSTONE', u0, v0, u1, v1, 0, 2.4, { top: 'ROOF' });
       w(0, -56, 26, -57); w(OPEN_SOMEI ? 33 : 26, -56, 190, -57);              // 北 (染井門)

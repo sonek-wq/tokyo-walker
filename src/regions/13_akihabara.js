@@ -6,7 +6,7 @@ REGION({
   towns: [['外神田', 160, -2780], ['外神田一丁目', 230, -2700], ['神田須田町', 170, -2540], ['神田佐久間町', 400, -2660]],
   labels: [],
   build(r) {
-    const HOKO_ON = () => DOW === 0 && gameH >= 13 && gameH < (MONTH >= 4 && MONTH <= 9 ? 18 : 17);
+    const HOKO_ON = () => DOW === 0 && gameH >= 13 && gameH < 18;
     const CX0 = 180, CX1 = 200, CZ0 = -2925, CZ1 = -2642;   // 中央通り (歩行者天国の区間)
     acRoad([CX0, CZ0, CX1, CZ1], 'ns', '中央通り (秋葉原)', { trees: false });
     acRoad([CX0, -2604, CX1, -2430], 'ns', '中央通り (須田町)');

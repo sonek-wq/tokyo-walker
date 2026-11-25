@@ -6,7 +6,7 @@ REGION({
   towns: [['根津', -150, -3900], ['千駄木', -170, -4220], ['谷中', 0, -4150], ['上野桜木', 60, -3990], ['西日暮里三丁目', 40, -4380]],
   labels: [],
   build(r) {
-    const SHU = lam({ color: 0xc8382a }), BLK = lam({ color: 0x24201e }), GOLD = lam({ color: 0xd8b040, emissive: 0x302000 }), APRIL = MONTH === 4;
+    const SHU = lam({ color: 0xc8382a }), BLK = lam({ color: 0x24201e }), GOLD = lam({ color: 0xd8b040, emissive: 0x302000 }), APRIL = true;   // つつじはいつも咲いている姿にする
     if (!WALL.YN_SHU) WALL.YN_SHU = SHU; if (!WALL.YN_BLK) WALL.YN_BLK = BLK;
     // ===== 不忍通り (根津 → 千駄木) と団子坂 =====
     akRoad([-29, -3832], [-75, -3980], 16, '不忍通り (根津)');

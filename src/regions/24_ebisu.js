@@ -83,9 +83,9 @@ REGION({
         const a0 = k / 9 * Math.PI, a1 = (k + 1) / 9 * Math.PI, am = (a0 + a1) / 2, w = 2 * 22 * Math.sin((a1 - a0) / 2), [x, z] = F.w(181, -130 + Math.cos(am) * 22);
         bake(GL, new THREE.BoxGeometry(w, 0.05, 62).rotateZ(Math.atan2(-sv * Math.cos(am), Math.sin(am))).rotateY(F.ang).translate(x, Math.sin(am) * 22, z));
       }
-      // 冬 (11〜12月) は木に電飾
+      // 並木に電飾
       const ILL = glow(lam({ color: 0xfff0c0 }), '#ffe8a0', 1.0);
-      for (let u = 128; u < 296; u += 12) for (const v of [-74, -240]) { const [x, z] = F.w(u, v); ROUND.push([x, z, 1.0]); if (MONTH === 11 || MONTH === 12) for (let k = 0; k < 8; k++) bake(ILL, new THREE.SphereGeometry(0.15, 4, 3).translate(x + rr(-2, 2), rr(2.5, 6), z + rr(-2, 2))); }
+      for (let u = 128; u < 296; u += 12) for (const v of [-74, -240]) { const [x, z] = F.w(u, v); ROUND.push([x, z, 1.0]); for (let k = 0; k < 8; k++) bake(ILL, new THREE.SphereGeometry(0.15, 4, 3).translate(x + rr(-2, 2), rr(2.5, 6), z + rr(-2, 2))); }
     }
     oBox(F, GPT, 222, -96, 258, -132, 0, 167); oBox(F, 'CONC', 224, -98, 256, -130, 167, 168, { top: 'CONC' });
     frontSign(F, 240, -95.9, 1, 'YEBISU GARDEN PLACE', '#2a2a2a', '#e8c878', 18, 2.2, 12);

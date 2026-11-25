@@ -60,7 +60,7 @@ STATION({
       water(PC[0], PC[1], 92, 118);
       POND_LAND.push(['e', PC[0], PC[1], 20, 15], ['r', 126, PC[1] - 4, 206, PC[1] + 4]);
       DL.push({ bb: [PC[0] - 20, PC[1] - 15, 206, PC[1] + 15], f: g => { g.fillStyle = '#b8ae98'; g.beginPath(); g.ellipse(PC[0], PC[1], 20, 15, 0, 0, 7); g.fill(); g.fillRect(126, PC[1] - 4, 80, 8); } });
-      for (let k = 0; k < 60; k++) { const a = rr(0, 6.28), r = rr(0.2, 0.95), x = PC[0] + Math.cos(a) * 86 * r, z = PC[1] + 30 + Math.abs(Math.sin(a)) * 80 * r; if (z > PC[1] + 20 && Math.hypot((x - PC[0]) / 92, (z - PC[1]) / 118) < 0.95) DL.push({ bb: [x - 5, z - 5, x + 5, z + 5], f: g => { g.fillStyle = MONTH >= 6 && MONTH <= 9 ? '#4a8a3a' : '#6a7a4a'; g.beginPath(); g.arc(x, z, rr(2.5, 4.5), 0, 7); g.fill(); } }); }   // 蓮
+      for (let k = 0; k < 60; k++) { const a = rr(0, 6.28), r = rr(0.2, 0.95), x = PC[0] + Math.cos(a) * 86 * r, z = PC[1] + 30 + Math.abs(Math.sin(a)) * 80 * r; if (z > PC[1] + 20 && Math.hypot((x - PC[0]) / 92, (z - PC[1]) / 118) < 0.95) DL.push({ bb: [x - 5, z - 5, x + 5, z + 5], f: g => { g.fillStyle = '#4a8a3a'; g.beginPath(); g.arc(x, z, rr(2.5, 4.5), 0, 7); g.fill(); if (k % 3 === 0) { g.fillStyle = '#f0a8c0'; g.beginPath(); g.arc(x + 1, z - 1, 0.9, 0, 7); g.fill(); } /* ハスの葉と花 (いつも夏の姿) */ } }); }   // 蓮
       pushPrism(STONE, STONE, regularPoly(PC[0], PC[1], 9, 8), 0, 0.8);
       pushPrism(SHU, 'ROOF', regularPoly(PC[0], PC[1], 6, 8), 0.8, 5.5);
       mesh(new THREE.ConeGeometry(9, 4.5, 8), WALL[KAWARA], PC[0], 7.6, PC[1]); polySolid(regularPoly(PC[0], PC[1], 5, 8), 5.5, 8);

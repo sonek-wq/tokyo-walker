@@ -100,7 +100,7 @@ REGION({
       jRoof('RF0', 1338, -1826, 1360, -1810, 3.6, 2.6, { over: 1.4, kind: 'irimoya' });
       // 築山「富士山」 (園内でいちばん高い築山。つつじが植わる)
       hill(1328, -1742, 13, 5.5);
-      for (let k = 0; k < 18; k++) { const a = rr(0, 6.28), d = rr(3, 11); bake(lam({ color: MONTH === 4 || MONTH === 5 ? 0xe0508a : 0x3e6a34 }), new THREE.DodecahedronGeometry(0.8, 0).scale(1, 0.6, 1).translate(1328 + Math.cos(a) * d, 5.5 * (1 - d / 13) + 0.3, -1742 + Math.sin(a) * d)); }
+      for (let k = 0; k < 18; k++) { const a = rr(0, 6.28), d = rr(3, 11); bake(lam({ color: 0xe0508a }), new THREE.DodecahedronGeometry(0.8, 0).scale(1, 0.6, 1).translate(1328 + Math.cos(a) * d, 5.5 * (1 - d / 13) + 0.3, -1742 + Math.sin(a) * d)); }
       // 名石と石灯籠
       for (let k = 0; k < 14; k++) { const a = rr(0, 6.28), x = PX + Math.cos(a) * (PRX + rr(5, 12)), z = PZ + Math.sin(a) * (PRZ + rr(5, 10)); if (!inR(R, x, z, -3) || Math.hypot(x - 1328, z + 1742) < 15) continue;
         bake(lam({ color: k === 0 ? 0x9a3a2a : pick([0x8a8478, 0x6a7078, 0x9a9488]) }), new THREE.DodecahedronGeometry(rr(0.7, 1.4), 0).scale(1.3, 0.8, 1).translate(x, 0.4, z)); }   // 佐渡の赤玉石もある

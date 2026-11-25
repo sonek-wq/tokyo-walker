@@ -58,22 +58,39 @@ function plant(list, crownGeo, colors, matOpt = {}) {
   list.forEach(([x, z, s], i) => {
     dummy.position.set(x, list[i][3] || 0, z); dummy.scale.setScalar(s); dummy.rotation.y = rr(0, 6); dummy.updateMatrix();
     trunk.setMatrixAt(i, dummy.matrix); crown.setMatrixAt(i, dummy.matrix);
-    crown.setColorAt(i, new THREE.Color(pick(colors)).multiplyScalar(rr(0.8, 1.15)));
+    crown.setColorAt(i, new THREE.Color(pick(typeof colors === 'function' ? colors(x, z) : colors)).multiplyScalar(rr(0.8, 1.15)));
     const ty = list[i][3] || 0; solid(x - 0.5 * s, z - 0.5 * s, x + 0.5 * s, z + 0.5 * s, ty, ty + 6.8 * s, true);
   });
   scene.add(trunk, crown);
 }
+// ---- 木の色は季節では変えず、場所ごとに決める: 緑が映える場所は緑、紅葉や黄葉が映える場所は紅葉・黄葉
+const GREEN = ['#4f8a38', '#5f9a40', '#3f7a32', '#58923c'];
+const KOUYOU = ['#c8402a', '#d8602a', '#b83020', '#e08a30', '#e0b038'];   // 紅葉 (赤・橙・黄が混ざる)
+const ICHOU = ['#e8c040', '#d8b030', '#f0d050', '#e0b838'];               // イチョウの黄葉
+// [名所の名前, 'momiji' (紅葉) | 'ichou' (黄葉), 園内の丸い木を色づかせる割合, 街路樹まで含める範囲の広げ方 (m)]
+// ここに無い場所は緑のまま (明治神宮の森・代々木公園・表参道やけやき坂のケヤキ並木など)
+const FOLIAGE = [
+  ['六義園', 'momiji', 0.6, 0], ['小石川後楽園', 'momiji', 0.6, 0], ['旧古河庭園', 'momiji', 0.5, 0], ['肥後細川庭園', 'momiji', 0.6, 0],
+  ['椿山荘の庭園', 'momiji', 0.5, 0], ['目白庭園', 'momiji', 0.6, 0], ['池田山公園', 'momiji', 0.6, 0], ['根津美術館の庭園', 'momiji', 0.6, 0],
+  ['八芳園の庭園', 'momiji', 0.5, 0], ['旧安田庭園', 'momiji', 0.5, 0], ['清澄庭園', 'momiji', 0.35, 0], ['日本庭園', 'momiji', 0.6, 0],
+  ['二の丸庭園', 'momiji', 0.5, 0], ['北の丸公園', 'momiji', 0.4, 0], ['有栖川宮記念公園', 'momiji', 0.45, 0], ['東京都庭園美術館', 'momiji', 0.4, 0],
+  ['大隈庭園', 'momiji', 0.4, 0], ['おとめ山公園', 'momiji', 0.45, 0], ['小石川植物園', 'momiji', 0.3, 0], ['殿ヶ谷戸庭園', 'momiji', 0.5, 0],
+  ['行幸通り', 'ichou', 1, 6], ['銀杏並木 (東大)', 'ichou', 1, 6], ['東京大学 本郷キャンパス', 'ichou', 0.35, 20], ['明治神宮外苑', 'ichou', 0.3, 20],
+  ['国会議事堂', 'ichou', 0.5, 40], ['国会前庭 (北庭)', 'ichou', 0.4, 12], ['国会前庭 (南庭)', 'ichou', 0.4, 12], ['日比谷公園', 'ichou', 0.25, 0],
+];
+const FOL_R = [];
+for (const [n, mode, p, pad] of FOLIAGE) for (const a of SPOT_AREAS) if (a[0] === n) FOL_R.push([a[1], a[2], a[3], a[4], mode, p, pad]);
+const folAt = (x, z, street) => FOL_R.find(r => inR(r, x, z, street ? r[6] : 0));
+const streetColors = (x, z) => { const f = folAt(x, z, true); return !f ? GREEN : f[4] === 'ichou' ? ICHOU : hash2((x * 7) | 0, (z * 7) | 0) < f[5] ? KOUYOU : GREEN; };   // 同じ場所はいつも同じ色
+// 紅葉・黄葉の名所の中の丸い木は、割合に応じてモミジやイチョウに植えかえる
+{ const keep = []; for (const t of ROUND) { const f = folAt(t[0], t[1]); if (f && rnd() < f[5]) (f[4] === 'ichou' ? GINKGO : MAPLES).push(t); else keep.push(t); } ROUND.length = 0; ROUND.push(...keep); }
 plant(PINES, new THREE.ConeGeometry(2.8, 4.2, 6).translate(0, 4.6, 0), ['#2f5a2a', '#3a6630', '#28502a']);
-plant(ROUND, new THREE.IcosahedronGeometry(2.3, 0).translate(0, 4.6, 0), ['#4f8a38', '#5f9a40', '#3f7a32']);
-plant(MAPLES, new THREE.IcosahedronGeometry(2.3, 0).translate(0, 4.6, 0), ['#c8402a', '#d8602a', '#b83020', '#e08a30']);
-plant(GINKGO, new THREE.ConeGeometry(3, 6, 7).translate(0, 5.4, 0), ['#e8c040', '#d8b030', '#f0d050']);
-const SEASON = MONTH >= 3 && MONTH <= 4 ? { name: '春', street: ['#f0b8cc', '#e8a8c0', '#f4c8d8', '#5f9a40'] }        // 桜
-  : MONTH >= 11 || MONTH === 12 ? { name: '秋', street: ['#e8c040', '#d8a830', '#e0b838', '#c86a28', '#5f9a40'] }    // イチョウ並木の黄葉
-  : MONTH >= 10 ? { name: '秋', street: ['#a8a038', '#7a9a38', '#c8902a'] }
-  : MONTH <= 2 ? { name: '冬', street: ['#6a7a4a', '#5a6a40', '#7a6a4a'] } : { name: '夏', street: ['#4f8a38', '#5f9a40', '#3f7a32'] };
+plant(ROUND, new THREE.IcosahedronGeometry(2.3, 0).translate(0, 4.6, 0), GREEN);
+plant(MAPLES, new THREE.IcosahedronGeometry(2.3, 0).translate(0, 4.6, 0), KOUYOU);
+plant(GINKGO, new THREE.ConeGeometry(3, 6, 7).translate(0, 5.4, 0), ICHOU);
 STREET.push(...LM_STREET);
-plant(STREET, new THREE.IcosahedronGeometry(2.3, 0).translate(0, 4.6, 0), SEASON.street);
-// 桜は花見の名所にだけ植えているので、季節に関係なく一年中満開にする (街路樹やイチョウ・モミジは季節で変わる)
+plant(STREET, new THREE.IcosahedronGeometry(2.3, 0).translate(0, 4.6, 0), streetColors);
+// 桜は花見の名所にだけ植えているので、いつも満開にする
 const SAKURA_PINK = ['#f6c4d4', '#f0b0c6', '#fad4e0', '#f4bccc', '#fbe2ea'];
 plant(SAKURA, new THREE.IcosahedronGeometry(2.5, 0).scale(1.25, 0.8, 1.25).translate(0, 4.4, 0), SAKURA_PINK, { emissive: 0x40242c });   // 影になる面も桜色に見えるよう、少し自分で光らせる
 // しだれ桜: 枝が垂れ下がった釣り鐘のような形

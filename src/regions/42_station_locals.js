@@ -141,7 +141,7 @@ REGION({
       hall([CX - 22, -2982, CX + 22, -2962], KS, 0.8, 5.5, 'RF_COPPER', 5);
       for (let dx = -20; dx <= 20; dx += 5) bake(lam({ color: 0x1e1a18 }), new THREE.BoxGeometry(0.5, 5.5, 0.5).translate(CX + dx, 3.55, -2961.6));
       // 藤棚 (4月下旬〜5月は紫の花房、ほかの季節は緑の葉)
-      const bloom = MONTH === 4 || MONTH === 5, FUJI = lam({ color: bloom ? 0xa682d8 : 0x5f8a3a }), POST = lam({ color: 0x6a5a48 });
+      const bloom = true, FUJI = lam({ color: bloom ? 0xa682d8 : 0x5f8a3a }), POST = lam({ color: 0x6a5a48 });
       for (const [x0, z0, x1, z1] of [[2158, -2902, 2198, -2890], [2222, -2902, 2262, -2890], [2158, -2942, 2198, -2930], [2222, -2942, 2262, -2930]]) {
         pushPrism(C('SL_FUJITANA', { color: 0x7a6650 }), C(bloom ? 'SL_FUJI_B' : 'SL_FUJI_G', { color: bloom ? 0xb894e4 : 0x6a9a44 }), rectPoly(x0, z0, x1, z1), 2.5, 2.75, { solid: false });
         for (let x = x0; x <= x1; x += 8) for (const z of [z0, z1]) bake(POST, new THREE.BoxGeometry(0.25, 2.5, 0.25).translate(x, 1.25, z));

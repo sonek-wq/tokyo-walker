@@ -76,7 +76,7 @@ REGION({
       fe(1850, -4192, 12, 8, '#a89c80'); fe(1850, -4192, 10, 6.5, '#3a6a64'); PONDS.push([1850, -4192, 10, 6.5]);
       POND_LAND.push(['r', 1845, -4194, 1855, -4190]); bake(lam({ color: 0x8a6a48 }), new THREE.BoxGeometry(10, 0.3, 4).translate(1850, 0.25, -4192));   // 池の橋
       // 萩のトンネル (竹のアーチ)
-      const BAM = lam({ color: 0xa89060 }), HAGI = lam({ color: MONTH === 9 ? 0xc85a9a : 0x5a8a3a });
+      const BAM = lam({ color: 0xa89060 }), HAGI = lam({ color: 0xc85a9a });   // 萩はいつも咲いている姿にする
       for (let z = -4210; z < -4170; z += 3) { bake(BAM, new THREE.TorusGeometry(2.2, 0.08, 4, 10, Math.PI).translate(1878, 0, z)); for (let k = 0; k < 4; k++) bake(HAGI, new THREE.DodecahedronGeometry(0.6, 0).translate(1878 + rr(-2.2, 2.2), rr(1.2, 2.3), z + rr(-1, 1))); }
       // 庭門と茶亭
       for (const dx of [-2, 2]) pushPrism('WOOD', 'WOOD', rectPoly(1850 + dx - 0.2, -4157.4, 1850 + dx + 0.2, -4157), 0, 3);
