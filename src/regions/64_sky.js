@@ -3,7 +3,7 @@
      それ以外の時間は東京湾の上を出入りする (羽田は地図の南の外)
    - 小型機 (調布の方角へ西へ)・輸送機 (横田の方角へ、高い空を北西へ)・高い空を横切る国際線
    - ヘリコプター: 東京ヘリポート (新木場の南端) から東京タワー・スカイツリーをめぐる遊覧、渋谷と新宿の上を回る報道ヘリ
-   - 飛行船: 1929年に東京上空を旋回したツェッペリン伯号をイメージした銀色の硬式飛行船が、皇居・銀座・東京湾の上をゆっくり回る
+   - 飛行船: 1929年に東京上空を旋回したツェッペリン伯号をイメージした銀色の硬式飛行船が、皇居・丸の内・神田の上をゆっくり回る (竹芝のスタート地点からは遠目に見える)
    - 気球: 1877年に日本で最初の軍用気球の実験が行われた築地 (海軍省の練兵所。のちの築地市場の場所) に、係留された気球
    - 大凧と鯉のぼり: 浅草の隅田公園
    空の乗り物は霧で消えないよう fog:false。航空灯の点は出さない。視線の先に来ると、ひとことの説明がトーストで出る */
@@ -175,9 +175,9 @@ REGION({
       const win = part(g, new THREE.BoxGeometry(18, 1.2, 6.2).translate(0, -D / 2 - 1.2, 0), 0xffe0a0, L * 0.3, 0, 0, { emissive: 0xffd080, emissiveIntensity: 0 });
       g.userData.lights = lightPts(g, [[L * 0.5, 0, 0, 0xffffff], [-L * 0.5, 0, 0, 0xffffff], [0, -D / 2 - 4, D * 0.4, 0x30ff50], [0, -D / 2 - 4, -D * 0.4, 0xff3030]]);
       g.rotation.order = 'YZX'; scene.add(g);
-      const C = [-250, -1350], RX = 1050, RZ = 850, Y = 420, W = 0.012;
+      const C = [-700, -2150], RX = 700, RZ = 480, Y = 440, W = 0.012, A0 = Math.PI * 1.2;   /* スタート地点 (竹芝) からは1.5km以上はなれて、遠目に見える */
       LM_UPDATERS.push((dt, t) => {
-        const a = t * W; g.position.set(C[0] + Math.cos(a) * RX, Y + Math.sin(t * 0.05) * 15, C[1] + Math.sin(a) * RZ);
+        const a = A0 + t * W; g.position.set(C[0] + Math.cos(a) * RX, Y + Math.sin(t * 0.05) * 15, C[1] + Math.sin(a) * RZ);
         tmpT.set(-Math.sin(a) * RX, 0, Math.cos(a) * RZ).normalize(); orient(g, tmpT, -0.03); g.rotation.z = Math.sin(t * 0.13) * 0.015;
         win.material.emissiveIntensity = NIGHT; blink(g, t, 3);
       });
