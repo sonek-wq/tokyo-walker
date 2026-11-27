@@ -6,7 +6,7 @@
    - 飛行船: 1929年に東京上空を旋回したツェッペリン伯号をイメージした銀色の硬式飛行船が、皇居・銀座・東京湾の上をゆっくり回る
    - 気球: 1877年に日本で最初の軍用気球の実験が行われた築地 (海軍省の練兵所。のちの築地市場の場所) に、係留された気球
    - 大凧と鯉のぼり: 浅草の隅田公園
-   空の乗り物は霧で消えないよう fog:false。視線の先に来ると、ひとことの説明がトーストで出る */
+   空の乗り物は霧で消えないよう fog:false。航空灯の点は出さない。視線の先に来ると、ひとことの説明がトーストで出る */
 REGION({
   name: '空',
   towns: [],
@@ -18,13 +18,7 @@ REGION({
     const M = (c, o = {}) => MATS[c + JSON.stringify(o)] || (MATS[c + JSON.stringify(o)] = new THREE.MeshLambertMaterial({ color: c, fog: false, ...o }));
     const part = (g, geo, c, x = 0, y = 0, z = 0, o) => { const m = new THREE.Mesh(geo, M(c, o)); m.position.set(x, y, z); g.add(m); return m; };
     // 航空灯 (サイズ固定の点。夜も見える)
-    const lightPts = (g, list) => {
-      const geo = new THREE.BufferGeometry(), pos = [], col = [];
-      for (const [x, y, z, c] of list) { pos.push(x, y, z); const cc = new THREE.Color(c); col.push(cc.r, cc.g, cc.b); }
-      geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); geo.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
-      const p = new THREE.Points(geo, new THREE.PointsMaterial({ size: 4, sizeAttenuation: false, vertexColors: true, fog: false, transparent: true, depthWrite: false }));
-      g.add(p); return p;
-    };
+    const lightPts = () => null;   /* 航空灯の点は出さない (画面上で目立ちすぎるため) */
     const AX = new THREE.Vector3(1, 0, 0);
     // ---- 旅客機 (前が +x、右翼が +z) ----
     const airliner = ({ L = 60, span = 58, eng = 2, hump = false, tail = 0x1e4a8a, body = 0xf4f4f2, belly = 0xb4b8c0, prop = false, highWing = false }) => {
