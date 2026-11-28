@@ -33,6 +33,7 @@ function applySettings() {
   mkBtns(document.getElementById('optJitter'), ['ON', 'OFF'], SET.jitter ? 0 : 1, i => { SET.jitter = i === 0; applySettings(); });
   mkBtns(document.getElementById('optPixel'), PIXEL_LEVELS.map(l => l.name), SET.pixel, i => { SET.pixel = i; applySettings(); });
   mkBtns(document.getElementById('optView'), VIEWS.map(v => v.name), SET.view, i => { SET.view = i; applySettings(); });
+  bgmApplySettings(mkBtns);   // BGM (game/35_bgm.js)
 }
 addEventListener('resize', resize);
 const toastEl = document.getElementById('toast'); let toastTimer = 0;

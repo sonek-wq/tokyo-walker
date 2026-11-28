@@ -40,4 +40,5 @@ engine/22_avatar_camera.js
 engine/23_vehicles.js
 engine/24_fast_travel.js
 game/30_fun.js
+game/35_bgm.js
 game/40_story_and_loop.js
